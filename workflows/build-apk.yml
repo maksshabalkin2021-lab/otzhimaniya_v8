@@ -1,0 +1,57 @@
+name: Build APK
+
+# Собирает Android APK автоматически в облаке GitHub (Android SDK там уже есть).
+# Запускается при пуше в main/master и вручную (вкладка Actions → Run workflow).
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java (JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" || true
+          yes | sdkmanager --licenses || true
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Sync Capacitor (web assets + plugins)
+        run: npx cap sync android
+
+      - name: Point Gradle to the SDK
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: otzhimaniya-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
