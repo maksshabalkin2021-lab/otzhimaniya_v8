@@ -1,0 +1,14 @@
+{
+	"appId": "com.otzhimaniya.app",
+	"appName": "Счёт отжиманий",
+	"webDir": "www",
+	"android": {
+		"allowMixedContent": true
+	},
+	"plugins": {
+		"LocalNotifications": {
+			"smallIcon": "ic_stat_icon",
+			"iconColor": "#C8FF00"
+		}
+	}
+}

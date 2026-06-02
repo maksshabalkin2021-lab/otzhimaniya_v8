@@ -1,0 +1,17 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Capacitor / Android build outputs
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/captures/
+android/.idea/
+*.apk
+*.aab
+*.keystore
+
+# Misc
+.DS_Store
