@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0b0d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Счётчик отжиманий</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0b0d;--bg2:#111317;--ink:#f2f4f0;--muted:#6b7280;--line:#1d2026;
+    --work:#c8ff00;--rest:#ff7a18;--gold:#ffd23f}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{background:var(--bg);color:var(--ink);font-family:'Oswald',sans-serif;
+    -webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none}
+  #app{height:100dvh;display:flex;flex-direction:column}
+
+  #bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:max(10px,env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,var(--bg2),transparent);z-index:5}
+  .brand{font-family:'Bebas Neue';font-size:20px;letter-spacing:1.5px;line-height:1}
+  .brand b{color:var(--work)}
+  #bar .spacer{flex:1}
+  .iconbtn{background:var(--bg2);border:1px solid var(--line);color:var(--ink);height:36px;padding:0 11px;
+    border-radius:10px;font-family:'Oswald';font-weight:600;font-size:12px;letter-spacing:.5px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;white-space:nowrap}
+  .iconbtn:active{transform:scale(.94)}
+  #finish{color:#000;background:var(--work);border-color:var(--work)}
+  #gear{font-size:23px;width:48px;padding:0;line-height:1}
+  #gear:active{transform:scale(.92)}
+  .lockdot{width:8px;height:8px;border-radius:50%;background:#3a3f47;transition:.3s;flex:0 0 auto}
+  .lockdot.on{background:var(--work);box-shadow:0 0 10px var(--work)}
+
+  #tap{position:relative;flex:1;cursor:pointer;overflow:hidden;
+    background:radial-gradient(120% 80% at 50% 45%,#15171c 0%,var(--bg) 72%)}
+  #tap.rest{background:radial-gradient(120% 80% at 50% 45%,#1c1510 0%,var(--bg) 72%)}
+  #flash{position:absolute;inset:0;opacity:0;pointer-events:none;mix-blend-mode:screen;background:var(--work)}
+  #flash.go{animation:fl .28s ease-out}
+  #flash.goal{background:var(--gold)}
+  @keyframes fl{0%{opacity:.5}100%{opacity:0}}
+
+  #topcount{position:absolute;top:6px;left:0;right:0;text-align:center;transform:rotate(180deg);
+    font-family:'Bebas Neue';font-size:clamp(40px,12vmin,90px);line-height:.8;color:#2c313a;
+    letter-spacing:-1px;pointer-events:none;transition:color .2s}
+  #cd{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;
+    background:rgba(8,9,11,.72);color:var(--work);font-family:'Bebas Neue';line-height:.8;
+    font-size:clamp(150px,52vmin,380px);text-align:center;letter-spacing:-2px;padding:0 12px}
+  #cd.pop{animation:cdpop .42s cubic-bezier(.2,.9,.3,1)}
+  @keyframes cdpop{0%{transform:scale(.4);opacity:0}45%{opacity:1}100%{transform:scale(1);opacity:1}}
+  .cdbtn{margin-top:6px;padding:14px 22px;border-radius:14px;border:none;background:var(--work);color:#000;
+    font-family:'Oswald';font-weight:700;letter-spacing:1.5px;font-size:15px;cursor:pointer;text-transform:uppercase}
+  .cdbtn:active{transform:scale(.96)}
+  .orline{font-family:'Oswald';font-weight:300;font-size:13px;color:var(--muted);letter-spacing:.5px}
+  #tap.work #topcount{color:#4a5a00}
+  #tap.rest #topcount{color:#5a3210}
+
+  .core{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 16px;pointer-events:none}
+  .state{font-family:'Bebas Neue';font-size:clamp(18px,5.5vw,26px);letter-spacing:5px;color:var(--muted);
+    height:1.25em;line-height:1.25;transition:color .25s}
+  .state.work{color:var(--work)} .state.rest{color:var(--rest)} .state.ready{color:var(--gold)}
+  .count{font-family:'Bebas Neue';font-size:clamp(140px,44vmin,320px);line-height:.85;letter-spacing:-2px;
+    color:#eef0ec;transition:transform .09s ease-out,color .2s;height:.85em;display:flex;align-items:center;justify-content:center}
+  #tap.work .count{color:var(--work)} #tap.rest .count{color:var(--rest)}
+  .count.bump{transform:scale(1.06)}
+  .count.alert{animation:al .8s ease-in-out infinite}
+  @keyframes al{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .goalwrap{height:24px;margin-top:14px;width:min(74vw,320px);opacity:0;transition:opacity .2s}
+  .goalwrap.show{opacity:1}
+  .goalbar{height:8px;border-radius:4px;background:#23262d;overflow:hidden}
+  .goalfill{height:100%;width:0;background:var(--work);border-radius:4px;transition:width .18s ease-out}
+  .goalfill.done{background:var(--gold)}
+  .goallab{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:1.5px;color:var(--muted);margin-top:6px;text-transform:uppercase}
+
+  .caption{font-family:'Oswald';font-weight:500;letter-spacing:5px;font-size:13px;color:var(--muted);
+    height:1.4em;line-height:1.4;margin-top:10px;text-transform:uppercase}
+  .setline{font-family:'Oswald';font-weight:500;letter-spacing:.5px;font-size:14px;color:var(--muted);
+    margin-top:10px;line-height:1.4}
+  .setline b{color:var(--ink)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:9px;max-width:84vw}
+  .chip{font-family:'Bebas Neue';font-size:16px;letter-spacing:.5px;color:var(--ink);
+    background:#1a1d23;border:1px solid var(--line);border-radius:7px;padding:2px 8px}
+  .chip.ok{border-color:#3a4a00;color:var(--work)}
+  .chip.miss{border-color:#3a2a10;color:var(--rest)}
+
+  #hello{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:26px;gap:12px;overflow-y:auto}
+  #hello .big{font-family:'Bebas Neue';font-size:clamp(30px,9vw,56px);letter-spacing:1px;line-height:.95}
+  #hello .big span{color:var(--work)}
+  #hello .meta{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  #hello .meta div{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  #hello .meta b{display:block;font-family:'Bebas Neue';font-weight:400;font-size:26px;letter-spacing:0;color:var(--ink)}
+  #hello .meta .w b{color:var(--work)}
+  #hello .meta .g b{color:var(--gold)}
+  .planbox{border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:14px 16px;max-width:340px}
+  .planbox .pt{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+  .planbox .pn{display:flex;gap:7px;justify-content:center;margin-top:9px}
+  .planbox .pn span{font-family:'Bebas Neue';font-size:30px;color:var(--ink);min-width:28px}
+  .planbox .pn span.first{color:var(--work)}
+  .planbox .ps{font-family:'Oswald';font-weight:300;font-size:12px;color:var(--muted);margin-top:7px}
+  #hello p{font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);max-width:290px;line-height:1.5;letter-spacing:.3px}
+  #hello .pulse{font-family:'Oswald';font-weight:600;letter-spacing:3px;font-size:13px;color:var(--work);animation:pp 1.4s ease-in-out infinite}
+  @keyframes pp{0%,100%{opacity:.35}50%{opacity:1}}
+
+  #action{flex:0 0 auto;display:flex;gap:8px;padding:9px 12px;border-top:1px solid var(--line);background:var(--bg2)}
+  #action button{height:50px;border-radius:12px;border:1px solid var(--line);background:#181b21;color:var(--ink);
+    font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:15px;cursor:pointer;text-transform:uppercase}
+  #action button:active{transform:scale(.97)}
+  #undo{width:64px;font-family:'Bebas Neue';font-size:24px;letter-spacing:0;color:var(--rest)}
+  #primary{flex:1;background:var(--work);color:#000;border-color:var(--work)}
+
+  #stats{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);
+    background:var(--bg2);padding-bottom:env(safe-area-inset-bottom)}
+  .cell{padding:10px 4px 12px;text-align:center;border-right:1px solid var(--line)}
+  .cell:last-child{border-right:none}
+  .cell .k{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase}
+  .cell .v{font-family:'Bebas Neue';font-size:28px;line-height:1;margin-top:3px}
+  .cell.work .v{color:var(--work)} .cell.rest .v{color:var(--rest)}
+
+  /* оверлеи */
+  .overlay{position:fixed;inset:0;z-index:30;background:rgba(8,9,11,.92);backdrop-filter:blur(6px);
+    display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+  .overlay.open{transform:translateY(0)}
+  .phead{display:flex;align-items:center;padding:max(14px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line)}
+  .phead h2{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;flex:1}
+  .pbody{flex:1;overflow-y:auto;padding:16px 16px 30px}
+  .grp{margin-bottom:22px}
+  .grp h3{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+  .row label{font-family:'Oswald';font-weight:400;font-size:15px;color:var(--ink)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg2)}
+  .seg button{background:transparent;border:none;color:var(--muted);font-family:'Oswald';font-weight:600;
+    font-size:13px;padding:8px 12px;cursor:pointer;letter-spacing:.5px}
+  .seg button.on{background:var(--work);color:#000}
+  .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg2)}
+  .stepper button{width:42px;height:38px;background:transparent;border:none;color:var(--work);font-size:22px;font-family:'Bebas Neue';cursor:pointer}
+  .stepper .val{min-width:58px;text-align:center;font-family:'Bebas Neue';font-size:22px;color:var(--ink)}
+  .tgl{width:50px;height:30px;border-radius:16px;background:#23262d;border:1px solid var(--line);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+  .tgl.on{background:var(--work)}
+  .tgl::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+  .tgl.on::after{left:23px}
+  .vsel{max-width:62%;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;
+    padding:8px 10px;font-family:'Oswald';font-weight:500;font-size:13px;cursor:pointer}
+  .weekprev{font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+  .weekprev b{color:var(--work);font-family:'Bebas Neue';font-size:18px}
+  .freeonly,.progonly{transition:opacity .2s}
+  .hist{display:flex;flex-direction:column;gap:1px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .hrow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.3fr;gap:8px;padding:10px 12px;background:var(--bg2);align-items:baseline}
+  .hrow.head{background:#16181d;font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .hrow.today{background:#1a1f10}
+  .hrow .d{font-family:'Oswald';font-weight:500;font-size:14px;color:var(--ink)}
+  .hrow .n{font-family:'Bebas Neue';font-size:20px;color:var(--work)}
+  .hrow .s{font-family:'Bebas Neue';font-size:20px;color:var(--ink)}
+  .hrow .t{font-family:'Oswald';font-size:13px;color:var(--muted)}
+  .empty{padding:18px;text-align:center;color:var(--muted);font-family:'Oswald';font-weight:300;font-size:14px}
+  .danger{width:100%;margin-top:6px;padding:12px;border-radius:10px;background:transparent;border:1px solid #3a1d1d;
+    color:#ff5a5a;font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:13px;cursor:pointer}
+
+  /* итоговый экран */
+  #sumbody{flex:1;overflow-y:auto;padding:20px 18px 30px;text-align:center}
+  .record{display:inline-block;font-family:'Oswald';font-weight:700;letter-spacing:2px;font-size:12px;color:#000;
+    background:var(--gold);padding:5px 12px;border-radius:20px;margin-bottom:14px;text-transform:uppercase}
+  .sumbig{font-family:'Bebas Neue';font-size:clamp(90px,30vmin,150px);line-height:.8;color:var(--work)}
+  .sumcap{font-family:'Oswald';font-weight:500;letter-spacing:4px;font-size:12px;color:var(--muted);text-transform:uppercase;margin-bottom:18px}
+  .summet{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+  .summet div{border:1px solid var(--line);border-radius:12px;background:var(--bg2);padding:12px 6px}
+  .summet .k{font-family:'Oswald';font-weight:500;font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .summet .v{font-family:'Bebas Neue';font-size:30px;margin-top:3px;color:var(--ink)}
+  .sumnote{font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);margin:6px 0 18px;line-height:1.5}
+  .sumnote b{color:var(--ink)}
+  .sumbtns{display:flex;flex-direction:column;gap:10px;max-width:380px;margin:0 auto}
+  .sumbtns button{height:52px;border-radius:12px;font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:15px;cursor:pointer;border:1px solid var(--line);text-transform:uppercase}
+  #save{background:var(--work);color:#000;border-color:var(--work)}
+  #nextweek{background:var(--gold);color:#000;border-color:var(--gold)}
+  #share{background:#181b21;color:var(--ink)}
+  #discard{background:transparent;color:#ff5a5a;border-color:#3a1d1d}
+  .hidden{display:none!important}
+  /* вкладки настроек */
+  .tabbar{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--bg2)}
+  .tabbar button{flex:1;padding:12px 2px;border:none;background:transparent;color:var(--muted);
+    font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:0;cursor:pointer;border-bottom:2px solid transparent;line-height:1.2}
+  .tabbar button.on{color:var(--ink);border-bottom-color:var(--work)}
+  /* светлая тема */
+  body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#828a93;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a}
+  body.light #tap{background:radial-gradient(120% 80% at 50% 45%,#ffffff 0%,var(--bg) 72%)}
+  body.light #tap.rest{background:radial-gradient(120% 80% at 50% 45%,#fff3e6 0%,var(--bg) 72%)}
+  body.light #testTap{background:radial-gradient(120% 80% at 50% 45%,#fffdf2 0%,var(--bg) 72%)}
+  body.light #cd{background:rgba(255,255,255,.8)}
+  body.light .count{color:#15181b}
+  body.light #topcount{color:#cdd3c2} body.light #tap.work #topcount{color:#aebd6a} body.light #tap.rest #topcount{color:#e0a877}
+  body.light .chip{background:#eef1ea} body.light .hrow{background:#fff}
+  body.light .hrow.head{background:#f2f4ee} body.light .hrow.today{background:#f3f7e3}
+  body.light #action button,body.light #undo,body.light #share{background:#eef1ea}
+  body.light .goalbar{background:#e2e6db} body.light .tgl{background:#d6dbcd} body.light .lockdot{background:#c5cbbb}
+  body.light .daybanner.rest{background:#e7eae2} body.light .wkstrip .wd .dot{background:#cdd3c2}
+  body.light .overlay{background:rgba(236,239,232,.95)}
+  body.light .wuitem .box{color:#fff} body.light .stepper button{color:var(--work)}
+
+  /* Пауза */
+  #pauseBar{display:none;align-items:center;gap:6px;padding:5px 10px;background:rgba(200,255,0,.08);border-bottom:1px solid #2a3300}
+  #pauseBar .pt{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:1.5px;color:var(--work);text-transform:uppercase;flex:1}
+  #pauseBar .pd{font-family:'Bebas Neue';font-size:18px;color:var(--work)}
+  #pauseResume{background:var(--work);color:#000;border:none;border-radius:8px;padding:5px 14px;font-family:'Oswald';font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer}
+  #tap.paused{pointer-events:none}
+  #tap.paused #pauseOverlay{display:block}
+  #pauseOverlay{position:absolute;inset:0;z-index:9;display:none;background:rgba(10,11,13,.6);backdrop-filter:blur(4px)}
+  #pauseIcon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;
+    display:none;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
+  #pauseIcon .pp{font-family:'Bebas Neue';font-size:clamp(80px,26vmin,160px);color:var(--work);line-height:.9;letter-spacing:3px;opacity:.9}
+  #pauseIcon .pl{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+  #tap.paused #pauseIcon{display:flex}
+
+  /* AMRAP */
+  #amrapTimer{display:none;position:absolute;bottom:18px;left:0;right:0;text-align:center;pointer-events:none;z-index:4}
+  #amrapTimer .at{font-family:'Bebas Neue';font-size:clamp(26px,8vw,48px);color:var(--rest);letter-spacing:2px;line-height:1}
+  #amrapTimer .al{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  #amrapTimer.warn .at{color:#ff4444;animation:al .5s ease-in-out infinite}
+
+  /* Ачивки тост */
+  #achieveToast{position:fixed;top:max(70px,calc(env(safe-area-inset-top)+62px));left:50%;
+    transform:translateX(-50%) translateY(-10px);z-index:200;background:var(--bg2);
+    border:1px solid var(--gold);border-radius:14px;padding:11px 16px;
+    display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .3s,transform .3s;
+    pointer-events:none;min-width:200px;max-width:88vw;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+  #achieveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #achieveToast .ae{font-size:26px;line-height:1;flex:0 0 auto}
+  #achieveToast .at2{font-family:'Oswald';font-weight:600;font-size:14px;color:var(--ink);line-height:1.3}
+  #achieveToast .as2{font-family:'Oswald';font-weight:300;font-size:11px;color:var(--muted);margin-top:2px}
+  .achbadge{font-size:20px;cursor:default;line-height:1;display:inline-block;transition:transform .15s}
+  .achbadge:hover{transform:scale(1.3)}
+  #testTap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;padding:0 16px;
+    background:radial-gradient(120% 80% at 50% 45%,#1c1a10 0%,var(--bg) 72%)}
+  #testAction{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line);padding-bottom:max(12px,env(safe-area-inset-bottom))}
+  #testAction button{height:54px;border-radius:12px;border:1px solid var(--line);font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:15px;cursor:pointer;text-transform:uppercase}
+  #testUndo{width:70px;background:#181b21;color:var(--rest);font-family:'Bebas Neue';font-size:24px}
+  #testDone{flex:1;background:var(--gold);color:#000;border-color:var(--gold)}
+  .bars{display:flex;align-items:flex-end;gap:3px;height:84px;padding:6px 0 4px}
+  .bars .b{flex:1;min-width:4px;background:var(--work);border-radius:3px 3px 0 0;opacity:.85;transition:height .2s}
+  .bars .b.today{background:var(--gold);opacity:1}
+  .glabel{display:flex;justify-content:space-between;font-family:'Oswald';font-weight:400;font-size:10px;color:var(--muted);margin:0 0 12px}
+  .gtitle{font-family:'Oswald';font-weight:500;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:2px}
+  .wuitem{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg2);margin-bottom:8px;cursor:pointer}
+  .wuitem .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:18px;color:#000}
+  .wuitem.on{border-color:var(--work)} .wuitem.on .box{background:var(--work);border-color:var(--work)}
+  .wuitem .tx{font-family:'Oswald';font-weight:500;font-size:15px;color:var(--ink);line-height:1.25}
+  .wuitem .tx span{display:block;font-weight:300;font-size:12px;color:var(--muted)}
+  .daychip{width:42px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);font-family:'Oswald';font-weight:600;font-size:12px;cursor:pointer}
+  .daychip.on{background:var(--work);color:#000;border-color:var(--work)}
+  .daybanner{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;padding:7px 14px;border-radius:20px;display:inline-block}
+  .daybanner.train{background:rgba(200,255,0,.14);color:var(--work)}
+  .daybanner.rest{background:#1a1d23;color:var(--muted)}
+  .wkstrip{display:flex;gap:5px;justify-content:center;margin-top:4px}
+  .wkstrip .wd{width:30px;text-align:center;font-family:'Oswald';font-weight:600;font-size:10px;color:var(--muted)}
+  .wkstrip .wd .dot{width:8px;height:8px;border-radius:50%;background:#2c313a;margin:4px auto 0}
+  .wkstrip .wd.train .dot{background:var(--work)} .wkstrip .wd.done .dot{background:var(--gold)}
+  .wkstrip .wd.today{color:var(--ink)}
+
+  /* Хваты */
+  .gripcard{display:flex;gap:13px;align-items:flex-start;padding:13px;border:1px solid var(--line);
+    border-radius:14px;background:var(--bg2);margin-bottom:11px}
+  .gripcard .dia{flex:0 0 92px;width:92px;height:72px;border-radius:10px;background:#15171c;border:1px solid var(--line);overflow:hidden}
+  body.light .gripcard .dia{background:#f2f4ee}
+  .gripcard .dia svg{display:block;width:100%;height:100%}
+  .gripcard .gc{flex:1;min-width:0}
+  .gripcard .gn{font-family:'Bebas Neue';font-size:21px;letter-spacing:.5px;color:var(--ink);line-height:1}
+  .gripcard .gt{display:inline-block;font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:.5px;
+    color:var(--work);background:rgba(200,255,0,.1);border:1px solid #3a4a00;border-radius:6px;padding:2px 7px;margin-top:5px;text-transform:uppercase}
+  body.light .gripcard .gt{background:rgba(95,125,0,.12)}
+  .gripcard .gd{font-family:'Oswald';font-weight:300;font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:6px}
+  .gripcard .gd b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="bar">
+    <div class="brand">СЧЁТ<b>•</b>ОТЖИМАНИЙ</div>
+    <div class="spacer"></div>
+    <div class="lockdot" id="lock" title="Экран не гаснет"></div>
+    <button class="iconbtn hidden" id="pauseBtn" style="color:var(--work)">⏸</button>
+    <button class="iconbtn" id="gear">⚙</button>
+    <button class="iconbtn hidden" id="finish">ФИНИШ</button>
+  </div>
+
+  <!-- Пауза (бар под шапкой) -->
+  <div id="pauseBar">
+    <span class="pt">⏸ ПАУЗА</span>
+    <span class="pd" id="pauseDur">0:00</span>
+    <button id="pauseResume">▶ ПРОДОЛЖИТЬ</button>
+  </div>
+
+  <!-- Ачивки тост -->
+  <div id="achieveToast"><span class="ae" id="aToastEmoji">🏅</span><div><div class="at2" id="aToastTitle"></div><div class="as2" id="aToastSub"></div></div></div>
+
+  <div id="tap">
+    <div id="flash"></div>
+    <div id="topcount" class="hidden">0</div>
+    <div id="cd" class="hidden"></div>
+    <div id="pauseOverlay"></div>
+    <div id="pauseIcon"><div class="pp">II</div><div class="pl">Нажми для продолжения</div></div>
+    <div id="amrapTimer"><div class="at" id="amrapCountdown">10:00</div><div class="al">ОСТАЛОСЬ ВРЕМЕНИ</div></div>
+
+    <div id="hello"></div>
+
+    <div class="core hidden" id="core">
+      <div class="state" id="state">ГОТОВ</div>
+      <div class="count" id="count">0</div>
+      <div class="goalwrap" id="goalwrap"><div class="goalbar"><div class="goalfill" id="goalfill"></div></div><div class="goallab" id="goallab"></div></div>
+      <div class="caption" id="caption">ПОВТОРЕНИЙ</div>
+      <div class="setline" id="setline"></div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <div id="action" class="hidden">
+    <button id="undo">−1</button>
+    <button id="primary">ПОДХОД ГОТОВ ▸</button>
+  </div>
+
+  <div id="stats">
+    <div class="cell"><div class="k">Повторов</div><div class="v" id="sReps">0</div></div>
+    <div class="cell"><div class="k">Подходы</div><div class="v" id="sSets">0</div></div>
+    <div class="cell work"><div class="k">Работа</div><div class="v" id="sWork">00:00</div></div>
+    <div class="cell rest"><div class="k">Отдых</div><div class="v" id="sRest">00:00</div></div>
+  </div>
+
+</div>
+
+<!-- Настройки -->
+<div id="panel" class="overlay">
+  <div class="phead"><h2>НАСТРОЙКИ</h2><button class="iconbtn" id="close">ЗАКРЫТЬ</button></div>
+  <div class="tabbar" id="tabbar">
+    <button data-tab="train" class="on">🏋 Тренировка</button>
+    <button data-tab="grips">🤚 Хваты</button>
+    <button data-tab="sound">🔊 Звук</button>
+    <button data-tab="hist">📊 История</button>
+  </div>
+  <div class="pbody">
+    <div class="grp" data-tab="train">
+      <h3>Режим</h3>
+      <div class="row"><label>Тип тренировки</label>
+        <div class="seg" id="mode"><button data-m="program" class="on">Программа</button><button data-m="free">Свободно</button><button data-m="amrap">На время</button></div>
+      </div>
+    </div>
+    <div class="grp progonly" data-tab="train" id="grpProg">
+      <h3>Программа · 52 недели</h3>
+      <div class="row"><label>Неделя</label>
+        <div class="stepper"><button id="wMinus">−</button><div class="val" id="wVal">1</div><button id="wPlus">+</button></div>
+      </div>
+      <div class="weekprev" id="wPrev"></div>
+      <div class="row" style="margin-top:14px"><label>Отдых между подходами<br><span style="font-size:11px;color:var(--muted)">15 сек – 5 мин</span></label>
+        <div class="stepper"><button id="prMinus">−</button><div class="val" id="prVal">1:00</div><button id="prPlus">+</button></div>
+      </div>
+      <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:11px;color:var(--muted)">когда закрыты все 5 целей</span></label><div class="tgl on" id="auto"></div></div>
+      <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">🎯 День теста · пересчитать под себя</button>
+      <div class="weekprev" id="maxInfo" style="margin-top:8px"></div>
+    </div>
+    <div class="grp freeonly" data-tab="train" id="grpFree">
+      <h3>Свободный режим</h3>
+      <div class="row"><label>Цель на подход</label>
+        <div class="stepper"><button id="gMinus">−</button><div class="val" id="gVal">выкл</div><button id="gPlus">+</button></div>
+      </div>
+      <div class="row"><label>Пауза = отдых, после</label>
+        <div class="seg" id="thr"><button data-t="3">3с</button><button data-t="4" class="on">4с</button><button data-t="5">5с</button><button data-t="6">6с</button></div>
+      </div>
+      <div class="row"><label>Таймер отдыха<br><span style="font-size:11px;color:var(--muted)">выкл / до 3 мин</span></label>
+        <div class="stepper"><button id="trMinus">−</button><div class="val" id="trVal">выкл</div><button id="trPlus">+</button></div>
+      </div>
+    </div>
+    <div class="grp" data-tab="sound">
+      <h3>Сигналы</h3>
+      <div class="row"><label>Голосовой счёт</label><div class="tgl on" id="voice"></div></div>
+      <div class="row"><label>Голос</label><select id="voiceSel" class="vsel"></select></div>
+      <div class="row"><label>Энергия голоса</label>
+        <div class="seg" id="vibe2"><button data-e="calm">спокойно</button><button data-e="hype" class="on">драйв</button><button data-e="beast">зверь</button></div>
+      </div>
+      <div class="row"><label>Отсчёт 3·2·1<br><span style="font-size:11px;color:var(--muted)">голосом перед подходом</span></label><div class="tgl on" id="count"></div></div>
+      <div class="row"><label>Звук</label><div class="tgl on" id="sound"></div></div>
+      <div class="row"><label>Вибрация</label><div class="tgl on" id="vibe"></div></div>
+    </div>
+    <div class="grp" data-tab="sound">
+      <h3>Темп и подбадривание</h3>
+      <div class="row"><label>Подбадривать<br><span style="font-size:11px;color:var(--muted)">за N повторов до цели</span></label>
+        <div class="stepper"><button id="clMinus">−</button><div class="val" id="clVal">3</div><button id="clPlus">+</button></div>
+      </div>
+      <div class="row"><label>Метроном темпа</label><div class="tgl" id="metro"></div></div>
+      <div class="row"><label>Голос темпа<br><span style="font-size:11px;color:var(--muted)">командует «вниз-вверх»</span></label><div class="tgl" id="tempoV"></div></div>
+      <div class="row"><label>Удар каждые</label>
+        <div class="stepper"><button id="msMinus">−</button><div class="val" id="msVal">1.5 с</div><button id="msPlus">+</button></div>
+      </div>
+    </div>
+    <div class="grp" data-tab="train">
+      <h3>Разминка и расписание</h3>
+      <div class="row"><label>Разминка перед стартом</label><div class="tgl on" id="warm"></div></div>
+      <div class="row" style="align-items:flex-start"><label>Дни тренировок</label>
+        <div id="days" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end"></div>
+      </div>
+      <div class="row"><label>Напоминание</label><div class="tgl" id="remind"></div></div>
+      <div class="row"><label>Время напоминания</label><input type="time" id="remTime" class="vsel" value="08:00" style="max-width:120px"></div>
+      <div class="weekprev" id="remStatus" style="margin-top:0"></div>
+      <div class="weekprev" id="schedInfo" style="margin-top:4px"></div>
+    </div>
+    <div class="grp" data-tab="sound">
+      <h3>Оформление</h3>
+      <div class="row"><label>Тема</label>
+        <div class="seg" id="theme"><button data-th="dark" class="on">Тёмная</button><button data-th="light">Светлая</button><button data-th="auto">Авто</button></div>
+      </div>
+    </div>
+    <div class="grp" data-tab="train" id="grpAmrap" style="display:none">
+      <h3>На время · максимум повторов</h3>
+      <div class="row"><label>Длительность<br><span style="font-size:11px;color:var(--muted)">1 – 60 минут</span></label>
+        <div class="stepper"><button id="amMinus">−</button><div class="val" id="amVal">10 мин</div><button id="amPlus">+</button></div>
+      </div>
+      <div style="font-family:'Oswald';font-weight:300;font-size:13px;color:var(--muted);line-height:1.5">
+        Жми до упора — обратный отсчёт идёт, пока идёт время. Можешь отдыхать между подходами. Итог: максимум повторов за отведённое время.
+      </div>
+    </div>
+    <div class="grp" data-tab="hist">
+      <h3>Ачивки</h3>
+      <div id="achList" style="display:flex;flex-wrap:wrap;gap:10px;padding:4px 0"></div>
+      <div id="graph"></div>
+      <div class="hist" id="hist"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="iconbtn" id="exportBtn" style="flex:1;height:42px">⬇ Экспорт</button>
+        <button class="iconbtn" id="importBtn" style="flex:1;height:42px">⬆ Импорт</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+      <button class="danger" id="clearHist">Очистить историю</button>
+    </div>
+
+    <!-- Хваты -->
+    <div class="grp" data-tab="grips">
+      <h3>Хваты отжиманий</h3>
+      <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:12px">Меняй хваты, чтобы прорабатывать разные мышцы и беречь суставы. Схема — вид сверху, ты лежишь лицом вниз.</div>
+      <div id="gripList"></div>
+      <div class="row" style="margin-top:16px"><label>Подсказывать хват голосом<br><span style="font-size:11px;color:var(--muted)">в режиме «Программа» — свой хват на каждый подход</span></label><div class="tgl" id="gripVoice"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Итоги -->
+<div id="summary" class="overlay">
+  <div class="phead"><h2>ТРЕНИРОВКА</h2></div>
+  <div id="sumbody"></div>
+</div>
+
+<!-- День теста -->
+<div id="test" class="overlay">
+  <div class="phead"><h2>ДЕНЬ ТЕСТА</h2><button class="iconbtn" id="testClose">ЗАКРЫТЬ</button></div>
+  <div id="testTap">
+    <div class="state" style="margin-bottom:6px">МАКСИМУМ ЗА ПОДХОД</div>
+    <div class="count" id="testCount" style="color:var(--gold)">0</div>
+    <div class="caption">КАСАЙСЯ НОСОМ ДО ОТКАЗА</div>
+    <p style="font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);max-width:300px;margin:14px auto 0;line-height:1.5">Отожмись максимум раз за один подход. Нажми «Готово», когда больше не можешь — программа пересчитается под твой уровень.</p>
+  </div>
+  <div id="testAction"><button id="testUndo">−1</button><button id="testDone">ГОТОВО ▸</button></div>
+</div>
+
+<!-- Разминка -->
+<div id="warmup" class="overlay">
+  <div class="phead"><h2>РАЗМИНКА</h2><button class="iconbtn" id="warmSkip">ПРОПУСТИТЬ</button></div>
+  <div class="pbody">
+    <div class="empty" style="text-align:left;padding:0 0 14px">Отметь по ходу — это бережёт плечи и запястья. ~3–4 минуты.</div>
+    <div id="warmList"></div>
+    <button class="cdbtn" id="warmGo" style="width:100%;margin-top:16px">К ТРЕНИРОВКЕ ▸</button>
+  </div>
+</div>
+
+<!-- Онбординг -->
+<div id="onboard" class="overlay">
+  <div class="pbody" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;max-width:420px;margin:0 auto">
+    <div style="font-family:'Bebas Neue';font-size:46px;letter-spacing:1px;line-height:1">СЧЁТ<b style="color:var(--work)">•</b>ОТЖИМАНИЙ</div>
+    <div style="font-family:'Oswald';font-weight:300;font-size:15px;color:var(--muted);line-height:1.5">Счётчик-тренер по отжиманиям. Коротко, как это работает:</div>
+    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin:6px 0">
+      <div class="wuitem on"><div class="box">1</div><div class="tx">Положи телефон на пол<span>касайся носом экрана — каждое касание = повтор</span></div></div>
+      <div class="wuitem on"><div class="box">2</div><div class="tx">Программа на 52 недели<span>подстраивается под твой уровень, ведёт по подходам с отдыхом</span></div></div>
+      <div class="wuitem on"><div class="box">3</div><div class="tx">Голос и темп<span>считает, командует «вниз-вверх», подбадривает на финише</span></div></div>
+      <div class="wuitem on"><div class="box">4</div><div class="tx">Прогресс сохраняется<span>история, рекорды, серия дней и график</span></div></div>
+    </div>
+    <button class="cdbtn" id="obTest" style="width:100%;background:var(--gold)">🎯 Замерить мой максимум</button>
+    <button class="cdbtn" id="obGo" style="width:100%">Поехали ▸</button>
+    <div class="orline">Совет: добавь на экран «Домой» — откроется как приложение</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $=id=>document.getElementById(id), now=()=>performance.now();
+
+  // масштабированная программа (старт с 7), 15 недель × 5 подходов
+  // программа строится под твой максимум: старт = твой максимум, финиш = цифры схемы
+  function buildPlan(sm){
+    sm=Math.max(1,Math.min(60,Math.round(sm)));
+    const N=52, end=[65,65,60,55,50];
+    const rs=[1,6/7,5/7,5/7,4/7], re=end.map(v=>v/end[0]);
+    const start=rs.map(r=>Math.max(1,Math.round(sm*r)));
+    for(let j=1;j<5;j++) if(start[j]>start[j-1]) start[j]=start[j-1];
+    const s1=[]; for(let i=0;i<N;i++) s1.push(Math.round(start[0]+(end[0]-start[0])*i/(N-1)));
+    const plan=[];
+    for(let i=0;i<N;i++){const row=[s1[i]];
+      for(let k=1;k<5;k++){const r=rs[k]+(re[k]-rs[k])*i/(N-1); row.push(Math.max(1,Math.round(s1[i]*r)));}
+      plan.push(row);}
+    plan[0]=start.slice(); plan[N-1]=end.slice();
+    for(let i=0;i<N;i++) for(let j=1;j<5;j++) if(plan[i][j]>plan[i][j-1]) plan[i][j]=plan[i][j-1];
+    for(let j=0;j<5;j++) for(let i=1;i<N;i++) if(plan[i][j]<plan[i-1][j]) plan[i][j]=plan[i-1][j];
+    plan[N-1]=end.slice();
+    for(let j=0;j<5;j++) for(let i=N-2;i>=0;i--) if(plan[i][j]>plan[i+1][j]) plan[i][j]=plan[i+1][j];
+    plan[0]=start.slice();
+    return plan;
+  }
+  let PLAN=buildPlan(7);
+  const planSum=w=>PLAN[w].reduce((a,b)=>a+b,0);
+
+  // настройки
+  let mode='program', week=0, programRest=60000;
+  let goal=0, restThreshold=4000, targetRest=0;
+  let soundOn=true, vibeOn=true, voiceOn=true;
+  let voiceName='', voiceEnergy='hype', voices=[];
+  let countOn=true, lastCountSec=99, counting=false;
+  let cheerLead=3, metroOn=false, metroSec=1.5, lastMetro=0, metroHi=false;
+  let startMax=7, autoProg=true;
+  let tempoVoiceOn=false, warmupOn=true, warmupDone=false;
+  let gripVoiceOn=false;
+  let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
+  let theme='dark';
+  let amrapMin=10; // AMRAP длительность в минутах
+  let amrapEndTime=0; // когда закончится AMRAP
+  // пауза
+  let paused=false, pauseStart=0, pauseMs=0;
+  const DEBOUNCE=330;
+  // сессия
+  let started=false, finished=false, reps=0, repsThisSet=0, sets=[];
+  let exerciseMs=0, restMs=0, lastTap=0, lastTick=0, wasResting=false;
+  let setIndex=0, phase='work', restStart=0, restAlert=false, goalHit=false, lastSave=0;
+  // банк за сегодня + история + рекорд
+  let committed={reps:0,sets:0,workMs:0,restMs:0,best:0};
+  let history={}, pr=0, storageOk=true;
+
+  const tap=$('tap'),flash=$('flash'),hello=$('hello'),core=$('core'),topcount=$('topcount');
+  const elState=$('state'),elCount=$('count'),elCap=$('caption'),elSet=$('setline'),elChips=$('chips');
+  const goalwrap=$('goalwrap'),goalfill=$('goalfill'),goallab=$('goallab');
+  const sReps=$('sReps'),sSets=$('sSets'),sWork=$('sWork'),sRest=$('sRest');
+  const action=$('action'),primary=$('primary'),finishBtn=$('finish');
+
+  const fmt=ms=>{const s=Math.floor(ms/1000),m=Math.floor(s/60);return String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+  const tkey=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+  const dshort=k=>{const p=k.split('-');return p[2]+'.'+p[1]};
+  const ms2=s=>{s=Math.max(0,Math.round(s));const m=Math.floor(s/60),r=s%60;return m>0?(m+':'+String(r).padStart(2,'0')):(''+r);};
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const pluralDays=n=>{const m=n%100,l=n%10;if(m>=11&&m<=14)return'дней';if(l===1)return'день';if(l>=2&&l<=4)return'дня';return'дней';};
+
+  // голос / звук / вибро
+  const ENERGY={calm:{rate:1.0,pitch:1.0},hype:{rate:1.22,pitch:1.12},beast:{rate:1.35,pitch:1.25}};
+  function loadVoices(){try{voices=(speechSynthesis.getVoices()||[]);}catch(e){voices=[];}buildVoiceSelect();}
+  function ruVoices(){const ru=voices.filter(v=>/ru/i.test(v.lang));return ru.length?ru:voices;}
+  function chosenVoice(){return voices.find(v=>v.name===voiceName)||ruVoices()[0]||voices[0]||null;}
+  function say(t,boost){if(!voiceOn||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';const e=ENERGY[voiceEnergy]||ENERGY.hype;
+    u.rate=e.rate*(boost?1.05:1);u.pitch=e.pitch;u.volume=1;const v=chosenVoice();if(v)u.voice=v;
+    speechSynthesis.speak(u);}catch(e){}}
+  // энергичные реплики
+  const SAY_REST=['Отдых.','Передышка.','Дыши.'];
+  const SAY_REST_HYPE=['Красава, отдых!','Мощно! Передышка.','Есть подход! Дыши.'];
+  const SAY_REST_BEAST=['Зверь! Отдыхай!','Огонь! Дыши, боец!','Машина! Передышка!'];
+  const SAY_GO=['Погнали!','Вперёд!','Поехали, жми!'];
+  const SAY_GO_BEAST=['В бой!','Рви! Погнали!','Жми до отказа!'];
+  const SAY_GOAL=['Цель!','Есть!','Взял!'];
+  const SAY_GOAL_BEAST=['Цель взята! Огонь!','Есть! Зверюга!','Красавчик! Цель!'];
+  const SAY_DONE=['Тренировка завершена. Красавчик!','Готово! Машина!','Всё! Зверь! Так держать!'];
+  function sayRest(){say(pick(voiceEnergy==='beast'?SAY_REST_BEAST:voiceEnergy==='calm'?SAY_REST:SAY_REST_HYPE));}
+  function sayGo(){say(pick(voiceEnergy==='beast'?SAY_GO_BEAST:SAY_GO),true);}
+  function sayGoal(){say(pick(voiceEnergy==='beast'?SAY_GOAL_BEAST:SAY_GOAL),true);}
+  let actx=null;
+  function beep(f,dur){if(!soundOn)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();const o=actx.createOscillator(),g=actx.createGain();
+    o.type='square';o.frequency.value=f;o.connect(g);g.connect(actx.destination);const t=actx.currentTime;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.09));o.start(t);o.stop(t+(dur||.1));}catch(e){}}
+  const buzz=p=>{if(vibeOn&&navigator.vibrate)try{navigator.vibrate(p);}catch(e){}};
+  function click(hi){if(!metroOn)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();const o=actx.createOscillator(),g=actx.createGain();
+    o.type='sine';o.frequency.value=hi?900:560;o.connect(g);g.connect(actx.destination);const t=actx.currentTime;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.005);
+    g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.start(t);o.stop(t+.06);}catch(e){}}
+
+  let wl=null;
+  async function lockScreen(){try{if('wakeLock' in navigator){wl=await navigator.wakeLock.request('screen');
+    $('lock').classList.add('on');wl.addEventListener('release',()=>$('lock').classList.remove('on'));}}catch(e){}}
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&started)lockScreen();});
+
+  // хранение
+  function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn}));}catch(e){storageOk=false;}}
+  function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
+    const c=JSON.parse(localStorage.getItem('pushup_cfg'));
+    if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
+      restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
+      soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
+      voiceName=c.voiceName||'';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+      cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;
+      startMax=c.startMax||7;autoProg=c.autoProg!==false;
+      tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
+      if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
+      reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
+      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;}
+    applyTheme();
+    PLAN=buildPlan(startMax);if(week>51)week=51;
+    const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
+  }catch(e){storageOk=false;history={};}}
+  const sessMax=()=>Math.max(0,repsThisSet,...sets.map(s=>s.reps));
+  function saveToday(){history[tkey()]={reps:committed.reps+reps,sets:committed.sets+sets.length,
+    workMs:committed.workMs+exerciseMs,restMs:committed.restMs+restMs,best:Math.max(committed.best,sessMax())};persist();}
+  function streak(){let n=0,d=new Date();for(;;){const k=tkey(d);const r=history[k];
+    if(r&&r.reps>0){n++;d.setDate(d.getDate()-1);}else if(k===tkey()){d.setDate(d.getDate()-1);}else break;}return n;}
+  const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const DOW_ORDER=[1,2,3,4,5,6,0]; // Пн..Вс
+  const isTrain=dow=>trainingDays.includes(dow);
+  function nextTrain(){for(let i=1;i<=7;i++){const d=new Date();d.setDate(d.getDate()+i);if(isTrain(d.getDay()))return DOW[d.getDay()];}return '';}
+  function weekCells(){ // понедельник..воскресенье текущей недели
+    const now0=new Date();const dow=now0.getDay();const monOff=(dow+6)%7;
+    const cells=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(now0.getDate()-monOff+i);
+      const k=tkey(d);cells.push({dow:d.getDay(),key:k,train:isTrain(d.getDay()),done:!!(history[k]&&history[k].reps>0),today:k===tkey()});}
+    return cells;}
+  const trainedToday=()=> (history[tkey()]&&history[tkey()].reps>0)||committed.reps>0||reps>0;
+
+  // ---- ПАУЗА ----
+  const pauseBar=$('pauseBar'), pauseDurEl=$('pauseDur');
+  function togglePause(){
+    if(!started||finished)return;
+    if(!paused){
+      paused=true;pauseStart=now();
+      tap.classList.add('paused');
+      pauseBar.style.display='flex';
+      $('pauseBtn').textContent='▶';
+      speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();
+    }else{
+      resumeFromPause();
+    }
+  }
+  function resumeFromPause(){
+    if(!paused)return;
+    const dur=now()-pauseStart;pauseMs+=dur;
+    // Сдвигаем lastTap и restStart, чтобы таймеры не сломались
+    lastTap+=dur;lastTick+=dur;
+    if(phase==='rest')restStart+=dur;
+    if(amrapEndTime>0)amrapEndTime+=dur;
+    paused=false;
+    tap.classList.remove('paused');
+    pauseBar.style.display='none';
+    $('pauseBtn').textContent='⏸';
+    beep(880,.1);buzz(30);
+  }
+  $('pauseResume').addEventListener('click',resumeFromPause);
+  $('pauseBtn').addEventListener('click',togglePause);
+  // тап по затемнённому overlay = возобновить
+  $('pauseOverlay').addEventListener('pointerdown',e=>{e.stopPropagation();resumeFromPause();});
+
+  // ---- АЧИВКИ ----
+  const ACHIEVEMENTS=[
+    {id:'rep50',emoji:'💪',title:'50 за сессию',sub:'Более 50 повторов за тренировку',check:()=>reps+committed.reps>=50},
+    {id:'rep100',emoji:'🔥',title:'100 за день',sub:'Сотня повторов за одну тренировку',check:()=>reps+committed.reps>=100},
+    {id:'rep200',emoji:'⚡',title:'Двести!',sub:'200 повторов — ты машина',check:()=>reps+committed.reps>=200},
+    {id:'set5',emoji:'🏋',title:'5 подходов',sub:'Завершил пять подходов за раз',check:()=>sets.length+committed.sets>=5},
+    {id:'streak3',emoji:'🗓',title:'3 дня подряд',sub:'Серия три дня — привычка формируется',check:()=>streak()>=3},
+    {id:'streak7',emoji:'🌟',title:'Неделя подряд',sub:'7 дней серии — это характер!',check:()=>streak()>=7},
+    {id:'pr',emoji:'🏆',title:'Личный рекорд',sub:'Лучший результат обновлён',check:()=>sessMax()>pr&&sessMax()>0},
+    {id:'best30',emoji:'🎯',title:'30 за подход',sub:'Тридцать без остановки — отлично',check:()=>sessMax()>=30},
+    {id:'best50',emoji:'🥇',title:'50 за подход',sub:'Полтинник без остановки — зверь!',check:()=>sessMax()>=50},
+  ];
+  let earnedAchieve=new Set();
+  function loadAchievements(){try{const a=JSON.parse(localStorage.getItem('pushup_achieve'));if(Array.isArray(a))earnedAchieve=new Set(a);}catch(e){}}
+  function saveAchievements(){try{localStorage.setItem('pushup_achieve',JSON.stringify([...earnedAchieve]));}catch(e){}}
+  let toastTimer=null;
+  function showAchieveToast(a){
+    $('aToastEmoji').textContent=a.emoji;$('aToastTitle').textContent=a.title;$('aToastSub').textContent=a.sub;
+    const el=$('achieveToast');el.classList.add('show');
+    if(toastTimer)clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+    beep(1320,.12);setTimeout(()=>beep(990,.1),130);buzz([0,40,50,40]);
+  }
+  function checkAchievements(){
+    ACHIEVEMENTS.forEach(a=>{if(!earnedAchieve.has(a.id)&&a.check()){earnedAchieve.add(a.id);saveAchievements();showAchieveToast(a);}});
+  }
+  function renderAchievements(){
+    const el=$('achList');if(!el)return;
+    el.innerHTML=ACHIEVEMENTS.map(a=>{const earned=earnedAchieve.has(a.id);
+      return '<span class="achbadge" title="'+(earned?a.title+' — '+a.sub:'Ещё не получена')+'" style="opacity:'+(earned?'1':'.25')+'">'+(earned?a.emoji:'⬜')+'</span>';
+    }).join('');
+  }
+  loadAchievements();
+
+  // ---- ХВАТЫ ----
+  function hand(cx,cy,deg,side){
+    const fingers=[-3.6,-1.2,1.2,3.6].map(fx=>'<rect x="'+(fx-0.8)+'" y="-8.5" width="1.6" height="6.5" rx="0.8"/>').join('');
+    const thumb='<rect x="'+(side>0?4.2:-6.4)+'" y="-1" width="2.2" height="5" rx="1.1"/>';
+    return '<g transform="translate('+cx+' '+cy+') rotate('+deg+')" fill="var(--work)">'+
+      '<rect x="-5" y="-2.5" width="10" height="8.5" rx="3"/>'+fingers+thumb+'</g>';
+  }
+  function fist(cx,cy){
+    return '<g transform="translate('+cx+' '+cy+')" fill="var(--work)">'+
+      '<rect x="-5.5" y="-5" width="11" height="10" rx="4"/>'+
+      '<line x1="-3" y1="-5" x2="-3" y2="5" stroke="#15171c" stroke-width="0.9"/>'+
+      '<line x1="0" y1="-5" x2="0" y2="5" stroke="#15171c" stroke-width="0.9"/>'+
+      '<line x1="3" y1="-5" x2="3" y2="5" stroke="#15171c" stroke-width="0.9"/></g>';
+  }
+  function bodySVG(){
+    return '<path d="M44 26 Q60 20 76 26 L73 64 Q60 71 47 64 Z" fill="var(--line)"/>'+
+      '<ellipse cx="60" cy="14" rx="8" ry="9" fill="var(--line)"/>'+
+      '<line x1="22" y1="30" x2="98" y2="30" stroke="var(--muted)" stroke-width="0.7" stroke-dasharray="3 3" opacity=".45"/>';
+  }
+  function gripSVG(hands){return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg">'+bodySVG()+hands+'</svg>';}
+
+  const DIAMOND='<path d="M60 30 L66.5 40 L60 50 L53.5 40 Z" fill="none" stroke="var(--gold)" stroke-width="1.1" opacity=".85"/>';
+  const PIKE='<path d="M50 72 L60 62 L70 72" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'+
+             '<path d="M60 62 L60 56 M57 59 L60 56 L63 59" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round"/>';
+
+  const GRIPS=[
+    {name:'Классический',target:'Грудь + трицепс',
+     hands:hand(40,34,0,1)+hand(80,34,0,-1),
+     desc:'Кисти под плечами, на ширине плеч. Локти идут назад под ~45°, тело — прямая линия от головы до пят. <b>База</b> для любого уровня.'},
+    {name:'Широкий',target:'Акцент на грудь',
+     hands:hand(28,34,-12,1)+hand(92,34,12,-1),
+     desc:'Кисти заметно шире плеч, пальцы чуть наружу. Сильнее грузит <b>грудные</b>. Не разводи локти на 90° — береги плечо.'},
+    {name:'Алмазный (узкий)',target:'Акцент на трицепс',
+     hands:DIAMOND+hand(53,41,38,1)+hand(67,41,-38,-1),
+     desc:'Ладони вместе под грудью: большие и указательные пальцы образуют ромб. Локти прижаты. Грузит <b>трицепс</b> — снижай число повторов.'},
+    {name:'На кулаках',target:'Бережёт запястья',
+     hands:fist(40,34)+fist(80,34),
+     desc:'Опора на кулаки (костяшки указательного и среднего), запястье прямое. Хорош при <b>боли в запястьях</b>. Подложи мягкий коврик.'},
+    {name:'«Домиком» (пика)',target:'Плечи · дельты',
+     hands:hand(42,34,0,1)+hand(78,34,0,-1)+PIKE,
+     desc:'Таз вверх, тело — буква «Л», смотришь на ноги. Опускайся макушкой к полу между ладоней. Подводка к <b>отжиманиям в стойке</b>.'},
+    {name:'Обратный (пальцы к себе)',target:'Бицепс · предплечья',
+     hands:hand(40,32,180,-1)+hand(80,32,180,1),
+     desc:'Пальцы развёрнуты к ногам. Непривычная нагрузка на <b>бицепс и предплечья</b>. Начинай с малого и не проваливайся резко — нагрузка на запястья.'},
+  ];
+  function renderGrips(){
+    const el=$('gripList');if(!el||el.children.length)return;
+    el.innerHTML=GRIPS.map(g=>'<div class="gripcard"><div class="dia">'+gripSVG(g.hands)+'</div>'+
+      '<div class="gc"><div class="gn">'+g.name+'</div><span class="gt">'+g.target+'</span><div class="gd">'+g.desc+'</div></div></div>').join('');
+  }
+  // ротация хватов по 5 подходам программы
+  const SET_GRIPS=[
+    {lab:'Классический',say:'классический хват'},
+    {lab:'Широкий',say:'широкий хват'},
+    {lab:'Алмазный',say:'узкий, алмазный хват'},
+    {lab:'Классический',say:'классический хват'},
+    {lab:'На кулаках',say:'на кулаках'},
+  ];
+  const gripForSet=i=>SET_GRIPS[((i%SET_GRIPS.length)+SET_GRIPS.length)%SET_GRIPS.length];
+
+
+  // ---- старт сессии / повтор ----
+  function startSession(t){started=true;finished=false;hello.classList.add('hidden');core.classList.remove('hidden');
+    topcount.classList.remove('hidden');action.classList.remove('hidden');finishBtn.classList.remove('hidden');
+    $('pauseBtn').classList.remove('hidden');
+    // AMRAP: установить таймер
+    if(mode==='amrap'){amrapEndTime=t+amrapMin*60000;$('amrapTimer').style.display='block';}
+    lastTick=t;lastTap=t;setIndex=0;phase='work';restAlert=false;goalHit=false;lastCountSec=99;lastMetro=t;metroHi=false;lockScreen();render();
+    if(mode==='program'&&gripVoiceOn)setTimeout(()=>{if(started&&!finished&&!counting)say('Первый подход — '+gripForSet(0).say+'.',true);},1100);}
+
+  // голосовой отсчёт 3·2·1 перед стартом
+  function startCountdown(done){
+    if(counting||started)return;counting=true;
+    const cd=$('cd');cd.classList.remove('hidden');
+    const seq=['3','2','1','ВПЕРЁД!'],words=['Три','Два','Один','Погнали, жми!'];
+    let i=0;const step=()=>{
+      cd.textContent=seq[i];cd.classList.remove('pop');void cd.offsetWidth;cd.classList.add('pop');
+      beep(i<3?700:1200,.13);buzz(i<3?45:100);say(words[i],true);i++;
+      if(i<seq.length)setTimeout(step,850);
+      else setTimeout(()=>{cd.classList.add('hidden');counting=false;done&&done();},650);
+    };step();
+  }
+  function armSession(){startSession(now());}
+
+  // ---- разминка ----
+  const WARMUP=[
+    ['Вращения руками','10 вперёд · 10 назад'],
+    ['Разминка кистей и запястий','круговые, ~20 сек'],
+    ['Отжимания с колен','5 медленных'],
+    ['Планка','20 секунд'],
+    ['Растяжка груди','15 секунд на сторону']
+  ];
+  function renderWarmup(){
+    $('warmList').innerHTML=WARMUP.map((w,i)=>'<div class="wuitem" data-i="'+i+'"><div class="box">✓</div><div class="tx">'+w[0]+'<span>'+w[1]+'</span></div></div>').join('');
+    [...$('warmList').children].forEach(el=>el.addEventListener('click',()=>el.classList.toggle('on')));
+  }
+  function openWarmup(cb){pendingStart=cb;renderWarmup();$('warmup').classList.add('open');say('Разминка. Береги плечи!',true);}
+  function finishWarmup(){$('warmup').classList.remove('open');warmupDone=true;const cb=pendingStart;pendingStart=null;if(cb)cb();}
+  function doStart(withCd){
+    const go=()=>{if(withCd&&countOn)startCountdown(armSession);else armSession();};
+    if(warmupOn&&!warmupDone)openWarmup(go);else go();
+  }
+
+  function countRep(e){
+    if(e)e.preventDefault();
+    if($('panel').classList.contains('open')||$('summary').classList.contains('open'))return;
+    const t=now();
+    if(counting)return;
+    if(started&&t-lastTap<DEBOUNCE)return;
+    if(!started){
+      if(warmupOn&&!warmupDone){openWarmup(armSession);return;}
+      startSession(t);
+    }
+    if(mode==='program'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;}
+    if(mode==='program'&&phase==='done')return;
+    if(mode==='amrap'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;}
+    if(repsThisSet===0)goalHit=false;
+    reps++;repsThisSet++;lastTap=t;
+    elCount.classList.remove('bump');void elCount.offsetWidth;elCount.classList.add('bump');
+    flash.classList.remove('go','goal');void flash.offsetWidth;
+    const target=mode==='program'?PLAN[week][setIndex]:goal;
+    const hitNow=target>0&&repsThisSet>=target&&!goalHit;
+    if(hitNow){goalHit=true;flash.classList.add('go','goal');buzz([0,40,30,40,30,90]);beep(1320,.18);}
+    else{flash.classList.add('go');buzz(28);beep(880);}
+    // голос: подбадривание на финише подхода
+    const rem=target>0?target-repsThisSet:99;
+    if(target>0&&rem>0&&rem<=cheerLead)say(rem===1?'Последний!':rem===2?'Ещё два!':'Ещё '+rem+'!',true);
+    else if(!tempoVoiceOn)say(String(repsThisSet));
+    if(hitNow&&(mode==='free'||mode==='amrap'))sayGoal();
+    if(mode==='program'&&repsThisSet>=PLAN[week][setIndex])completeSet(t);
+    saveToday();checkAchievements();render();
+  }
+  tap.addEventListener('pointerdown',countRep);
+
+  function completeSet(t){
+    const target=mode==='program'?PLAN[week][setIndex]:goal;
+    sets.push({reps:repsThisSet,target:target||null});
+    if(mode==='program'){
+      if(setIndex>=PLAN[week].length-1){phase='done';finishWorkout();return;}
+      setIndex++;phase='rest';restStart=t;restAlert=false;repsThisSet=0;lastCountSec=99;
+      if(gripVoiceOn)say('Отдых. Следующий подход — '+gripForSet(setIndex).say+'.');else sayRest();
+      beep(420);buzz([0,60,40,60]);
+    }else{repsThisSet=0;}
+    render();
+  }
+
+  function tick(){
+    const t=now();
+    if(!started||finished||paused){lastTick=t;
+      // обновляем счётчик паузы
+      if(paused){const ps=Math.floor((t-pauseStart)/1000),pm=Math.floor(ps/60);pauseDurEl.textContent=pm+':'+String(ps%60).padStart(2,'0');}
+      return;}
+    const dt=t-lastTick;lastTick=t;
+    // AMRAP: проверяем таймер
+    if(mode==='amrap'&&amrapEndTime>0){
+      const left=amrapEndTime-t;
+      const atEl=$('amrapCountdown');
+      if(left<=0){$('amrapTimer').style.display='none';finishWorkout();return;}
+      atEl.textContent=fmt(Math.ceil(left/1000)*1000);
+      $('amrapTimer').classList.toggle('warn',left<30000);
+    }
+    if(mode==='free'||mode==='amrap'){
+      const gap=t-lastTap, resting=gap>=restThreshold;
+      if(resting)restMs+=dt;else exerciseMs+=dt;
+      if(resting&&!wasResting){if(repsThisSet>0){sets.push({reps:repsThisSet,target:goal||null});repsThisSet=0;}restAlert=false;lastCountSec=99;buzz([0,60,40,60]);beep(420);sayRest();}
+      if(resting&&targetRest>0&&mode==='free'){
+        const ls=Math.ceil((targetRest-gap)/1000);
+        if(countOn&&ls<=3&&ls>=1&&ls!==lastCountSec){lastCountSec=ls;say(['','один','два','три'][ls],true);beep(760,.1);buzz(35);}
+        if(gap>=targetRest&&!restAlert){restAlert=true;buzz([0,120,60,120]);beep(620,.25);sayGo();}
+      }
+      wasResting=resting;
+    }else{
+      if(phase==='work')exerciseMs+=dt;
+      else if(phase==='rest'){restMs+=dt;
+        const ls=Math.ceil((programRest-(now()-restStart))/1000);
+        if(countOn&&ls<=3&&ls>=1&&ls!==lastCountSec){lastCountSec=ls;say(['','один','два','три'][ls],true);beep(760,.1);buzz(35);}
+        if(now()-restStart>=programRest&&!restAlert){restAlert=true;buzz([0,120,60,120]);beep(620,.25);sayGo();}
+      }
+    }
+    // метроном / голос темпа (только во время работы)
+    if((metroOn||tempoVoiceOn)&&!counting){
+      const working = (mode==='free'||mode==='amrap') ? !wasResting : phase==='work';
+      if(working && t-lastMetro>=metroSec*1000){lastMetro=t;
+        if(metroOn)click(metroHi);
+        if(tempoVoiceOn)say(metroHi?'Вверх':'Вниз');
+        metroHi=!metroHi;}
+    }
+    if(t-lastSave>3000){lastSave=t;saveToday();}
+    render();
+  }
+  setInterval(tick,100);
+
+  // ---- отрисовка ----
+  function render(){
+    sReps.textContent=reps;sSets.textContent=sets.length;
+    sWork.textContent=fmt(exerciseMs);sRest.textContent=fmt(restMs);
+
+    let resting=false, gap=0;
+    if(mode==='free'||mode==='amrap'){gap=now()-lastTap;resting=started&&gap>=restThreshold;}
+    else resting=(phase==='rest');
+
+    if(resting){
+      tap.classList.add('rest');tap.classList.remove('work');goalwrap.classList.remove('show');
+      if(mode==='program'){
+        const left=Math.ceil((programRest-(now()-restStart))/1000);
+        if(left>0){elState.textContent='ОТДЫХ';elState.className='state rest';elCount.textContent=ms2(left);
+          elCount.classList.remove('alert');topcount.textContent=ms2(left);elCap.textContent=left>=60?'ДО ПОДХОДА':'СЕКУНД ДО ПОДХОДА';}
+        else{elState.textContent='ПОРА!';elState.className='state rest';elCount.textContent='ПОРА';
+          elCount.classList.add('alert');topcount.textContent='!';elCap.textContent='КОСНИСЬ — НОВЫЙ ПОДХОД';}
+        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · цель <b>'+PLAN[week][setIndex]+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).lab+'</b>':'');
+      }else{
+        const sec=Math.floor(gap/1000);
+        if(targetRest>0){const left=Math.ceil((targetRest-gap)/1000);
+          if(left>0){elState.textContent='ОТДЫХ';elState.className='state rest';elCount.textContent=ms2(left);elCount.classList.remove('alert');topcount.textContent=ms2(left);elCap.textContent=left>=60?'ДО ПОДХОДА':'СЕКУНД ДО ПОДХОДА';}
+          else{elState.textContent='ПОРА!';elState.className='state rest';elCount.textContent='ПОРА';elCount.classList.add('alert');topcount.textContent='!';elCap.textContent='КОСНИСЬ — НОВЫЙ ПОДХОД';}}
+        else{elState.textContent='ОТДЫХ';elState.className='state rest';elCount.textContent=ms2(sec);elCount.classList.remove('alert');topcount.textContent=ms2(sec);elCap.textContent='КОСНИСЬ — НОВЫЙ ПОДХОД';}
+        elSet.innerHTML='Следующий — подход <b>'+(sets.length+1)+'</b>';
+      }
+    }else{
+      tap.classList.remove('rest');elCount.classList.remove('alert');
+      elCount.textContent=repsThisSet;topcount.textContent=repsThisSet;elCap.textContent='В ПОДХОДЕ';
+      const target=mode==='program'?PLAN[week][setIndex]:goal;
+      if(started&&target>0){
+        goalwrap.classList.add('show');
+        const pct=Math.min(100,repsThisSet/target*100);goalfill.style.width=pct+'%';
+        const done=repsThisSet>=target;goalfill.classList.toggle('done',done);
+        goallab.textContent=(done?'ЦЕЛЬ ВЫПОЛНЕНА · ':'ЦЕЛЬ ')+repsThisSet+' / '+target;
+        elState.textContent=done?'ЦЕЛЬ!':'РАБОТА';elState.className=done?'state ready':'state work';
+      }else{goalwrap.classList.remove('show');
+        elState.textContent=started?'РАБОТА':'ГОТОВ';elState.className=started?'state work':'state';}
+      if(started){
+        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).lab+'</b>':'');
+        else if(mode==='amrap')elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b> за время';
+        else elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b>';
+      }
+    }
+
+    // контекстная кнопка
+    if(mode==='program'&&resting)primary.textContent='ПРОПУСТИТЬ ОТДЫХ ▸';
+    else primary.textContent='ПОДХОД ГОТОВ ▸';
+
+    // плитки
+    elChips.innerHTML='';
+    sets.slice(-8).forEach((s)=>{const c=document.createElement('div');c.className='chip';
+      if(s.target){c.classList.add(s.reps>=s.target?'ok':'miss');c.textContent=s.reps+'/'+s.target;}
+      else c.textContent=s.reps;elChips.appendChild(c);});
+  }
+
+  // ---- стартовый экран ----
+  function renderHello(){
+    const today=committed.reps, st=streak();
+    let h='<div class="big">КАСАЙСЯ <span>НОСОМ</span></div>';
+    h+='<div class="meta"><div class="g">Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
+       '<div>Сегодня<b>'+today+'</b></div><div class="w">Рекорд<b>'+pr+'</b></div></div>';
+    // расписание
+    const cells=weekCells();const doneWk=cells.filter(c=>c.done).length;const todayTrain=isTrain(new Date().getDay());
+    h+='<div class="daybanner '+(todayTrain?'train':'rest')+'">'+
+       (trainedToday()?'Сегодня тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'Сегодня — день отдыха · восстанавливайся')+'</div>';
+    h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
+    h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · следующая: '+nextTrain())+'</div>';
+    if(mode==='program'){
+      h+='<div class="planbox"><div class="pt">Программа · неделя '+(week+1)+' из 52</div><div class="pn">'+
+        PLAN[week].map((n,i)=>'<span'+(i===0?' class="first"':'')+'>'+n+'</span>').join('')+
+        '</div><div class="ps">5 подходов · всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+'</div></div>';
+      h+='<p>Положи телефон на пол. Касайся носом — счёт идёт к цели подхода ('+PLAN[week][0]+'). После цели включится отдых с обратным отсчётом.</p>';
+    }else if(mode==='amrap'){
+      h+='<div class="planbox"><div class="pt">На время · максимум повторов</div>'+
+        '<div class="pn"><span class="first">'+amrapMin+'</span></div>'+
+        '<div class="ps">минут · жми до упора · можно отдыхать между подходами</div></div>';
+      h+='<p>Обратный отсчёт идёт — жми максимум раз за '+amrapMin+' мин. Отжался, отдохни, жми снова.</p>';
+    }else{
+      h+='<p>Положи телефон на пол под собой. Каждое касание носом экрана = одно повторение. Свободный режим без плана.</p>';
+    }
+    if(countOn){
+      h+='<button id="cdStart" class="cdbtn">▶ Старт с отсчётом 3·2·1</button>';
+      h+='<div class="orline">или просто коснись носом — начнётся сразу</div>';
+    }else{
+      h+='<div class="pulse">▾ КОСНИСЬ ЭКРАНА ▾</div>';
+    }
+    hello.innerHTML=h;
+    const sb=hello.querySelector('#cdStart');
+    if(sb)sb.addEventListener('pointerdown',ev=>{ev.stopPropagation();ev.preventDefault();doStart(true);});
+  }
+
+  // ---- завершение тренировки + итоги ----
+  function finishWorkout(){
+    if(!started){return;}
+    finished=true;
+    const all=sets.slice();if(repsThisSet>0)all.push({reps:repsThisSet,target:mode==='program'?PLAN[week][setIndex]:(goal||null)});
+    const total=reps, nSets=all.length;
+    const best=Math.max(0,...all.map(s=>s.reps));
+    const avg=nSets?Math.round(total/nSets):0;
+    const tempo=exerciseMs>0?Math.round(total/(exerciseMs/60000)):0;
+    const newPR=best>pr;
+    let note='', fullDone=false;
+    if(mode==='program'){
+      const planned=planSum(week), pct=Math.round(total/planned*100);
+      fullDone=phase==='done'||(nSets>=5&&all.every((s,i)=>s.reps>=PLAN[week][i]));
+      note='Неделя <b>'+(week+1)+'</b> · план '+planned+' повт. · выполнено <b>'+pct+'%</b>'+
+        (fullDone?' — неделя пройдена! 💪':' — добей все 5 целей, чтобы открыть следующую.');
+    }else if(mode==='amrap'){
+      note='Режим «На время» · <b>'+amrapMin+'</b> мин · <b>'+total+'</b> повторов за отведённое время. '+(newPR?'Новый рекорд!':'Так держать!');
+    }else note='Свободная тренировка.';
+
+    let chips=all.map(s=>{if(s.target)return '<span class="chip '+(s.reps>=s.target?'ok':'miss')+'">'+s.reps+'/'+s.target+'</span>';return '<span class="chip">'+s.reps+'</span>';}).join('');
+    let html='';
+    if(newPR)html+='<div class="record">🏆 Новый рекорд подхода!</div>';
+    html+='<div class="sumbig">'+total+'</div><div class="sumcap">всего повторений</div>';
+    html+='<div class="summet"><div><div class="k">Подходы</div><div class="v">'+nSets+'</div></div>'+
+      '<div><div class="k">Лучший</div><div class="v">'+best+'</div></div>'+
+      '<div><div class="k">В среднем</div><div class="v">'+avg+'</div></div>'+
+      '<div><div class="k">Работа</div><div class="v">'+fmt(exerciseMs)+'</div></div>'+
+      '<div><div class="k">Отдых</div><div class="v">'+fmt(restMs)+'</div></div>'+
+      '<div><div class="k">Темп /мин</div><div class="v">'+tempo+'</div></div></div>';
+    html+='<div class="chips" style="justify-content:center;margin-bottom:14px">'+chips+'</div>';
+    html+='<div class="sumnote">'+note+'<br>Сегодня всего будет: <b>'+(committed.reps+total)+'</b> · рекорд подхода: <b>'+Math.max(pr,best)+'</b></div>';
+    html+='<div class="sumbtns">';
+    if(mode==='program'){
+      const canAdvance=week<51;
+      if(fullDone&&canAdvance){
+        html+='<button id="nextweek">Сохранить · открыть неделю '+(week+2)+' ▸</button>';
+        html+='<button id="save">Сохранить, остаться на неделе '+(week+1)+'</button>';
+      }else{
+        html+='<button id="save">Сохранить'+(canAdvance?' · повторить неделю '+(week+1):'')+'</button>';
+        if(!autoProg&&canAdvance)html+='<button id="nextweek">Перейти на неделю '+(week+2)+' всё равно ▸</button>';
+      }
+    }else if(mode==='amrap'){
+      html+='<button id="save">Сохранить результат «На время»</button>';
+    }else{
+      html+='<button id="save">Сохранить и закрыть</button>';
+    }
+    html+='<button id="share" style="display:flex;align-items:center;justify-content:center;gap:6px">📸 Поделиться карточкой</button>';
+    html+='<button id="discard">Удалить тренировку</button></div>';
+    $('sumbody').innerHTML=html;
+    $('summary').classList.add('open');
+    say(newPR?'Новый рекорд! Огонь!':pick(SAY_DONE),true);beep(990,.3);
+
+    const sumText='💪 Отжимания\nВсего: '+total+' повт. · '+nSets+' подходов\nЛучший подход: '+best+' · работа '+fmt(exerciseMs)+
+      (mode==='program'?'\nПрограмма: неделя '+(week+1):'')+(mode==='amrap'?'\nНа время '+amrapMin+' мин':'');
+    $('save').onclick=()=>commitSession(best,false);
+    $('discard').onclick=()=>{if(confirm('Удалить тренировку без сохранения?'))discardSession();};
+    $('share').onclick=async()=>{
+      try{
+        const W=800,H=420,pad=40;
+        const c=document.createElement('canvas');c.width=W;c.height=H;
+        const ctx=c.getContext('2d');
+        // фон
+        const grad=ctx.createLinearGradient(0,0,W,H);
+        const isDark=document.body.classList.contains('light')?false:true;
+        grad.addColorStop(0,isDark?'#0a0b0d':'#ecefe8');
+        grad.addColorStop(1,isDark?'#111317':'#dde2d8');
+        ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+        // акцент полоса
+        ctx.fillStyle=isDark?'#c8ff00':'#5f7d00';ctx.fillRect(0,0,W,6);
+        // заголовок
+        ctx.fillStyle=isDark?'#c8ff00':'#5f7d00';
+        ctx.font='bold 18px Oswald,sans-serif';ctx.textBaseline='top';
+        ctx.fillText('СЧЁТ ОТЖИМАНИЙ',pad,pad);
+        // большое число
+        ctx.fillStyle=isDark?'#c8ff00':'#4a6400';
+        ctx.font='bold 160px Oswald,sans-serif';ctx.textBaseline='middle';
+        ctx.fillText(total,pad,H/2+10);
+        // подпись под числом
+        ctx.fillStyle=isDark?'#6b7280':'#828a93';
+        ctx.font='500 20px Oswald,sans-serif';ctx.textBaseline='top';
+        const tw=ctx.measureText(total).width;
+        ctx.fillText('ПОВТОРЕНИЙ',pad+tw+14,H/2+20);
+        // метрики справа
+        const mx=W-pad-220,my=pad+10;
+        const metrics=[
+          ['Подходов',nSets],['Лучший',best],['Работа',fmt(exerciseMs)],
+          mode==='program'?['Неделя',week+1]:mode==='amrap'?['Время',amrapMin+'м']:null
+        ].filter(Boolean);
+        metrics.forEach((m,i)=>{
+          ctx.fillStyle=isDark?'#6b7280':'#828a93';ctx.font='500 11px Oswald,sans-serif';
+          ctx.textBaseline='top';ctx.fillText(m[0].toUpperCase(),mx,my+i*68);
+          ctx.fillStyle=isDark?'#f2f4f0':'#15181b';ctx.font='bold 36px Oswald,sans-serif';
+          ctx.fillText(m[1],mx,my+i*68+14);
+        });
+        if(newPR){ctx.fillStyle='#ffd23f';ctx.font='bold 14px Oswald,sans-serif';ctx.textBaseline='bottom';ctx.fillText('🏆 ЛИЧНЫЙ РЕКОРД',pad,H-pad+2);}
+        // серия
+        const str=streak();if(str>1){ctx.fillStyle=isDark?'#6b7280':'#828a93';ctx.font='500 13px Oswald,sans-serif';ctx.textBaseline='bottom';ctx.fillText('🔥 Серия: '+str+' '+pluralDays(str),pad+(newPR?240:0),H-pad+2);}
+        c.toBlob(async blob=>{
+          try{
+            const file=new File([blob],'otzhimaniya.png',{type:'image/png'});
+            if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text:sumText});}
+            else if(navigator.share){await navigator.share({text:sumText});}
+            else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='otzhimaniya.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+          }catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='otzhimaniya.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}}
+        },'image/png');
+      }catch(err){try{if(navigator.share)await navigator.share({text:sumText});else{await navigator.clipboard.writeText(sumText);alert('Скопировано!');}}catch(e){}}
+    };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true);
+  }
+
+  function commitSession(best,advance){
+    committed={reps:committed.reps+reps,sets:committed.sets+sets.length,
+      workMs:committed.workMs+exerciseMs,restMs:committed.restMs+restMs,best:Math.max(committed.best,sessMax(),best)};
+    if(best>pr)pr=best;
+    saveToday();persist();
+    if(advance&&week<51)week++;
+    persist();
+    closeSession();
+  }
+  function discardSession(){history[tkey()]=committed.reps>0?{reps:committed.reps,sets:committed.sets,workMs:committed.workMs,restMs:committed.restMs,best:committed.best}:undefined;
+    if(history[tkey()]===undefined)delete history[tkey()];persist();closeSession();}
+
+  function closeSession(){
+    $('summary').classList.remove('open');
+    started=false;finished=false;reps=0;repsThisSet=0;sets=[];exerciseMs=0;restMs=0;lastTap=0;wasResting=false;
+    setIndex=0;phase='work';goalHit=false;restAlert=false;lastCountSec=99;counting=false;warmupDone=false;
+    paused=false;pauseMs=0;amrapEndTime=0;
+    tap.classList.remove('work','rest','paused');core.classList.add('hidden');topcount.classList.add('hidden');
+    action.classList.add('hidden');finishBtn.classList.add('hidden');$('pauseBtn').classList.add('hidden');
+    pauseBar.style.display='none';$('amrapTimer').style.display='none';
+    renderHello();hello.classList.remove('hidden');render();
+  }
+
+  // ---- кнопки ----
+  finishBtn.addEventListener('click',()=>{if(started)finishWorkout();});
+  $('undo').addEventListener('click',()=>{if(repsThisSet>0){repsThisSet--;reps--;saveToday();render();buzz(20);}});
+  primary.addEventListener('click',()=>{
+    if(!started)return;
+    if(mode==='program'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;render();return;}
+    completeSet(now());
+  });
+
+  // ---- панель ----
+  function schedText(){const td=isTrain(new Date().getDay());
+    return (td?'Сегодня — тренировка':'Сегодня — отдых')+' · следующая: '+(nextTrain()||'—')+(remindOn?' · напоминание в '+reminderTime:'');}
+  function applyModeUI(){
+    $('grpProg').style.opacity=mode==='program'?'1':'.35';
+    $('grpFree').style.opacity=mode==='free'?'1':'.35';
+    $('grpAmrap').style.display=mode==='amrap'?'':'none';
+  }
+  function applyTheme(){
+    const isLight=theme==='light'||(theme==='auto'&&window.matchMedia('(prefers-color-scheme: light)').matches);
+    document.body.classList.toggle('light',isLight);
+  }
+  try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);}catch(e){}
+  function showTab(name){[...document.querySelectorAll('.grp[data-tab]')].forEach(g=>g.style.display=g.dataset.tab===name?'':'none');
+    [...$('tabbar').children].forEach(b=>b.classList.toggle('on',b.dataset.tab===name));}
+  function syncControls(){
+    [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+    $('wVal').textContent=week+1;
+    $('wPrev').innerHTML='Подходы: '+PLAN[week].map(n=>'<b>'+n+'</b>').join(' · ')+' = '+planSum(week);
+    $('prVal').textContent=ms2(programRest/1000);
+    $('gVal').textContent=goal>0?goal:'выкл';
+    [...$('thr').children].forEach(b=>b.classList.toggle('on',+b.dataset.t*1000===restThreshold));
+    $('trVal').textContent=targetRest>0?ms2(targetRest/1000):'выкл';
+    $('amVal').textContent=amrapMin+' мин';
+    $('voice').classList.toggle('on',voiceOn);$('sound').classList.toggle('on',soundOn);$('vibe').classList.toggle('on',vibeOn);
+    $('count').classList.toggle('on',countOn);
+    $('clVal').textContent=cheerLead>0?cheerLead:'выкл';
+    $('metro').classList.toggle('on',metroOn);
+    $('msVal').textContent=metroSec+' с';
+    $('tempoV').classList.toggle('on',tempoVoiceOn);
+    $('warm').classList.toggle('on',warmupOn);
+    $('gripVoice').classList.toggle('on',gripVoiceOn);
+    renderGrips();
+    $('remind').classList.toggle('on',remindOn);
+    $('remTime').value=reminderTime;
+    if(!$('days').children.length){
+      $('days').innerHTML=DOW_ORDER.map(d=>'<button class="daychip" data-d="'+d+'">'+DOW[d]+'</button>').join('');
+      [...$('days').children].forEach(b=>b.addEventListener('click',()=>{const d=+b.dataset.d;
+        const i=trainingDays.indexOf(d);if(i>=0)trainingDays.splice(i,1);else trainingDays.push(d);
+        b.classList.toggle('on');persist();$('schedInfo').innerHTML=schedText();}));
+    }
+    [...$('days').children].forEach(b=>b.classList.toggle('on',trainingDays.includes(+b.dataset.d)));
+    $('schedInfo').innerHTML=schedText();
+    (function(){let rs;const hasN='Notification' in window;
+      if(!remindOn)rs='Напоминание выключено.';
+      else if(isNative)rs='✓ Уведомления включены — приходят даже когда приложение закрыто.';
+      else if(hasN&&Notification.permission==='granted')rs='✓ Уведомления разрешены (надёжнее всего — в установленном приложении/APK).';
+      else if(hasN&&Notification.permission==='denied')rs='Уведомления запрещены в настройках браузера — напомним внутри приложения при открытии.';
+      else rs='Напомним внутри приложения при открытии в день тренировки.';
+      $('remStatus').textContent=rs;})();
+    [...$('theme').children].forEach(b=>b.classList.toggle('on',b.dataset.th===theme));
+    $('auto').classList.toggle('on',autoProg);
+    $('maxInfo').innerHTML='Текущий уровень: максимум <b>'+startMax+'</b> · неделя 1 = '+PLAN[0].join('·');
+    [...$('vibe2').children].forEach(b=>b.classList.toggle('on',b.dataset.e===voiceEnergy));
+    if($('voiceSel').value!==voiceName)$('voiceSel').value=voiceName;
+    applyModeUI();
+    renderAchievements();
+  }
+  function buildVoiceSelect(){
+    const sel=$('voiceSel');if(!sel)return;const list=ruVoices();
+    sel.innerHTML='<option value="">Авто (системный)</option>'+
+      list.map(v=>'<option value="'+v.name.replace(/"/g,'')+'">'+v.name+(/ru/i.test(v.lang)?'':' ('+v.lang+')')+'</option>').join('');
+    sel.value=voiceName;
+  }
+  function renderHist(){
+    const h=$('hist');const keys=Object.keys(history).filter(k=>history[k]&&history[k].reps>0).sort().reverse().slice(0,12);
+    if(!storageOk){h.innerHTML='<div class="empty">История сохраняется в обычном браузере или при добавлении на экран Домой, а не в предпросмотре.</div>';return;}
+    if(!keys.length){h.innerHTML='<div class="empty">Пока пусто — заверши первую тренировку.</div>';return;}
+    let html='<div class="hrow head"><div>Дата</div><div>Повт.</div><div>Подх.</div><div>Работа</div></div>';
+    const tk=tkey();
+    keys.forEach(k=>{const r=history[k];html+='<div class="hrow'+(k===tk?' today':'')+'"><div class="d">'+(k===tk?'Сегодня':dshort(k))+
+      '</div><div class="n">'+r.reps+'</div><div class="s">'+r.sets+'</div><div class="t">'+fmt(r.workMs)+'</div></div>';});
+    h.innerHTML=html;
+  }
+  function renderGraph(){
+    const g=$('graph');if(!g)return;
+    const keys=Object.keys(history).filter(k=>history[k]&&history[k].reps>0).sort().slice(-21);
+    if(keys.length<2){g.innerHTML='';return;}
+    const max=Math.max(...keys.map(k=>history[k].reps));const tk=tkey();
+    let bars=keys.map(k=>{const r=history[k];const hgt=Math.max(6,Math.round(r.reps/max*100));
+      return '<div class="b'+(k===tk?' today':'')+'" style="height:'+hgt+'%" title="'+dshort(k)+': '+r.reps+'"></div>';}).join('');
+    g.innerHTML='<div class="gtitle">Прогресс · повторов в день</div><div class="bars">'+bars+'</div>'+
+      '<div class="glabel"><span>'+dshort(keys[0])+'</span><span>макс '+max+'</span><span>'+(keys[keys.length-1]===tk?'сегодня':dshort(keys[keys.length-1]))+'</span></div>';
+  }
+  $('gear').addEventListener('click',()=>{loadVoices();syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
+  $('close').addEventListener('click',()=>{$('panel').classList.remove('open');if(!started)renderHello();});
+  $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;syncControls();persist();if(!started)renderHello();});
+  $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
+  $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
+  const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
+  $('prPlus').addEventListener('click',()=>{programRest=Math.min(PR_MAX,programRest+PR_STEP);syncControls();persist();if(!started)renderHello();});
+  $('prMinus').addEventListener('click',()=>{programRest=Math.max(PR_MIN,programRest-PR_STEP);syncControls();persist();if(!started)renderHello();});
+  $('gPlus').addEventListener('click',()=>{goal=Math.min(200,goal+1);syncControls();persist();});
+  $('gMinus').addEventListener('click',()=>{goal=Math.max(0,goal-1);syncControls();persist();});
+  $('amPlus').addEventListener('click',()=>{amrapMin=Math.min(60,amrapMin+1);syncControls();persist();});
+  $('amMinus').addEventListener('click',()=>{amrapMin=Math.max(1,amrapMin-1);syncControls();persist();});
+  $('thr').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;restThreshold=+b.dataset.t*1000;syncControls();persist();});
+  $('trPlus').addEventListener('click',()=>{targetRest=Math.min(TR_MAX,targetRest+TR_STEP);syncControls();persist();});
+  $('trMinus').addEventListener('click',()=>{targetRest=Math.max(0,targetRest-TR_STEP);syncControls();persist();});
+  $('voiceSel').addEventListener('change',e=>{voiceName=e.target.value;persist();say('Поехали, жми!',true);});
+  $('vibe2').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;voiceEnergy=b.dataset.e;syncControls();persist();sayGo();});
+  $('voice').addEventListener('click',()=>{voiceOn=!voiceOn;syncControls();persist();if(voiceOn)say('Поехали! Погнали!',true);});
+  $('count').addEventListener('click',()=>{countOn=!countOn;syncControls();persist();if(!started)renderHello();if(countOn)say('Три, два, один, погнали!',true);});
+  $('clPlus').addEventListener('click',()=>{cheerLead=Math.min(8,cheerLead+1);syncControls();persist();});
+  $('clMinus').addEventListener('click',()=>{cheerLead=Math.max(0,cheerLead-1);syncControls();persist();});
+  $('metro').addEventListener('click',()=>{metroOn=!metroOn;syncControls();persist();if(metroOn){metroHi=false;click(false);setTimeout(()=>click(true),metroSec*1000);}});
+  $('tempoV').addEventListener('click',()=>{tempoVoiceOn=!tempoVoiceOn;syncControls();persist();if(tempoVoiceOn){say('Вниз');setTimeout(()=>say('Вверх'),metroSec*1000);}});
+  $('warm').addEventListener('click',()=>{warmupOn=!warmupOn;syncControls();persist();});
+  $('gripVoice').addEventListener('click',()=>{gripVoiceOn=!gripVoiceOn;syncControls();persist();if(gripVoiceOn)say('Буду подсказывать хват на каждый подход.',true);});
+  $('warmGo').addEventListener('click',finishWarmup);
+  $('warmSkip').addEventListener('click',finishWarmup);
+  // ===== УВЕДОМЛЕНИЯ (APK / PWA / браузер) =====
+  const Cap = window.Capacitor;
+  const isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
+  const LN = () => (Cap && Cap.Plugins && Cap.Plugins.LocalNotifications) || null;
+  let swReg = null;
+  const NOTIF_TITLE='Пора отжиматься 💪';
+  const NOTIF_BODY='Сегодня день тренировки. Открывай и поехали!';
+
+  async function initNotifications(){
+    if(isNative){
+      try{await LN().requestPermissions();}catch(e){}
+      try{ // Android: создаём канал, чтобы был звук/важность
+        await LN().createChannel({id:'pushup',name:'Напоминания',description:'Напоминания о тренировке',importance:4,visibility:1});
+      }catch(e){}
+      try{ // тап по уведомлению — открываем приложение (оно и так откроется)
+        LN().addListener && LN().addListener('localNotificationActionPerformed',()=>{});
+      }catch(e){}
+      scheduleNativeReminders();
+      return;
+    }
+    if('serviceWorker' in navigator){
+      try{swReg = await navigator.serviceWorker.register('sw.js');}catch(e){swReg=null;}
+    }
+  }
+
+  async function ensurePermission(){
+    if(isNative){try{const r=await LN().requestPermissions();return r&&r.display==='granted';}catch(e){return false;}}
+    if('Notification' in window){
+      if(Notification.permission==='granted')return true;
+      if(Notification.permission==='default'){try{return (await Notification.requestPermission())==='granted';}catch(e){return false;}}
+    }
+    return false;
+  }
+
+  // показать уведомление прямо сейчас (Android-safe: без new Notification())
+  async function notifyNow(title,body){
+    if(isNative){try{await LN().schedule({notifications:[{id:Math.floor(Math.random()*90000)+1,title,body,channelId:'pushup'}]});return;}catch(e){}}
+    try{
+      const reg = swReg || (('serviceWorker' in navigator) ? await navigator.serviceWorker.ready : null);
+      if(reg && reg.showNotification && 'Notification' in window && Notification.permission==='granted'){
+        reg.showNotification(title,{body,icon:'icon-192.png',badge:'icon-192.png',tag:'pushup-reminder',renotify:true});
+        return;
+      }
+    }catch(e){}
+    try{if('Notification' in window && Notification.permission==='granted') new Notification(title,{body});}catch(e){}
+  }
+
+  // нативное планирование на 14 дней вперёд — приходит, даже когда приложение закрыто
+  async function scheduleNativeReminders(){
+    if(!isNative)return;
+    try{
+      const pend=await LN().getPending();
+      if(pend&&pend.notifications&&pend.notifications.length)
+        await LN().cancel({notifications:pend.notifications.map(n=>({id:n.id}))});
+    }catch(e){}
+    if(!remindOn)return;
+    const[rh,rm]=reminderTime.split(':').map(Number);
+    const list=[];
+    for(let i=0;i<14;i++){
+      const d=new Date();d.setDate(d.getDate()+i);d.setHours(rh,rm,0,0);
+      if(d.getTime()<=Date.now())continue;
+      if(!isTrain(d.getDay()))continue;
+      list.push({id:1000+i,title:NOTIF_TITLE,body:NOTIF_BODY,channelId:'pushup',schedule:{at:d,allowWhileIdle:true}});
+    }
+    if(list.length){try{await LN().schedule({notifications:list});}catch(e){}}
+  }
+
+  // вызывается при изменении настроек напоминаний
+  function refreshReminders(){ if(isNative) scheduleNativeReminders(); }
+
+  $('remind').addEventListener('click',async()=>{
+    remindOn=!remindOn;
+    if(remindOn)await ensurePermission();
+    syncControls();persist();refreshReminders();
+  });
+  $('remTime').addEventListener('change',e=>{reminderTime=e.target.value||'08:00';persist();syncControls();refreshReminders();});
+
+  // подстраховка: пока приложение открыто, проверяем время напоминания
+  function checkReminder(){
+    if(!remindOn)return;
+    const d=new Date();if(!isTrain(d.getDay()))return;
+    if(trainedToday())return;
+    const tk=tkey();if(lastNotifyDay===tk)return;
+    const hm=d.getHours()*60+d.getMinutes();
+    const[rh,rm]=reminderTime.split(':').map(Number);
+    if(hm>=rh*60+rm){lastNotifyDay=tk;
+      if(!isNative)notifyNow(NOTIF_TITLE,NOTIF_BODY); // нативно уже запланировано системой
+      if(!started)beep(880,.2);}
+  }
+  setInterval(checkReminder,60000);setTimeout(checkReminder,2000);
+  initNotifications();
+  $('msPlus').addEventListener('click',()=>{metroSec=Math.min(3,Math.round((metroSec+0.25)*100)/100);syncControls();persist();if(metroOn)click(true);});
+  $('msMinus').addEventListener('click',()=>{metroSec=Math.max(0.5,Math.round((metroSec-0.25)*100)/100);syncControls();persist();if(metroOn)click(true);});
+  $('sound').addEventListener('click',()=>{soundOn=!soundOn;syncControls();persist();if(soundOn)beep(880);});
+  $('vibe').addEventListener('click',()=>{vibeOn=!vibeOn;syncControls();persist();if(vibeOn)buzz(40);});
+  $('clearHist').addEventListener('click',()=>{if(confirm('Удалить всю историю и рекорд?')){history={};committed={reps:0,sets:0,workMs:0,restMs:0,best:0};pr=0;persist();renderGraph();renderHist();if(!started)renderHello();}});
+  $('auto').addEventListener('click',()=>{autoProg=!autoProg;syncControls();persist();});
+
+  // ---- День теста ----
+  let testReps=0, testLast=0;
+  function openTest(){testReps=0;testLast=0;$('testCount').textContent='0';$('panel').classList.remove('open');$('test').classList.add('open');say('День теста. Жми максимум!',true);}
+  function testTapFn(e){e&&e.preventDefault();const t=now();if(t-testLast<DEBOUNCE)return;testLast=t;testReps++;
+    const c=$('testCount');c.textContent=testReps;c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');
+    buzz(28);beep(880);say(String(testReps));}
+  $('testBtn').addEventListener('click',openTest);
+  $('testClose').addEventListener('click',()=>$('test').classList.remove('open'));
+  $('testTap').addEventListener('pointerdown',testTapFn);
+  $('testUndo').addEventListener('click',()=>{if(testReps>0){testReps--;$('testCount').textContent=testReps;buzz(20);}});
+  $('testDone').addEventListener('click',()=>{
+    if(testReps<1){$('test').classList.remove('open');return;}
+    const m=Math.max(1,Math.min(60,testReps));
+    const np=buildPlan(m);
+    if(confirm('Твой максимум: '+testReps+'.\nПересчитать программу под этот уровень?\nНеделя 1 станет: '+np[0].join('·')+' (до '+np[51].join('·')+' к 52-й неделе), и ты начнёшь с недели 1.')){
+      startMax=m;PLAN=np;week=0;mode='program';if(testReps>pr)pr=testReps;persist();
+      $('test').classList.remove('open');renderHello();
+      alert('Готово! Программа пересчитана под максимум '+testReps+'. Удачи! 💪');
+    }
+  });
+
+  // ---- Бэкап ----
+  $('exportBtn').addEventListener('click',()=>{
+    const data={v:1,history,pr,cfg:{mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg}};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='otzhimaniya-backup-'+tkey()+'.json';document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},100);
+  });
+  $('importBtn').addEventListener('click',()=>$('importFile').click());
+  $('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=()=>{try{const d=JSON.parse(r.result);
+      if(d.history&&confirm('Импортировать данные из файла? Текущая история будет заменена.')){
+        history=d.history||{};pr=d.pr||0;const c=d.cfg||{};
+        startMax=c.startMax||7;week=c.week||0;mode=c.mode||'program';programRest=c.programRest||60000;
+        goal=c.goal||0;restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
+        soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
+        voiceName=c.voiceName||'';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+        cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;autoProg=c.autoProg!==false;
+        PLAN=buildPlan(startMax);if(week>51)week=51;
+        const t=history[tkey()];committed=t?{reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0}:{reps:0,sets:0,workMs:0,restMs:0,best:0};
+        persist();syncControls();renderGraph();renderHist();renderHello();alert('Импорт выполнен.');
+      }
+    }catch(err){alert('Не удалось прочитать файл.');}e.target.value='';};
+    r.readAsText(f);});
+
+  $('tabbar').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab);});
+  $('theme').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;theme=b.dataset.th;applyTheme();syncControls();persist();});
+  function closeOnboard(){try{localStorage.setItem('pushup_onboarded','1');}catch(e){}$('onboard').classList.remove('open');}
+  $('obGo').addEventListener('click',closeOnboard);
+  $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
+
+  if('speechSynthesis' in window){try{speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}}
+  loadAll();loadVoices();showTab('train');renderHello();render();
+  let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
+  if(!seen)$('onboard').classList.add('open');
+})();
+</script>
+</body>
+</html>
