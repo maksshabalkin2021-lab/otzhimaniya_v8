@@ -295,6 +295,7 @@
     <div class="brand">СЧЁТ<b>•</b>ОТЖИМАНИЙ</div>
     <div class="spacer"></div>
     <div class="lockdot" id="lock" title="Экран не гаснет"></div>
+    <button class="iconbtn hidden" id="musicBtn" title="Открыть музыку">🎵</button>
     <button class="iconbtn hidden" id="pauseBtn" style="color:var(--work)">⏸</button>
     <button class="iconbtn" id="gear">⚙</button>
     <button class="iconbtn hidden" id="finish">ФИНИШ</button>
@@ -363,6 +364,7 @@
       <div class="row"><label>Способ счёта<br><span style="font-size:11px;color:var(--muted)">тап носом · камера · оба вместе</span></label>
         <div class="seg" id="inputMode"><button data-im="tap" class="on">Тап</button><button data-im="camera">Камера</button><button data-im="both">Оба</button></div>
       </div>
+      <div class="row"><label>Проверка техники (бета)<br><span style="font-size:11px;color:var(--muted)">только фронтальная камера — оценивает глубину и симметрию приблизительно</span></label><div class="tgl" id="formCheck"></div></div>
     </div>
     <div class="grp progonly" data-tab="train" id="grpProg">
       <h3>Программа · 52 недели</h3>
@@ -374,6 +376,7 @@
         <div class="stepper"><button id="prMinus">−</button><div class="val" id="prVal">1:00</div><button id="prPlus">+</button></div>
       </div>
       <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:11px;color:var(--muted)">когда закрыты все 5 целей</span></label><div class="tgl on" id="auto"></div></div>
+      <div class="row"><label>Авто-подбор нагрузки<br><span style="font-size:11px;color:var(--muted)">2 тренировки подряд ≥115% — план чуть растёт; &lt;80% — повторяем неделю</span></label><div class="tgl" id="autoAdjust"></div></div>
       <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">🎯 День теста · пересчитать под себя</button>
       <div class="weekprev" id="maxInfo" style="margin-top:8px"></div>
     </div>
@@ -409,6 +412,22 @@
       <div class="row"><label>Голос темпа<br><span style="font-size:11px;color:var(--muted)">командует «вниз-вверх»</span></label><div class="tgl" id="tempoV"></div></div>
       <div class="row"><label>Удар каждые</label>
         <div class="stepper"><button id="msMinus">−</button><div class="val" id="msVal">1.5 с</div><button id="msPlus">+</button></div>
+      </div>
+    </div>
+    <div class="grp" data-tab="sound">
+      <h3>Музыка</h3>
+      <div class="row"><label>Приложение<br><span style="font-size:11px;color:var(--muted)">кнопка 🎵 откроет его прямо из тренировки</span></label>
+        <select id="musicApp" class="vsel">
+          <option value="off">Выкл</option>
+          <option value="spotify">Spotify</option>
+          <option value="yandex">Яндекс Музыка</option>
+          <option value="vk">VK Музыка</option>
+          <option value="ytmusic">YouTube Music</option>
+          <option value="custom">Своя ссылка</option>
+        </select>
+      </div>
+      <div class="row hidden" id="musicCustomRow"><label>Ссылка/схема<br><span style="font-size:11px;color:var(--muted)">например vkmusic:// или https://…</span></label>
+        <input type="text" id="musicCustomUrl" class="vsel" placeholder="myapp://" style="max-width:170px">
       </div>
     </div>
     <div class="grp" data-tab="train">
@@ -542,10 +561,14 @@
   let voiceName='dmitry', voiceEnergy='hype';
   let countOn=true, lastCountSec=99, counting=false;
   let cheerLead=3, metroOn=false, metroSec=1.5, lastMetro=0, metroHi=false;
-  let startMax=7, autoProg=true;
+  let startMax=7, autoProg=true, autoAdjust=false;
   let tempoVoiceOn=false, warmupOn=true, warmupDone=false;
   let gripVoiceOn=false;
   let inputMode='tap'; // 'tap' | 'camera' | 'both'
+  let formCheckOn=false; // бета: разбор техники по камере (PoseLandmarker вместо FaceLandmarker)
+  let musicApp='off', musicCustomUrl='';
+  const MUSIC_PRESETS={spotify:'spotify:',yandex:'yandexmusic://',vk:'vkmusic://',ytmusic:'youtubemusic://'};
+  function musicUrl(){return musicApp==='custom'?musicCustomUrl:(MUSIC_PRESETS[musicApp]||'');}
   let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
   let theme='dark';
   let amrapMin=10; // AMRAP длительность в минутах
@@ -622,24 +645,34 @@
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.005);
     g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.start(t);o.stop(t+.06);}catch(e){}}
 
-  // ---- КАМЕРА (счёт по носу через MediaPipe FaceLandmarker) ----
+  // ---- КАМЕРА (счёт по носу через FaceLandmarker, либо разбор техники через PoseLandmarker) ----
   const camVideo=$('camVideo'), camPip=$('camPip'), camStatusEl=$('camStatus');
-  let faceLandmarker=null, camInitPromise=null;
+  let faceLandmarker=null, faceInitPromise=null;
+  let poseLandmarker=null, poseInitPromise=null, poseModeActive=false;
   let camStream=null, camRaf=0, camActive=false, camReady=false, camError='';
   let lastInference=0, camState='up', smoothedDist=0, upBaseline=0, calibUntil=0, camLastFaceT=0;
+  let repMinElbow=999, formTipUntil=0, formTipCount=0;
   const CAM_INFER_MS=80, CAM_DOWN=1.18, CAM_UP=1.06, CAM_EMA=0.35, CAM_BASE_EMA=0.06, CAM_CALIB_MS=1500, CAM_LOST_MS=1500;
+  const FORM_SHALLOW_DEG=100, FORM_ASYM_DIFF=0.045, FORM_TIP_EVERY=4;
 
   function setCamStatus(cls,text){
     if(!camPip)return;
+    if(now()<formTipUntil&&cls!=='error')return; // не перекрываем подсказку по технике
     camPip.classList.remove('ok','lost','error');
     if(cls)camPip.classList.add(cls);
     if(camStatusEl)camStatusEl.textContent=text;
   }
+  function formTip(text){
+    say(text);
+    if(camPip){camPip.classList.remove('ok','lost','error');camPip.classList.add('ok');}
+    if(camStatusEl)camStatusEl.textContent='💡 '+text;
+    formTipUntil=now()+2500;
+  }
 
   async function ensureFaceLandmarker(){
     if(faceLandmarker)return faceLandmarker;
-    if(camInitPromise)return camInitPromise;
-    camInitPromise=(async()=>{
+    if(faceInitPromise)return faceInitPromise;
+    faceInitPromise=(async()=>{
       const {FaceLandmarker,FilesetResolver}=await import('./vendor/mediapipe/tasks-vision/vision_bundle.mjs');
       const fileset=await FilesetResolver.forVisionTasks('./vendor/mediapipe/tasks-vision/wasm');
       const opts=d=>({baseOptions:{modelAssetPath:'./vendor/mediapipe/models/face_landmarker.task',delegate:d},
@@ -648,7 +681,22 @@
       catch(e){faceLandmarker=await FaceLandmarker.createFromOptions(fileset,opts('CPU'));}
       return faceLandmarker;
     })();
-    return camInitPromise;
+    return faceInitPromise;
+  }
+
+  async function ensurePoseLandmarker(){
+    if(poseLandmarker)return poseLandmarker;
+    if(poseInitPromise)return poseInitPromise;
+    poseInitPromise=(async()=>{
+      const {PoseLandmarker,FilesetResolver}=await import('./vendor/mediapipe/tasks-vision/vision_bundle.mjs');
+      const fileset=await FilesetResolver.forVisionTasks('./vendor/mediapipe/tasks-vision/wasm');
+      const opts=d=>({baseOptions:{modelAssetPath:'./vendor/mediapipe/models/pose_landmarker_lite.task',delegate:d},
+        runningMode:'VIDEO',numPoses:1,outputSegmentationMasks:false});
+      try{poseLandmarker=await PoseLandmarker.createFromOptions(fileset,opts('GPU'));}
+      catch(e){poseLandmarker=await PoseLandmarker.createFromOptions(fileset,opts('CPU'));}
+      return poseLandmarker;
+    })();
+    return poseInitPromise;
   }
 
   async function startCamera(){
@@ -656,7 +704,9 @@
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
       camError='unsupported';setCamStatus('error','⚠️ камера не поддерживается');return;
     }
+    poseModeActive=formCheckOn;
     camActive=true;camReady=false;camError='';camState='up';smoothedDist=0;upBaseline=0;
+    repMinElbow=999;formTipUntil=0;formTipCount=0;
     if(camPip)camPip.classList.remove('hidden');
     setCamStatus('lost','⏳ включаю камеру…');
     try{
@@ -664,7 +714,7 @@
       if(!camActive){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;return;} // режим сменили, пока ждали разрешение
       camVideo.srcObject=camStream;
       await camVideo.play().catch(()=>{});
-      await ensureFaceLandmarker();
+      await (poseModeActive?ensurePoseLandmarker():ensureFaceLandmarker());
       if(!camActive)return;
       camReady=true;calibUntil=now()+CAM_CALIB_MS;camLastFaceT=now();
       setCamStatus('lost','🧭 калибровка…');
@@ -683,22 +733,44 @@
     if(camPip)camPip.classList.add('hidden');
   }
 
-  // гистерезис по межзрачковому расстоянию: приближение лица к камере = "вниз", отдаление = "вверх" → повтор
+  // угол в локте (плечо-локоть-запястье), градусы
+  function elbowAngleDeg(shoulder,elbow,wrist){
+    const v1x=shoulder.x-elbow.x, v1y=shoulder.y-elbow.y;
+    const v2x=wrist.x-elbow.x, v2y=wrist.y-elbow.y;
+    const m1=Math.hypot(v1x,v1y), m2=Math.hypot(v2x,v2y);
+    if(!m1||!m2)return 180;
+    const cos=Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/(m1*m2)));
+    return Math.acos(cos)*180/Math.PI;
+  }
+
+  // гистерезис по дистанции: глаза (счёт по лицу) или плечи (режим "проверка техники").
+  // В режиме позы дополнительно на нижней точке цикла считаем угол в локте (глубина) и перекос плеч (симметрия).
   function camLoop(t){
     if(!camActive)return;
     camRaf=requestAnimationFrame(camLoop);
-    if(!camReady||!faceLandmarker||!camVideo||camVideo.readyState<2)return;
+    const model=poseModeActive?poseLandmarker:faceLandmarker;
+    if(!camReady||!model||!camVideo||camVideo.readyState<2)return;
     if(t-lastInference<CAM_INFER_MS)return;
     lastInference=t;
-    let res;try{res=faceLandmarker.detectForVideo(camVideo,t);}catch(e){return;}
-    const lm=res&&res.faceLandmarks&&res.faceLandmarks[0];
-    if(!lm){
-      if(now()-camLastFaceT>CAM_LOST_MS)setCamStatus('lost','🔴 не вижу лицо');
+    let res;try{res=model.detectForVideo(camVideo,t);}catch(e){return;}
+    let dist=null, elbow=null, asym=null;
+    if(poseModeActive){
+      const lm=res&&res.landmarks&&res.landmarks[0];
+      if(lm){
+        const ls=lm[11],rs=lm[12],le=lm[13],re=lm[14],lw=lm[15],rw=lm[16];
+        dist=Math.hypot(ls.x-rs.x,ls.y-rs.y);
+        elbow=Math.min(elbowAngleDeg(ls,le,lw),elbowAngleDeg(rs,re,rw));
+        asym=Math.abs(ls.y-rs.y);
+      }
+    }else{
+      const lm=res&&res.faceLandmarks&&res.faceLandmarks[0];
+      if(lm){const a=lm[33],b=lm[263];dist=Math.hypot(a.x-b.x,a.y-b.y);} // внешние уголки глаз
+    }
+    if(dist==null){
+      if(now()-camLastFaceT>CAM_LOST_MS)setCamStatus('lost',poseModeActive?'🔴 не вижу тело':'🔴 не вижу лицо');
       return;
     }
     camLastFaceT=now();
-    const a=lm[33],b=lm[263]; // внешние уголки глаз
-    const dist=Math.hypot(a.x-b.x,a.y-b.y);
     smoothedDist=smoothedDist?smoothedDist+(dist-smoothedDist)*CAM_EMA:dist;
     if(now()<calibUntil||!upBaseline){
       upBaseline=upBaseline?upBaseline+(smoothedDist-upBaseline)*0.3:smoothedDist;
@@ -707,9 +779,19 @@
     }
     if(smoothedDist<=upBaseline*CAM_UP)upBaseline+=(smoothedDist-upBaseline)*CAM_BASE_EMA;
     const ratio=smoothedDist/upBaseline;
-    if(camState==='up'&&ratio>=CAM_DOWN){camState='down';setCamStatus('ok','⬇ вниз');}
-    else if(camState==='down'&&ratio<=CAM_UP){camState='up';setCamStatus('ok','⬆ есть!');registerRep(now());}
-    else setCamStatus('ok','🟢 слежу');
+    if(camState==='up'&&ratio>=CAM_DOWN){
+      camState='down';repMinElbow=999;setCamStatus('ok','⬇ вниз');
+    }else if(camState==='down'){
+      if(poseModeActive&&elbow!=null)repMinElbow=Math.min(repMinElbow,elbow);
+      if(ratio<=CAM_UP){
+        camState='up';setCamStatus('ok','⬆ есть!');registerRep(now());
+        if(poseModeActive){
+          formTipCount++;
+          if(repMinElbow>FORM_SHALLOW_DEG&&formTipCount%FORM_TIP_EVERY===0)formTip('Опускайся ниже');
+          else if(asym!=null&&asym>FORM_ASYM_DIFF&&formTipCount%FORM_TIP_EVERY===0)formTip('Держи корпус ровно');
+        }
+      }
+    }else setCamStatus('ok','🟢 слежу');
   }
 
   let wl=null;
@@ -726,7 +808,7 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,inputMode}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,inputMode,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
     if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
@@ -734,11 +816,12 @@
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
       voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
       cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;
-      startMax=c.startMax||7;autoProg=c.autoProg!==false;
+      startMax=c.startMax||7;autoProg=c.autoProg!==false;autoAdjust=!!c.autoAdjust;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
       reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
-      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';}
+      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';formCheckOn=!!c.formCheckOn;
+      musicApp=c.musicApp||'off';musicCustomUrl=c.musicCustomUrl||'';}
     applyTheme();
     PLAN=buildPlan(startMax);if(week>51)week=51;
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
@@ -748,6 +831,15 @@
     workMs:committed.workMs+exerciseMs,restMs:committed.restMs+restMs,best:Math.max(committed.best,sessMax())};persist();}
   function streak(){let n=0,d=new Date();for(;;){const k=tkey(d);const r=history[k];
     if(r&&r.reps>0){n++;d.setDate(d.getDate()-1);}else if(k===tkey()){d.setDate(d.getDate()-1);}else break;}return n;}
+  // авто-подбор нагрузки: тренд % выполнения плана за последние 2 тренировки программы
+  function perfTrend(){
+    const keys=Object.keys(history).filter(k=>history[k]&&typeof history[k].perf==='number').sort();
+    if(keys.length<2)return null;
+    const last2=keys.slice(-2).map(k=>history[k].perf);
+    if(last2.every(p=>p>=115))return 'up';
+    if(last2.every(p=>p<80))return 'down';
+    return null;
+  }
   const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const DOW_ORDER=[1,2,3,4,5,6,0]; // Пн..Вс
   const isTrain=dow=>trainingDays.includes(dow);
@@ -977,7 +1069,7 @@
     const target=mode==='program'?PLAN[week][setIndex]:goal;
     sets.push({reps:repsThisSet,target:target||null});
     if(mode==='program'){
-      if(setIndex>=PLAN[week].length-1){phase='done';finishWorkout();return;}
+      if(setIndex>=PLAN[week].length-1){phase='done';repsThisSet=0;finishWorkout();return;}
       setIndex++;phase='rest';restStart=t;restAlert=false;repsThisSet=0;lastCountSec=99;
       if(gripVoiceOn)say('Отдых. Следующий подход — '+gripForSet(setIndex).say+'.');else sayRest();
       beep(420);buzz([0,60,40,60]);
@@ -1137,9 +1229,9 @@
     const avg=nSets?Math.round(total/nSets):0;
     const tempo=exerciseMs>0?Math.round(total/(exerciseMs/60000)):0;
     const newPR=best>pr;
-    let note='', fullDone=false;
+    let note='', fullDone=false, pct=null;
     if(mode==='program'){
-      const planned=planSum(week), pct=Math.round(total/planned*100);
+      const planned=planSum(week); pct=Math.round(total/planned*100);
       fullDone=phase==='done'||(nSets>=5&&all.every((s,i)=>s.reps>=PLAN[week][i]));
       note='Неделя <b>'+(week+1)+'</b> · план '+planned+' повт. · выполнено <b>'+pct+'%</b>'+
         (fullDone?' — неделя пройдена! 💪':' — добей все 5 целей, чтобы открыть следующую.');
@@ -1182,7 +1274,7 @@
 
     const sumText='💪 Отжимания\nВсего: '+total+' повт. · '+nSets+' подходов\nЛучший подход: '+best+' · работа '+fmt(exerciseMs)+
       (mode==='program'?'\nПрограмма: неделя '+(week+1):'')+(mode==='amrap'?'\nНа время '+amrapMin+' мин':'');
-    $('save').onclick=()=>commitSession(best,false);
+    $('save').onclick=()=>commitSession(best,false,pct);
     $('discard').onclick=()=>{if(confirm('Удалить тренировку без сохранения?'))discardSession();};
     $('share').onclick=async()=>{
       try{
@@ -1234,15 +1326,33 @@
           }catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='otzhimaniya.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}}
         },'image/png');
       }catch(err){try{if(navigator.share)await navigator.share({text:sumText});else{await navigator.clipboard.writeText(sumText);alert('Скопировано!');}}catch(e){}}
-    };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true);
+    };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true,pct);
   }
 
-  function commitSession(best,advance){
+  function commitSession(best,advance,pct){
     committed={reps:committed.reps+reps,sets:committed.sets+sets.length,
       workMs:committed.workMs+exerciseMs,restMs:committed.restMs+restMs,best:Math.max(committed.best,sessMax(),best)};
     if(best>pr)pr=best;
-    saveToday();persist();
-    if(advance&&week<51)week++;
+    saveToday();
+    if(mode==='program'&&pct!=null&&history[tkey()])history[tkey()].perf=pct;
+    persist();
+    if(advance&&week<51){
+      week++;
+      if(mode==='program'&&autoAdjust){
+        // "рост": цель подхода структурно нельзя перевыполнить (по её достижении сразу включается отдых),
+        // поэтому сигнал роста — реальный рекорд (pr, меряется в свободном режиме/«Дне теста») заметно выше базы плана
+        if(pr>=startMax*1.3&&startMax<60){
+          startMax=Math.min(60,Math.max(startMax+1,Math.round(pr*0.8)));PLAN=buildPlan(startMax);
+          showAchieveToast({emoji:'📈',title:'Нагрузка выросла',sub:'Твой рекорд заметно выше базы плана — план чуть повышен'});
+        }else{
+          const trend=perfTrend();
+          if(trend==='down'&&week>0){
+            week--;
+            showAchieveToast({emoji:'📉',title:'Повторим неделю',sub:'2 тренировки подряд <80% — закрепим текущую нагрузку'});
+          }
+        }
+      }
+    }
     persist();
     closeSession();
   }
@@ -1288,6 +1398,11 @@
   function syncControls(){
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
     [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
+    $('formCheck').classList.toggle('on',formCheckOn);
+    if($('musicApp').value!==musicApp)$('musicApp').value=musicApp;
+    $('musicCustomRow').classList.toggle('hidden',musicApp!=='custom');
+    $('musicCustomUrl').value=musicCustomUrl;
+    $('musicBtn').classList.toggle('hidden',musicApp==='off'||!musicUrl());
     $('wVal').textContent=week+1;
     $('wPrev').innerHTML='Подходы: '+PLAN[week].map(n=>'<b>'+n+'</b>').join(' · ')+' = '+planSum(week);
     $('prVal').textContent=ms2(programRest/1000);
@@ -1323,6 +1438,7 @@
       $('remStatus').textContent=rs;})();
     [...$('theme').children].forEach(b=>b.classList.toggle('on',b.dataset.th===theme));
     $('auto').classList.toggle('on',autoProg);
+    $('autoAdjust').classList.toggle('on',autoAdjust);
     $('maxInfo').innerHTML='Текущий уровень: максимум <b>'+startMax+'</b> · неделя 1 = '+PLAN[0].join('·');
     [...$('vibe2').children].forEach(b=>b.classList.toggle('on',b.dataset.e===voiceEnergy));
     if($('voiceSel').value!==voiceName)$('voiceSel').value=voiceName;
@@ -1358,13 +1474,18 @@
     if(started&&!paused){if(inputMode==='tap')stopCamera();else if(!camActive)startCamera();}
     if(!started)renderHello();
   });
+  $('formCheck').addEventListener('click',()=>{formCheckOn=!formCheckOn;syncControls();persist();});
+  $('musicApp').addEventListener('change',e=>{musicApp=e.target.value;syncControls();persist();});
+  $('musicCustomUrl').addEventListener('change',e=>{musicCustomUrl=e.target.value.trim();syncControls();persist();});
+  $('musicBtn').addEventListener('click',()=>{const u=musicUrl();if(!u)return;try{window.location.href=u;}catch(e){}});
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
   $('prPlus').addEventListener('click',()=>{programRest=Math.min(PR_MAX,programRest+PR_STEP);syncControls();persist();if(!started)renderHello();});
   $('prMinus').addEventListener('click',()=>{programRest=Math.max(PR_MIN,programRest-PR_STEP);syncControls();persist();if(!started)renderHello();});
-  $('gPlus').addEventListener('click',()=>{goal=Math.min(200,goal+1);syncControls();persist();});
-  $('gMinus').addEventListener('click',()=>{goal=Math.max(0,goal-1);syncControls();persist();});
+  const goalStep=g=>g>=100?10:g>=20?5:1;
+  $('gPlus').addEventListener('click',()=>{goal=Math.min(1000,goal+goalStep(goal));syncControls();persist();});
+  $('gMinus').addEventListener('click',()=>{goal=Math.max(0,goal-goalStep(goal-1));syncControls();persist();});
   $('amPlus').addEventListener('click',()=>{amrapMin=Math.min(60,amrapMin+1);syncControls();persist();});
   $('amMinus').addEventListener('click',()=>{amrapMin=Math.max(1,amrapMin-1);syncControls();persist();});
   $('thr').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;restThreshold=+b.dataset.t*1000;syncControls();persist();});
@@ -1479,6 +1600,7 @@
   $('vibe').addEventListener('click',()=>{vibeOn=!vibeOn;syncControls();persist();if(vibeOn)buzz(40);});
   $('clearHist').addEventListener('click',()=>{if(confirm('Удалить всю историю и рекорд?')){history={};committed={reps:0,sets:0,workMs:0,restMs:0,best:0};pr=0;persist();renderGraph();renderHist();if(!started)renderHello();}});
   $('auto').addEventListener('click',()=>{autoProg=!autoProg;syncControls();persist();});
+  $('autoAdjust').addEventListener('click',()=>{autoAdjust=!autoAdjust;syncControls();persist();});
 
   // ---- День теста ----
   let testReps=0, testLast=0;
