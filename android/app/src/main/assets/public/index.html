@@ -225,6 +225,15 @@
   #amrapTimer .al{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
   #amrapTimer.warn .at{color:#ff4444;animation:al .5s ease-in-out infinite}
 
+  /* Камера-режим: PIP превью + статус */
+  #camPip{position:absolute;bottom:96px;right:14px;width:92px;height:122px;border-radius:12px;overflow:hidden;
+    z-index:4;background:#000;border:2px solid var(--line);transition:border-color .2s}
+  #camPip.hidden{display:none}
+  #camPip.ok{border-color:var(--work)} #camPip.lost{border-color:var(--gold)} #camPip.error{border-color:var(--rest)}
+  #camPip video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+  #camStatus{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;font-family:'Oswald';font-weight:600;
+    font-size:9px;letter-spacing:.3px;color:#fff;background:rgba(0,0,0,.55);text-align:center;line-height:1.3}
+
   /* Ачивки тост */
   #achieveToast{position:fixed;top:max(70px,calc(env(safe-area-inset-top)+62px));left:50%;
     transform:translateX(-50%) translateY(-10px);z-index:200;background:var(--bg2);
@@ -308,6 +317,7 @@
     <div id="pauseOverlay"></div>
     <div id="pauseIcon"><div class="pp">II</div><div class="pl">Нажми для продолжения</div></div>
     <div id="amrapTimer"><div class="at" id="amrapCountdown">10:00</div><div class="al">ОСТАЛОСЬ ВРЕМЕНИ</div></div>
+    <div id="camPip" class="hidden"><video id="camVideo" muted playsinline autoplay></video><div id="camStatus"></div></div>
 
     <div id="hello"></div>
 
@@ -350,6 +360,9 @@
       <div class="row"><label>Тип тренировки</label>
         <div class="seg" id="mode"><button data-m="program" class="on">Программа</button><button data-m="free">Свободно</button><button data-m="amrap">На время</button></div>
       </div>
+      <div class="row"><label>Способ счёта<br><span style="font-size:11px;color:var(--muted)">тап носом · камера · оба вместе</span></label>
+        <div class="seg" id="inputMode"><button data-im="tap" class="on">Тап</button><button data-im="camera">Камера</button><button data-im="both">Оба</button></div>
+      </div>
     </div>
     <div class="grp progonly" data-tab="train" id="grpProg">
       <h3>Программа · 52 недели</h3>
@@ -379,7 +392,7 @@
     <div class="grp" data-tab="sound">
       <h3>Сигналы</h3>
       <div class="row"><label>Голосовой счёт</label><div class="tgl on" id="voice"></div></div>
-      <div class="row"><label>Голос</label><select id="voiceSel" class="vsel"></select></div>
+      <div class="row"><label>Голос</label><select id="voiceSel" class="vsel"><option value="dmitry">Дмитрий</option><option value="svetlana">Светлана</option></select></div>
       <div class="row"><label>Энергия голоса</label>
         <div class="seg" id="vibe2"><button data-e="calm">спокойно</button><button data-e="hype" class="on">драйв</button><button data-e="beast">зверь</button></div>
       </div>
@@ -486,6 +499,7 @@
       <div class="wuitem on"><div class="box">3</div><div class="tx">Голос и темп<span>считает, командует «вниз-вверх», подбадривает на финише</span></div></div>
       <div class="wuitem on"><div class="box">4</div><div class="tx">Прогресс сохраняется<span>история, рекорды, серия дней и график</span></div></div>
     </div>
+    <div class="orline">Есть режим счёта по камере (без касания) — включи в Настройки → Тренировка → Способ счёта</div>
     <button class="cdbtn" id="obTest" style="width:100%;background:var(--gold)">🎯 Замерить мой максимум</button>
     <button class="cdbtn" id="obGo" style="width:100%">Поехали ▸</button>
     <div class="orline">Совет: добавь на экран «Домой» — откроется как приложение</div>
@@ -525,12 +539,13 @@
   let mode='program', week=0, programRest=60000;
   let goal=0, restThreshold=4000, targetRest=0;
   let soundOn=true, vibeOn=true, voiceOn=true;
-  let voiceName='', voiceEnergy='hype', voices=[];
+  let voiceName='dmitry', voiceEnergy='hype';
   let countOn=true, lastCountSec=99, counting=false;
   let cheerLead=3, metroOn=false, metroSec=1.5, lastMetro=0, metroHi=false;
   let startMax=7, autoProg=true;
   let tempoVoiceOn=false, warmupOn=true, warmupDone=false;
   let gripVoiceOn=false;
+  let inputMode='tap'; // 'tap' | 'camera' | 'both'
   let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
   let theme='dark';
   let amrapMin=10; // AMRAP длительность в минутах
@@ -559,15 +574,29 @@
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const pluralDays=n=>{const m=n%100,l=n%10;if(m>=11&&m<=14)return'дней';if(l===1)return'день';if(l>=2&&l<=4)return'дня';return'дней';};
 
-  // голос / звук / вибро
-  const ENERGY={calm:{rate:1.0,pitch:1.0},hype:{rate:1.22,pitch:1.12},beast:{rate:1.35,pitch:1.25}};
-  function loadVoices(){try{voices=(speechSynthesis.getVoices()||[]);}catch(e){voices=[];}buildVoiceSelect();}
-  function ruVoices(){const ru=voices.filter(v=>/ru/i.test(v.lang));return ru.length?ru:voices;}
-  function chosenVoice(){return voices.find(v=>v.name===voiceName)||ruVoices()[0]||voices[0]||null;}
-  function say(t,boost){if(!voiceOn||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';const e=ENERGY[voiceEnergy]||ENERGY.hype;
-    u.rate=e.rate*(boost?1.05:1);u.pitch=e.pitch;u.volume=1;const v=chosenVoice();if(v)u.voice=v;
-    speechSynthesis.speak(u);}catch(e){}}
+  // голос / звук / вибро — предзаписанные клипы (edge-tts), т.к. speechSynthesis не звучит в Android WebView
+  const ENERGY={calm:{rate:1.0},hype:{rate:1.22},beast:{rate:1.35}};
+  let voiceManifest=null;
+  async function loadVoiceManifest(){try{const r=await fetch('vendor/voice/manifest.json');voiceManifest=await r.json();}catch(e){voiceManifest=null;}}
+  const voiceAudio=new Audio();
+  function voiceFile(t){
+    if(!voiceManifest)return null;
+    if(voiceManifest.phrases[t])return voiceManifest.phrases[t];
+    if(/^\d+$/.test(t)&&voiceManifest.numbers[t])return voiceManifest.numbers[t];
+    return null;
+  }
+  function say(t,boost){
+    if(!voiceOn)return;
+    const fname=voiceFile(t);if(!fname)return;
+    try{
+      voiceAudio.pause();voiceAudio.currentTime=0;
+      const e=ENERGY[voiceEnergy]||ENERGY.hype;
+      voiceAudio.src='vendor/voice/'+(voiceName==='svetlana'?'svetlana':'dmitry')+'/'+fname;
+      voiceAudio.playbackRate=e.rate*(boost?1.05:1);
+      voiceAudio.volume=1;
+      voiceAudio.play().catch(()=>{});
+    }catch(e){}
+  }
   // энергичные реплики
   const SAY_REST=['Отдых.','Передышка.','Дыши.'];
   const SAY_REST_HYPE=['Красава, отдых!','Мощно! Передышка.','Есть подход! Дыши.'];
@@ -593,26 +622,123 @@
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.005);
     g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.start(t);o.stop(t+.06);}catch(e){}}
 
+  // ---- КАМЕРА (счёт по носу через MediaPipe FaceLandmarker) ----
+  const camVideo=$('camVideo'), camPip=$('camPip'), camStatusEl=$('camStatus');
+  let faceLandmarker=null, camInitPromise=null;
+  let camStream=null, camRaf=0, camActive=false, camReady=false, camError='';
+  let lastInference=0, camState='up', smoothedDist=0, upBaseline=0, calibUntil=0, camLastFaceT=0;
+  const CAM_INFER_MS=80, CAM_DOWN=1.18, CAM_UP=1.06, CAM_EMA=0.35, CAM_BASE_EMA=0.06, CAM_CALIB_MS=1500, CAM_LOST_MS=1500;
+
+  function setCamStatus(cls,text){
+    if(!camPip)return;
+    camPip.classList.remove('ok','lost','error');
+    if(cls)camPip.classList.add(cls);
+    if(camStatusEl)camStatusEl.textContent=text;
+  }
+
+  async function ensureFaceLandmarker(){
+    if(faceLandmarker)return faceLandmarker;
+    if(camInitPromise)return camInitPromise;
+    camInitPromise=(async()=>{
+      const {FaceLandmarker,FilesetResolver}=await import('./vendor/mediapipe/tasks-vision/vision_bundle.mjs');
+      const fileset=await FilesetResolver.forVisionTasks('./vendor/mediapipe/tasks-vision/wasm');
+      const opts=d=>({baseOptions:{modelAssetPath:'./vendor/mediapipe/models/face_landmarker.task',delegate:d},
+        runningMode:'VIDEO',numFaces:1,outputFaceBlendshapes:false,outputFacialTransformationMatrixes:false});
+      try{faceLandmarker=await FaceLandmarker.createFromOptions(fileset,opts('GPU'));}
+      catch(e){faceLandmarker=await FaceLandmarker.createFromOptions(fileset,opts('CPU'));}
+      return faceLandmarker;
+    })();
+    return camInitPromise;
+  }
+
+  async function startCamera(){
+    if(camActive)return;
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+      camError='unsupported';setCamStatus('error','⚠️ камера не поддерживается');return;
+    }
+    camActive=true;camReady=false;camError='';camState='up';smoothedDist=0;upBaseline=0;
+    if(camPip)camPip.classList.remove('hidden');
+    setCamStatus('lost','⏳ включаю камеру…');
+    try{
+      camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:240}},audio:false});
+      if(!camActive){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;return;} // режим сменили, пока ждали разрешение
+      camVideo.srcObject=camStream;
+      await camVideo.play().catch(()=>{});
+      await ensureFaceLandmarker();
+      if(!camActive)return;
+      camReady=true;calibUntil=now()+CAM_CALIB_MS;camLastFaceT=now();
+      setCamStatus('lost','🧭 калибровка…');
+      camRaf=requestAnimationFrame(camLoop);
+    }catch(err){
+      camError=(err&&err.name)||'error';camActive=false;camReady=false;
+      setCamStatus('error',camError==='NotAllowedError'?'⚠️ нет доступа к камере':'⚠️ камера недоступна');
+    }
+  }
+
+  function stopCamera(){
+    camActive=false;camReady=false;
+    if(camRaf)cancelAnimationFrame(camRaf);camRaf=0;
+    if(camStream){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;}
+    if(camVideo)camVideo.srcObject=null;
+    if(camPip)camPip.classList.add('hidden');
+  }
+
+  // гистерезис по межзрачковому расстоянию: приближение лица к камере = "вниз", отдаление = "вверх" → повтор
+  function camLoop(t){
+    if(!camActive)return;
+    camRaf=requestAnimationFrame(camLoop);
+    if(!camReady||!faceLandmarker||!camVideo||camVideo.readyState<2)return;
+    if(t-lastInference<CAM_INFER_MS)return;
+    lastInference=t;
+    let res;try{res=faceLandmarker.detectForVideo(camVideo,t);}catch(e){return;}
+    const lm=res&&res.faceLandmarks&&res.faceLandmarks[0];
+    if(!lm){
+      if(now()-camLastFaceT>CAM_LOST_MS)setCamStatus('lost','🔴 не вижу лицо');
+      return;
+    }
+    camLastFaceT=now();
+    const a=lm[33],b=lm[263]; // внешние уголки глаз
+    const dist=Math.hypot(a.x-b.x,a.y-b.y);
+    smoothedDist=smoothedDist?smoothedDist+(dist-smoothedDist)*CAM_EMA:dist;
+    if(now()<calibUntil||!upBaseline){
+      upBaseline=upBaseline?upBaseline+(smoothedDist-upBaseline)*0.3:smoothedDist;
+      setCamStatus('lost','🧭 калибровка… руки прямые');
+      return;
+    }
+    if(smoothedDist<=upBaseline*CAM_UP)upBaseline+=(smoothedDist-upBaseline)*CAM_BASE_EMA;
+    const ratio=smoothedDist/upBaseline;
+    if(camState==='up'&&ratio>=CAM_DOWN){camState='down';setCamStatus('ok','⬇ вниз');}
+    else if(camState==='down'&&ratio<=CAM_UP){camState='up';setCamStatus('ok','⬆ есть!');registerRep(now());}
+    else setCamStatus('ok','🟢 слежу');
+  }
+
   let wl=null;
   async function lockScreen(){try{if('wakeLock' in navigator){wl=await navigator.wakeLock.request('screen');
     $('lock').classList.add('on');wl.addEventListener('release',()=>$('lock').classList.remove('on'));}}catch(e){}}
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&started)lockScreen();});
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'){
+      if(started)lockScreen();
+      if(started&&!paused&&inputMode!=='tap')startCamera();
+    }else{
+      stopCamera();
+    }
+  });
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,inputMode}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
     if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
       restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-      voiceName=c.voiceName||'';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+      voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
       cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;
       startMax=c.startMax||7;autoProg=c.autoProg!==false;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
       reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
-      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;}
+      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';}
     applyTheme();
     PLAN=buildPlan(startMax);if(week>51)week=51;
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
@@ -642,7 +768,8 @@
       tap.classList.add('paused');
       pauseBar.style.display='flex';
       $('pauseBtn').textContent='▶';
-      speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();
+      voiceAudio.pause();voiceAudio.currentTime=0;
+      stopCamera();
     }else{
       resumeFromPause();
     }
@@ -659,6 +786,7 @@
     pauseBar.style.display='none';
     $('pauseBtn').textContent='⏸';
     beep(880,.1);buzz(30);
+    if(inputMode!=='tap')startCamera();
   }
   $('pauseResume').addEventListener('click',resumeFromPause);
   $('pauseBtn').addEventListener('click',togglePause);
@@ -767,6 +895,7 @@
     // AMRAP: установить таймер
     if(mode==='amrap'){amrapEndTime=t+amrapMin*60000;$('amrapTimer').style.display='block';}
     lastTick=t;lastTap=t;setIndex=0;phase='work';restAlert=false;goalHit=false;lastCountSec=99;lastMetro=t;metroHi=false;lockScreen();render();
+    if(inputMode!=='tap')startCamera();
     if(mode==='program'&&gripVoiceOn)setTimeout(()=>{if(started&&!finished&&!counting)say('Первый подход — '+gripForSet(0).say+'.',true);},1100);}
 
   // голосовой отсчёт 3·2·1 перед стартом
@@ -805,13 +934,25 @@
   function countRep(e){
     if(e)e.preventDefault();
     if($('panel').classList.contains('open')||$('summary').classList.contains('open'))return;
+    if(inputMode==='camera'&&camReady)return; // режим "только камера": тап не считает, пока камера реально работает
     const t=now();
     if(counting)return;
     if(started&&t-lastTap<DEBOUNCE)return;
+    const wasStarted=started;
     if(!started){
       if(warmupOn&&!warmupDone){openWarmup(armSession);return;}
       startSession(t);
     }
+    registerRep(t,!wasStarted);
+  }
+  tap.addEventListener('pointerdown',countRep);
+
+  // registerRep: единая точка засчитывания повтора — вызывается и тапом (countRep), и камерой (camLoop).
+  // skipDebounce=true только когда countRep только что сам стартовал сессию этим же t (lastTap уже = t).
+  function registerRep(t,skipDebounce){
+    if(counting)return;
+    if(!skipDebounce&&started&&t-lastTap<DEBOUNCE)return;
+    if(!started)return;
     if(mode==='program'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;}
     if(mode==='program'&&phase==='done')return;
     if(mode==='amrap'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;}
@@ -831,7 +972,6 @@
     if(mode==='program'&&repsThisSet>=PLAN[week][setIndex])completeSet(t);
     saveToday();checkAchievements();render();
   }
-  tap.addEventListener('pointerdown',countRep);
 
   function completeSet(t){
     const target=mode==='program'?PLAN[week][setIndex]:goal;
@@ -950,7 +1090,7 @@
   // ---- стартовый экран ----
   function renderHello(){
     const today=committed.reps, st=streak();
-    let h='<div class="big">КАСАЙСЯ <span>НОСОМ</span></div>';
+    let h=inputMode==='camera'?'<div class="big">СЧЁТ <span>КАМЕРОЙ</span></div>':'<div class="big">КАСАЙСЯ <span>НОСОМ</span></div>';
     h+='<div class="meta"><div class="g">Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
        '<div>Сегодня<b>'+today+'</b></div><div class="w">Рекорд<b>'+pr+'</b></div></div>';
     // расписание
@@ -959,18 +1099,21 @@
        (trainedToday()?'Сегодня тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'Сегодня — день отдыха · восстанавливайся')+'</div>';
     h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
     h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · следующая: '+nextTrain())+'</div>';
+    const posHint=inputMode==='tap'?'Положи телефон на пол.':inputMode==='camera'?'Поставь телефон так, чтобы камера видела лицо.':'Положи телефон на пол — или поставь так, чтобы камера видела лицо.';
+    const touchHint=inputMode==='camera'?'Опускайся и поднимайся перед камерой':inputMode==='both'?'Касайся носом экрана или двигайся перед камерой':'Касайся носом';
+    const pushHint=inputMode==='camera'?'опускайся и поднимайся':inputMode==='both'?'жми или двигайся перед камерой':'жми';
     if(mode==='program'){
       h+='<div class="planbox"><div class="pt">Программа · неделя '+(week+1)+' из 52</div><div class="pn">'+
         PLAN[week].map((n,i)=>'<span'+(i===0?' class="first"':'')+'>'+n+'</span>').join('')+
         '</div><div class="ps">5 подходов · всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+'</div></div>';
-      h+='<p>Положи телефон на пол. Касайся носом — счёт идёт к цели подхода ('+PLAN[week][0]+'). После цели включится отдых с обратным отсчётом.</p>';
+      h+='<p>'+posHint+' '+touchHint+' — счёт идёт к цели подхода ('+PLAN[week][0]+'). После цели включится отдых с обратным отсчётом.</p>';
     }else if(mode==='amrap'){
       h+='<div class="planbox"><div class="pt">На время · максимум повторов</div>'+
         '<div class="pn"><span class="first">'+amrapMin+'</span></div>'+
         '<div class="ps">минут · жми до упора · можно отдыхать между подходами</div></div>';
-      h+='<p>Обратный отсчёт идёт — жми максимум раз за '+amrapMin+' мин. Отжался, отдохни, жми снова.</p>';
+      h+='<p>'+posHint+' Обратный отсчёт идёт — '+pushHint+' максимум раз за '+amrapMin+' мин. Отжался, отдохни, '+pushHint+' снова.</p>';
     }else{
-      h+='<p>Положи телефон на пол под собой. Каждое касание носом экрана = одно повторение. Свободный режим без плана.</p>';
+      h+='<p>'+posHint+' '+touchHint+' = одно повторение. Свободный режим без плана.</p>';
     }
     if(countOn){
       h+='<button id="cdStart" class="cdbtn">▶ Старт с отсчётом 3·2·1</button>';
@@ -987,6 +1130,7 @@
   function finishWorkout(){
     if(!started){return;}
     finished=true;
+    stopCamera();
     const all=sets.slice();if(repsThisSet>0)all.push({reps:repsThisSet,target:mode==='program'?PLAN[week][setIndex]:(goal||null)});
     const total=reps, nSets=all.length;
     const best=Math.max(0,...all.map(s=>s.reps));
@@ -1106,6 +1250,7 @@
     if(history[tkey()]===undefined)delete history[tkey()];persist();closeSession();}
 
   function closeSession(){
+    stopCamera();
     $('summary').classList.remove('open');
     started=false;finished=false;reps=0;repsThisSet=0;sets=[];exerciseMs=0;restMs=0;lastTap=0;wasResting=false;
     setIndex=0;phase='work';goalHit=false;restAlert=false;lastCountSec=99;counting=false;warmupDone=false;
@@ -1142,6 +1287,7 @@
     [...$('tabbar').children].forEach(b=>b.classList.toggle('on',b.dataset.tab===name));}
   function syncControls(){
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+    [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
     $('wVal').textContent=week+1;
     $('wPrev').innerHTML='Подходы: '+PLAN[week].map(n=>'<b>'+n+'</b>').join(' · ')+' = '+planSum(week);
     $('prVal').textContent=ms2(programRest/1000);
@@ -1183,12 +1329,6 @@
     applyModeUI();
     renderAchievements();
   }
-  function buildVoiceSelect(){
-    const sel=$('voiceSel');if(!sel)return;const list=ruVoices();
-    sel.innerHTML='<option value="">Авто (системный)</option>'+
-      list.map(v=>'<option value="'+v.name.replace(/"/g,'')+'">'+v.name+(/ru/i.test(v.lang)?'':' ('+v.lang+')')+'</option>').join('');
-    sel.value=voiceName;
-  }
   function renderHist(){
     const h=$('hist');const keys=Object.keys(history).filter(k=>history[k]&&history[k].reps>0).sort().reverse().slice(0,12);
     if(!storageOk){h.innerHTML='<div class="empty">История сохраняется в обычном браузере или при добавлении на экран Домой, а не в предпросмотре.</div>';return;}
@@ -1209,9 +1349,15 @@
     g.innerHTML='<div class="gtitle">Прогресс · повторов в день</div><div class="bars">'+bars+'</div>'+
       '<div class="glabel"><span>'+dshort(keys[0])+'</span><span>макс '+max+'</span><span>'+(keys[keys.length-1]===tk?'сегодня':dshort(keys[keys.length-1]))+'</span></div>';
   }
-  $('gear').addEventListener('click',()=>{loadVoices();syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
+  $('gear').addEventListener('click',()=>{syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
   $('close').addEventListener('click',()=>{$('panel').classList.remove('open');if(!started)renderHello();});
   $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;syncControls();persist();if(!started)renderHello();});
+  $('inputMode').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    inputMode=b.dataset.im;syncControls();persist();
+    if(started&&!paused){if(inputMode==='tap')stopCamera();else if(!camActive)startCamera();}
+    if(!started)renderHello();
+  });
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
@@ -1371,7 +1517,7 @@
         startMax=c.startMax||7;week=c.week||0;mode=c.mode||'program';programRest=c.programRest||60000;
         goal=c.goal||0;restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
         soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-        voiceName=c.voiceName||'';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+        voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
         cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;autoProg=c.autoProg!==false;
         PLAN=buildPlan(startMax);if(week>51)week=51;
         const t=history[tkey()];committed=t?{reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0}:{reps:0,sets:0,workMs:0,restMs:0,best:0};
@@ -1386,8 +1532,7 @@
   $('obGo').addEventListener('click',closeOnboard);
   $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
 
-  if('speechSynthesis' in window){try{speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}}
-  loadAll();loadVoices();showTab('train');renderHello();render();
+  loadAll();loadVoiceManifest();showTab('train');renderHello();render();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   if(!seen)$('onboard').classList.add('open');
 })();

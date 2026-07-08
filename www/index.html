@@ -392,7 +392,7 @@
     <div class="grp" data-tab="sound">
       <h3>Сигналы</h3>
       <div class="row"><label>Голосовой счёт</label><div class="tgl on" id="voice"></div></div>
-      <div class="row"><label>Голос</label><select id="voiceSel" class="vsel"></select></div>
+      <div class="row"><label>Голос</label><select id="voiceSel" class="vsel"><option value="dmitry">Дмитрий</option><option value="svetlana">Светлана</option></select></div>
       <div class="row"><label>Энергия голоса</label>
         <div class="seg" id="vibe2"><button data-e="calm">спокойно</button><button data-e="hype" class="on">драйв</button><button data-e="beast">зверь</button></div>
       </div>
@@ -539,7 +539,7 @@
   let mode='program', week=0, programRest=60000;
   let goal=0, restThreshold=4000, targetRest=0;
   let soundOn=true, vibeOn=true, voiceOn=true;
-  let voiceName='', voiceEnergy='hype', voices=[];
+  let voiceName='dmitry', voiceEnergy='hype';
   let countOn=true, lastCountSec=99, counting=false;
   let cheerLead=3, metroOn=false, metroSec=1.5, lastMetro=0, metroHi=false;
   let startMax=7, autoProg=true;
@@ -574,15 +574,29 @@
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const pluralDays=n=>{const m=n%100,l=n%10;if(m>=11&&m<=14)return'дней';if(l===1)return'день';if(l>=2&&l<=4)return'дня';return'дней';};
 
-  // голос / звук / вибро
-  const ENERGY={calm:{rate:1.0,pitch:1.0},hype:{rate:1.22,pitch:1.12},beast:{rate:1.35,pitch:1.25}};
-  function loadVoices(){try{voices=(speechSynthesis.getVoices()||[]);}catch(e){voices=[];}buildVoiceSelect();}
-  function ruVoices(){const ru=voices.filter(v=>/ru/i.test(v.lang));return ru.length?ru:voices;}
-  function chosenVoice(){return voices.find(v=>v.name===voiceName)||ruVoices()[0]||voices[0]||null;}
-  function say(t,boost){if(!voiceOn||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(t);u.lang='ru-RU';const e=ENERGY[voiceEnergy]||ENERGY.hype;
-    u.rate=e.rate*(boost?1.05:1);u.pitch=e.pitch;u.volume=1;const v=chosenVoice();if(v)u.voice=v;
-    speechSynthesis.speak(u);}catch(e){}}
+  // голос / звук / вибро — предзаписанные клипы (edge-tts), т.к. speechSynthesis не звучит в Android WebView
+  const ENERGY={calm:{rate:1.0},hype:{rate:1.22},beast:{rate:1.35}};
+  let voiceManifest=null;
+  async function loadVoiceManifest(){try{const r=await fetch('vendor/voice/manifest.json');voiceManifest=await r.json();}catch(e){voiceManifest=null;}}
+  const voiceAudio=new Audio();
+  function voiceFile(t){
+    if(!voiceManifest)return null;
+    if(voiceManifest.phrases[t])return voiceManifest.phrases[t];
+    if(/^\d+$/.test(t)&&voiceManifest.numbers[t])return voiceManifest.numbers[t];
+    return null;
+  }
+  function say(t,boost){
+    if(!voiceOn)return;
+    const fname=voiceFile(t);if(!fname)return;
+    try{
+      voiceAudio.pause();voiceAudio.currentTime=0;
+      const e=ENERGY[voiceEnergy]||ENERGY.hype;
+      voiceAudio.src='vendor/voice/'+(voiceName==='svetlana'?'svetlana':'dmitry')+'/'+fname;
+      voiceAudio.playbackRate=e.rate*(boost?1.05:1);
+      voiceAudio.volume=1;
+      voiceAudio.play().catch(()=>{});
+    }catch(e){}
+  }
   // энергичные реплики
   const SAY_REST=['Отдых.','Передышка.','Дыши.'];
   const SAY_REST_HYPE=['Красава, отдых!','Мощно! Передышка.','Есть подход! Дыши.'];
@@ -718,7 +732,7 @@
     if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
       restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-      voiceName=c.voiceName||'';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+      voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
       cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;
       startMax=c.startMax||7;autoProg=c.autoProg!==false;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
@@ -754,7 +768,7 @@
       tap.classList.add('paused');
       pauseBar.style.display='flex';
       $('pauseBtn').textContent='▶';
-      speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();
+      voiceAudio.pause();voiceAudio.currentTime=0;
       stopCamera();
     }else{
       resumeFromPause();
@@ -1315,12 +1329,6 @@
     applyModeUI();
     renderAchievements();
   }
-  function buildVoiceSelect(){
-    const sel=$('voiceSel');if(!sel)return;const list=ruVoices();
-    sel.innerHTML='<option value="">Авто (системный)</option>'+
-      list.map(v=>'<option value="'+v.name.replace(/"/g,'')+'">'+v.name+(/ru/i.test(v.lang)?'':' ('+v.lang+')')+'</option>').join('');
-    sel.value=voiceName;
-  }
   function renderHist(){
     const h=$('hist');const keys=Object.keys(history).filter(k=>history[k]&&history[k].reps>0).sort().reverse().slice(0,12);
     if(!storageOk){h.innerHTML='<div class="empty">История сохраняется в обычном браузере или при добавлении на экран Домой, а не в предпросмотре.</div>';return;}
@@ -1341,7 +1349,7 @@
     g.innerHTML='<div class="gtitle">Прогресс · повторов в день</div><div class="bars">'+bars+'</div>'+
       '<div class="glabel"><span>'+dshort(keys[0])+'</span><span>макс '+max+'</span><span>'+(keys[keys.length-1]===tk?'сегодня':dshort(keys[keys.length-1]))+'</span></div>';
   }
-  $('gear').addEventListener('click',()=>{loadVoices();syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
+  $('gear').addEventListener('click',()=>{syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
   $('close').addEventListener('click',()=>{$('panel').classList.remove('open');if(!started)renderHello();});
   $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;syncControls();persist();if(!started)renderHello();});
   $('inputMode').addEventListener('click',e=>{
@@ -1509,7 +1517,7 @@
         startMax=c.startMax||7;week=c.week||0;mode=c.mode||'program';programRest=c.programRest||60000;
         goal=c.goal||0;restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
         soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-        voiceName=c.voiceName||'';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+        voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
         cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;autoProg=c.autoProg!==false;
         PLAN=buildPlan(startMax);if(week>51)week=51;
         const t=history[tkey()];committed=t?{reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0}:{reps:0,sets:0,workMs:0,restMs:0,best:0};
@@ -1524,8 +1532,7 @@
   $('obGo').addEventListener('click',closeOnboard);
   $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
 
-  if('speechSynthesis' in window){try{speechSynthesis.onvoiceschanged=loadVoices;}catch(e){}}
-  loadAll();loadVoices();showTab('train');renderHello();render();
+  loadAll();loadVoiceManifest();showTab('train');renderHello();render();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   if(!seen)$('onboard').classList.add('open');
 })();
