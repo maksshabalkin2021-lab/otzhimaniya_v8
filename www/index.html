@@ -263,7 +263,7 @@
   #camCalibRing.hidden{display:none}
 
   /* Ачивки тост */
-  #achieveToast{position:fixed;top:max(70px,calc(env(safe-area-inset-top)+62px));left:50%;
+  #achieveToast{position:fixed;top:max(100px,calc(env(safe-area-inset-top)+72px));left:50%;
     transform:translateX(-50%) translateY(-16px);z-index:200;background:var(--bg2);
     border:1px solid var(--gold);border-radius:14px;padding:11px 16px;
     display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1);
@@ -404,6 +404,7 @@
     <button data-tab="train" class="on">🏋 Тренировка</button>
     <button data-tab="grips">🤚 Хваты</button>
     <button data-tab="sound">🔊 Звук</button>
+    <button data-tab="theme">🎨 Тема</button>
     <button data-tab="hist">📊 История</button>
   </div>
   <div class="pbody">
@@ -492,7 +493,7 @@
       <div class="weekprev" id="remStatus" style="margin-top:0"></div>
       <div class="weekprev" id="schedInfo" style="margin-top:4px"></div>
     </div>
-    <div class="grp" data-tab="sound">
+    <div class="grp" data-tab="theme">
       <h3>Оформление</h3>
       <div class="themegrid" id="theme">
         <button data-th="dark" class="on"><span class="sw" style="--sb:#0a0b0d;--sw:#c8ff00"></span>Тёмная</button>
