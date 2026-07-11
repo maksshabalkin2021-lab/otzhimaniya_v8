@@ -119,6 +119,28 @@
   #hello p{font-family:'Oswald';font-weight:400;font-size:15px;color:var(--muted);max-width:290px;line-height:1.5;letter-spacing:.3px}
   #hello .pulse{font-family:'Oswald';font-weight:600;letter-spacing:3px;font-size:13px;color:var(--work);animation:pp 1.4s ease-in-out infinite}
   @keyframes pp{0%,100%{opacity:.35}50%{opacity:1}}
+  /* Герой-карточка главного экрана — фокус на сегодняшней тренировке, одна главная кнопка */
+  .herocard{width:min(90vw,360px);border-radius:20px;padding:17px 16px;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--work) 10%,transparent),color-mix(in srgb,var(--bg2) 60%,transparent) 55%);
+    -webkit-backdrop-filter:saturate(1.35) blur(13px);backdrop-filter:saturate(1.35) blur(13px);
+    border:1px solid color-mix(in srgb,var(--work) 28%,transparent);
+    box-shadow:0 12px 32px -16px color-mix(in srgb,var(--work) 35%,transparent),0 8px 24px -12px rgba(0,0,0,.55)}
+  .herohead{display:flex;align-items:center;justify-content:center;gap:9px}
+  .herotag{font-family:'Oswald';font-weight:700;font-size:12px;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--accent-ink);background:var(--work);border-radius:20px;padding:3px 11px}
+  .herometa{font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted)}
+  .herotitle{font-family:'Oswald';font-weight:600;font-size:16px;color:var(--ink);margin-top:12px;letter-spacing:.3px}
+  .heronums{display:flex;gap:7px;margin-top:11px;justify-content:center}
+  .heronums .hn{flex:1;max-width:58px;text-align:center;background:color-mix(in srgb,var(--ink) 5%,transparent);
+    border:1px solid var(--line);border-radius:11px;padding:8px 0;font-family:'Bebas Neue';font-size:27px;color:var(--ink)}
+  .heronums .hn.first{color:var(--work);border-color:color-mix(in srgb,var(--work) 40%,var(--line))}
+  .heronums .hn.big1{flex:0 0 auto;max-width:none;padding:4px 26px;font-size:44px}
+  .herosub{font-family:'Oswald';font-weight:400;font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.4}
+  .herocta{width:100%;margin-top:15px;height:52px;border:none;border-radius:14px;
+    background:var(--work);color:var(--accent-ink);font-family:'Oswald';font-weight:700;letter-spacing:1px;
+    font-size:16px;cursor:pointer;text-transform:uppercase;
+    box-shadow:0 10px 22px -10px color-mix(in srgb,var(--work) 60%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 30%,transparent)}
+  .herocta:active{transform:scale(.97)}
 
   #action{flex:0 0 auto;display:flex;gap:8px;padding:9px max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left));
     border-top:1px solid var(--line);background:var(--bg2)}
@@ -1470,37 +1492,37 @@
   // ---- стартовый экран ----
   function renderHello(){
     const today=committed.reps, st=streak();
-    let h=inputMode==='camera'?'<div class="big">СЧЁТ <span>КАМЕРОЙ</span></div>':'<div class="big">КАСАЙСЯ <span>НОСОМ</span></div>';
-    h+='<div class="meta"><div class="g">Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
-       '<div>Сегодня<b>'+today+'</b></div><div class="w">Рекорд<b>'+pr+'</b></div></div>';
-    // расписание
     const cells=weekCells();const doneWk=cells.filter(c=>c.done).length;const todayTrain=isTrain(new Date().getDay());
-    h+='<div class="daybanner '+(todayTrain?'train':'rest')+'">'+
-       (trainedToday()?'Сегодня тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'Сегодня — день отдыха · восстанавливайся')+'</div>';
-    h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
-    h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · следующая: '+nextTrain())+'</div>';
-    const posHint=inputMode==='tap'?'Положи телефон на пол.':inputMode==='camera'?'Поставь телефон так, чтобы камера видела лицо.':'Положи телефон на пол — или поставь так, чтобы камера видела лицо.';
-    const touchHint=inputMode==='camera'?'Опускайся и поднимайся перед камерой':inputMode==='both'?'Касайся носом экрана или двигайся перед камерой':'Касайся носом';
-    const pushHint=inputMode==='camera'?'опускайся и поднимайся':inputMode==='both'?'жми или двигайся перед камерой':'жми';
+    const modeLabel=inputMode==='camera'?'счёт камерой':inputMode==='both'?'тап или камера':'касайся носом';
+    // содержимое героя зависит от режима
+    let heroTag,heroMeta,heroTitle,heroNums,heroSub;
     if(mode==='program'){
-      h+='<div class="planbox"><div class="pt">Программа · неделя '+(week+1)+' из 52</div><div class="pn">'+
-        PLAN[week].map((n,i)=>'<span'+(i===0?' class="first"':'')+'>'+n+'</span>').join('')+
-        '</div><div class="ps">5 подходов · всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+'</div></div>';
-      h+='<p>'+posHint+' '+touchHint+' — счёт идёт к цели подхода ('+PLAN[week][0]+'). После цели включится отдых с обратным отсчётом.</p>';
+      heroTag='Сегодня';heroMeta='неделя '+(week+1)+' из 52';heroTitle='Тренировка · 5 подходов';
+      heroNums=PLAN[week].map((n,i)=>'<span class="hn'+(i===0?' first':'')+'">'+n+'</span>').join('');
+      heroSub='всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+' · '+modeLabel;
     }else if(mode==='amrap'){
-      h+='<div class="planbox"><div class="pt">На время · максимум повторов</div>'+
-        '<div class="pn"><span class="first">'+amrapMin+'</span></div>'+
-        '<div class="ps">минут · жми до упора · можно отдыхать между подходами</div></div>';
-      h+='<p>'+posHint+' Обратный отсчёт идёт — '+pushHint+' максимум раз за '+amrapMin+' мин. Отжался, отдохни, '+pushHint+' снова.</p>';
+      heroTag='На время';heroMeta=amrapMin+' мин';heroTitle='Максимум повторов';
+      heroNums='<span class="hn first big1">'+amrapMin+'</span>';
+      heroSub='минут без плана · '+modeLabel;
     }else{
-      h+='<p>'+posHint+' '+touchHint+' = одно повторение. Свободный режим без плана.</p>';
+      heroTag='Свободно';heroMeta='без плана';heroTitle='Считай в своём темпе';
+      heroNums='<span class="hn first big1">∞</span>';
+      heroSub=modeLabel;
     }
-    if(countOn){
-      h+='<button id="cdStart" class="cdbtn">▶ Старт с отсчётом 3·2·1</button>';
-      h+='<div class="orline">или просто коснись носом — начнётся сразу</div>';
-    }else{
-      h+='<div class="pulse">▾ КОСНИСЬ ЭКРАНА ▾</div>';
-    }
+    let h='<div class="daybanner '+(todayTrain?'train':'rest')+'">'+
+      (trainedToday()?'Тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'День отдыха · восстанавливайся')+'</div>';
+    // ГЕРОЙ: фокус экрана + встроенная главная кнопка
+    h+='<div class="herocard"><div class="herohead"><span class="herotag">'+heroTag+'</span><span class="herometa">'+heroMeta+'</span></div>'+
+       '<div class="herotitle">'+heroTitle+'</div><div class="heronums">'+heroNums+'</div><div class="herosub">'+heroSub+'</div>';
+    if(countOn){h+='<button id="cdStart" class="herocta">▶ Поехали</button>';}
+    else{h+='<div class="pulse" style="margin-top:14px">▾ Коснись экрана, чтобы начать ▾</div>';}
+    h+='</div>';
+    if(countOn)h+='<div class="orline">или просто коснись экрана — начнётся сразу</div>';
+    // вспомогательная статистика (приглушённо: серия/сегодня — нейтрально, рекорд — золото)
+    h+='<div class="meta"><div>Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
+       '<div>Сегодня<b>'+today+'</b></div><div class="g">Рекорд<b>'+pr+'</b></div></div>';
+    h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
+    h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · след.: '+nextTrain())+'</div>';
     hello.innerHTML=h;
     const sb=hello.querySelector('#cdStart');
     if(sb)sb.addEventListener('pointerdown',ev=>{ev.stopPropagation();ev.preventDefault();doStart(true);});
