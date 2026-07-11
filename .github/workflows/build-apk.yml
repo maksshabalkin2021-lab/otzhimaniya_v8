@@ -85,3 +85,24 @@ jobs:
           name: otzhimaniya-release-apk
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+
+      # AAB (Android App Bundle) — формат, который требует Google Play (RuStore принимает APK).
+      # Использует ту же release-подпись, что и APK выше.
+      - name: Build release AAB for Google Play (signed, only if keystore secrets are set)
+        if: env.HAS_KEYSTORE == '1'
+        env:
+          KEYSTORE_PATH: release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd android
+          ./gradlew bundleRelease --no-daemon --stacktrace
+
+      - name: Upload release AAB
+        if: env.HAS_KEYSTORE == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: otzhimaniya-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
