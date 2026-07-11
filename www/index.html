@@ -18,7 +18,7 @@
     --surface1:#181b21;--surface2:#23262d;--surface3:#3a3f47;--accent-ink:#000}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden}
-  body{background:var(--bg);color:var(--ink);font-family:'Oswald',sans-serif;text-align:center;
+  body{background:var(--bg);color:var(--ink);font-family:'Oswald',sans-serif;
     -webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none}
   #app{height:100dvh;display:flex;flex-direction:column}
 
@@ -642,7 +642,7 @@
     <!-- Хваты -->
     <div class="grp" data-tab="grips">
       <h3>Варианты отжиманий · 50</h3>
-      <div class="orline" style="text-align:center;color:var(--muted);margin-bottom:12px">Меняй хваты и положения, чтобы прорабатывать разные мышцы и беречь суставы. Разбито по уровням. Схема — вид сверху, ты лежишь лицом вниз.</div>
+      <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:12px">Меняй хваты и положения, чтобы прорабатывать разные мышцы и беречь суставы. Разбито по уровням. Схема — вид сверху, ты лежишь лицом вниз.</div>
       <div id="gripList"></div>
       <div class="row" style="margin-top:16px"><label>Подсказывать хват голосом<br><span style="font-size:13.5px;color:var(--muted)">в режиме «Программа» — свой хват на каждый подход</span></label><div class="tgl" id="gripVoice"></div></div>
     </div>
@@ -671,7 +671,7 @@
 <div id="warmup" class="overlay">
   <div class="phead"><h2>РАЗМИНКА</h2><button class="iconbtn" id="warmSkip">ПРОПУСТИТЬ</button></div>
   <div class="pbody">
-    <div class="empty" style="text-align:center;padding:0 0 14px">Отметь по ходу — это бережёт плечи и запястья. ~3–4 минуты.</div>
+    <div class="empty" style="text-align:left;padding:0 0 14px">Отметь по ходу — это бережёт плечи и запястья. ~3–4 минуты.</div>
     <div id="warmList"></div>
     <button class="cdbtn" id="warmGo" style="width:100%;margin-top:16px">К ТРЕНИРОВКЕ ▸</button>
   </div>
@@ -682,7 +682,7 @@
   <div class="pbody" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;width:100%;max-width:420px;margin:0 auto;box-sizing:border-box;overflow-wrap:break-word">
     <div style="font-family:'Bebas Neue';font-size:clamp(26px,9vw,46px);letter-spacing:1px;line-height:1">СЧЁТ<b style="color:var(--work)">•</b>ОТЖИМАНИЙ</div>
     <div style="font-family:'Oswald';font-weight:300;font-size:15px;color:var(--muted);line-height:1.5">Счётчик-тренер по отжиманиям. Коротко, как это работает:</div>
-    <div style="text-align:center;display:flex;flex-direction:column;gap:12px;margin:6px 0">
+    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin:6px 0">
       <div class="wuitem on"><div class="box">1</div><div class="tx">Положи телефон на пол<span>касайся носом экрана — каждое касание = повтор</span></div></div>
       <div class="wuitem on"><div class="box">2</div><div class="tx">Программа на 52 недели<span>подстраивается под твой уровень, ведёт по подходам с отдыхом</span></div></div>
       <div class="wuitem on"><div class="box">3</div><div class="tx">Голос и темп<span>считает, командует «вниз-вверх», подбадривает на финише</span></div></div>
