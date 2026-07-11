@@ -667,7 +667,7 @@
     <div class="orline">Есть режим счёта по камере (без касания) — включи в Настройки → Тренировка → Способ счёта</div>
     <button class="cdbtn" id="obTest" style="width:100%;background:var(--gold)">🎯 Замерить мой максимум</button>
     <button class="cdbtn" id="obGo" style="width:100%">Поехали ▸</button>
-    <div class="orline">Совет: добавь на экран «Домой» — откроется как приложение</div>
+    <div class="orline" id="pwaHint">Совет: добавь на экран «Домой» — откроется как приложение</div>
   </div>
 </div>
 
@@ -1819,6 +1819,8 @@
   // ===== УВЕДОМЛЕНИЯ (APK / PWA / браузер) =====
   const Cap = window.Capacitor;
   const isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
+  // в установленном APK подсказка «добавь на экран Домой» не нужна — прячем
+  if(isNative){const _ph=$('pwaHint');if(_ph)_ph.style.display='none';}
   const LN = () => (Cap && Cap.Plugins && Cap.Plugins.LocalNotifications) || null;
   let swReg = null;
   const NOTIF_TITLE='Пора отжиматься 💪';
