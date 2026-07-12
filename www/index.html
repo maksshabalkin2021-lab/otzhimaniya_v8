@@ -229,14 +229,14 @@
     padding-bottom:env(safe-area-inset-bottom);
     padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
   #bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    min-height:44px;border:none;background:transparent;color:var(--muted);cursor:pointer;padding:6px 2px;
-    font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:.3px;transition:color .15s}
-  #bottomnav button .bi{font-size:21px;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .15s,transform .12s}
+    min-height:44px;border:none;background:transparent;color:var(--muted);cursor:pointer;padding:6px 1px;
+    font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:0;white-space:nowrap;transition:color .15s}
+  #bottomnav button .bi{font-size:20px;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .15s,transform .12s}
   #bottomnav button.on{color:var(--work)}
   #bottomnav button.on .bi{filter:none;transform:translateY(-1px)}
   #bottomnav button:active .bi{transform:scale(.88)}
   /* модальные оверлеи (итоги/тест/разминка/онбординг) — поверх таб-бара; страницы (#panel) — под ним */
-  #summary,#test,#warmup,#onboard{z-index:45}
+  #summary,#test,#warmup,#onboard,#mediaView{z-index:45}
   /* темы — каждая это один блок из 12 переменных, всё остальное в приложении уже завязано на них */
   body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#626a74;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a;
     --surface1:#eef1ea;--surface2:#e2e6db;--surface3:#c5cbbb;--accent-ink:#fff}
@@ -383,6 +383,36 @@
     color:var(--muted);font-family:'Bebas Neue';font-size:16px;line-height:1;cursor:pointer;transition:transform .08s}
   .gasg button.on{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
   .gasg button:active{transform:scale(.9)}
+  /* ---- галерея прогресса (фото/видео) ---- */
+  .mediatools{display:flex;gap:10px;align-items:stretch;margin-bottom:16px;flex-wrap:wrap}
+  .mediatools .cdbtn{margin-top:0;flex:1 1 180px}
+  .mediaempty{text-align:center;color:var(--muted);font-family:'Oswald';font-size:14.5px;padding:40px 12px;line-height:1.6}
+  .mediagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .mediacell{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface1);border:1px solid var(--line);cursor:pointer}
+  .mediacell img,.mediacell video{width:100%;height:100%;object-fit:cover;display:block}
+  .mediacell .mdate{position:absolute;left:0;right:0;bottom:0;z-index:1;font-family:'Oswald';font-weight:600;font-size:10.5px;color:#fff;
+    background:linear-gradient(transparent,rgba(0,0,0,.74));padding:14px 5px 5px;text-align:center;letter-spacing:.3px}
+  .mediacell .mvid{position:absolute;top:6px;right:7px;z-index:1;font-size:14px;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}
+  /* просмотр одного элемента */
+  .mvbody{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 16px;gap:12px}
+  .mvbody img,.mvbody video{max-width:100%;max-height:68vh;border-radius:14px;background:#000}
+  .mvbody .mvdate{font-family:'Oswald';font-weight:600;font-size:15px;color:var(--muted);letter-spacing:.5px}
+  .mvactions{display:flex;gap:8px;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg2)}
+  .mvactions button{flex:1;height:48px}
+  /* сравнение до/после */
+  .mediacompare{display:flex;flex-direction:column;gap:12px}
+  .cmprow{display:flex;gap:8px}
+  .cmpslot{flex:1;aspect-ratio:3/4;border-radius:14px;border:1px dashed var(--line);background:var(--surface1);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .cmpslot.active{border-color:var(--work);border-style:solid}
+  .cmpslot img{width:100%;height:100%;object-fit:cover}
+  .cmplabel{position:absolute;top:6px;left:6px;z-index:2;font-family:'Bebas Neue';font-size:15px;letter-spacing:1px;color:var(--work);
+    background:color-mix(in srgb,var(--bg) 68%,transparent);padding:1px 9px;border-radius:6px}
+  .cmppick{color:var(--muted);font-family:'Oswald';font-size:12.5px;text-align:center;padding:0 6px}
+  .cmpstriplabel{font-family:'Oswald';font-size:12.5px;color:var(--muted);text-align:center}
+  .cmpstrip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+  .cmpstrip .cs{flex:0 0 62px;height:80px;border-radius:10px;overflow:hidden;border:1px solid var(--line);cursor:pointer;background:var(--surface1)}
+  .cmpstrip .cs img{width:100%;height:100%;object-fit:cover}
+  .cmpstrip .cs.used{outline:2px solid var(--work);outline-offset:-2px}
 
   /* планшеты/широкие экраны — не растягиваем на всю ширину */
   @media (min-width:700px){
@@ -543,6 +573,7 @@
     <button data-view="train" class="on"><span class="bi">🏋️</span><span class="bl">Тренировка</span></button>
     <button data-view="grips"><span class="bi">🤚</span><span class="bl">Хваты</span></button>
     <button data-view="progress"><span class="bi">📊</span><span class="bl">Прогресс</span></button>
+    <button data-view="media"><span class="bi">📸</span><span class="bl">Галерея</span></button>
     <button data-view="more"><span class="bi">⚙️</span><span class="bl">Ещё</span></button>
   </nav>
 
@@ -688,6 +719,36 @@
       <div id="gripList"></div>
       <div class="row" style="margin-top:16px"><label>Хваты по подходам<br><span style="font-size:13.5px;color:var(--muted)">в режиме «Программа» — показывать и озвучивать назначенный хват в каждом подходе</span></label><div class="tgl" id="gripVoice"></div></div>
     </div>
+
+    <!-- Галерея прогресса -->
+    <div class="grp" data-tab="media">
+      <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:14px">Добавляй фото и видео своих результатов и следи, как меняешься. Всё хранится только на твоём телефоне — ничего не загружается в сеть.</div>
+      <div class="mediatools">
+        <button class="cdbtn" id="mediaAdd">＋ Добавить фото / видео</button>
+        <div class="seg" id="mediaMode"><button data-mm="grid" class="on">Лента</button><button data-mm="compare">До / После</button></div>
+      </div>
+      <input type="file" id="mediaFile" accept="image/*,video/*" style="display:none">
+      <div id="mediaEmpty" class="mediaempty">Пока пусто. Добавь первое фото прогресса 📸</div>
+      <div id="mediaGrid" class="mediagrid"></div>
+      <div id="mediaCompare" class="mediacompare hidden">
+        <div class="cmprow">
+          <div class="cmpslot active" data-slot="0"><div class="cmplabel">До</div><div class="cmppick">выбери фото ниже</div></div>
+          <div class="cmpslot" data-slot="1"><div class="cmplabel">После</div><div class="cmppick">выбери фото ниже</div></div>
+        </div>
+        <div class="cmpstriplabel">Нажми слот, затем фото из ленты ниже</div>
+        <div class="cmpstrip" id="cmpStrip"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Просмотр фото/видео -->
+<div id="mediaView" class="overlay">
+  <div class="phead"><h2 id="mediaViewTitle">ФОТО</h2><button class="iconbtn" id="mediaViewClose">ЗАКРЫТЬ</button></div>
+  <div class="mvbody" id="mvBody"></div>
+  <div class="mvactions">
+    <button class="iconbtn" id="mediaShare">↗ Поделиться</button>
+    <button class="danger" id="mediaDelete">🗑 Удалить</button>
   </div>
 </div>
 
@@ -1808,6 +1869,7 @@
     const tb=$('tabbar'), title=$('panelTitle');
     if(view==='grips'){ tb.style.display='none'; title.textContent='Хваты'; showTab('grips'); }
     else if(view==='progress'){ tb.style.display='none'; title.textContent='Прогресс'; showTab('hist'); }
+    else if(view==='media'){ tb.style.display='none'; title.textContent='Мой прогресс'; showTab('media'); renderMedia(); }
     else { tb.style.display=''; title.textContent='Настройки'; showTab(moreSub); }
     $('panel').classList.add('open');
     const pb=document.querySelector('#panel .pbody');if(pb)pb.scrollTop=0;
@@ -2089,7 +2151,111 @@
   $('obGo').addEventListener('click',closeOnboard);
   $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
 
-  loadAll();loadVoiceManifest();showTab('train');showView('train');renderHello();render();
+  // ================= Галерея прогресса (фото/видео) =================
+  const FS = () => (Cap && Cap.Plugins && Cap.Plugins.Filesystem) || null;
+  const SH = () => (Cap && Cap.Plugins && Cap.Plugins.Share) || null;
+  const MEDIA_DIR = 'progress';
+  let media = [];               // метаданные: [{id,type:'image'|'video',ext,date}]
+  let mediaMode = 'grid';
+  let mediaSeq = 0, mediaViewId = null;
+  let cmpActive = 0; const cmpSel = [null, null];
+  const objUrls = {};           // браузер: id -> objectURL
+  const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  function fmtMediaDate(iso, full){ const d=new Date(iso); const s=d.getDate()+' '+MONTHS[d.getMonth()]; return full? s+' '+d.getFullYear() : s; }
+  function loadMedia(){ try{ media = JSON.parse(localStorage.getItem('pushup_media'))||[]; }catch(e){ media=[]; } }
+  function saveMedia(){ try{ localStorage.setItem('pushup_media', JSON.stringify(media)); }catch(e){} }
+  // --- IndexedDB (браузерный фолбэк для медиа-байтов) ---
+  let _mdb=null;
+  function mdb(){ return new Promise((res,rej)=>{ if(_mdb)return res(_mdb);
+    const r=indexedDB.open('pushup_media_db',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('m');
+    r.onsuccess=()=>{_mdb=r.result;res(_mdb);}; r.onerror=()=>rej(r.error); }); }
+  function idbPut(id,blob){ return mdb().then(db=>new Promise((res,rej)=>{ const t=db.transaction('m','readwrite'); t.objectStore('m').put(blob,id); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); })); }
+  function idbGet(id){ return mdb().then(db=>new Promise((res,rej)=>{ const t=db.transaction('m','readonly'); const q=t.objectStore('m').get(id); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); })); }
+  function idbDel(id){ return mdb().then(db=>new Promise((res,rej)=>{ const t=db.transaction('m','readwrite'); t.objectStore('m').delete(id); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); })); }
+  const mediaPath = e => MEDIA_DIR+'/'+e.id+'.'+e.ext;
+  function blobToB64(blob){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(blob); }); }
+  async function mediaSaveBlob(id, ext, blob){
+    if(isNative && FS()){ const b64=await blobToB64(blob); await FS().writeFile({ path:MEDIA_DIR+'/'+id+'.'+ext, data:b64, directory:'DATA', recursive:true }); }
+    else { await idbPut(id, blob); }
+  }
+  async function mediaSrc(e){
+    if(isNative && FS()){ try{ const u=await FS().getUri({ path:mediaPath(e), directory:'DATA' }); return Cap.convertFileSrc(u.uri); }catch(err){ return ''; } }
+    if(objUrls[e.id]) return objUrls[e.id];
+    try{ const blob=await idbGet(e.id); if(!blob)return ''; const u=URL.createObjectURL(blob); objUrls[e.id]=u; return u; }catch(err){ return ''; }
+  }
+  async function mediaRemove(e){
+    if(isNative && FS()){ try{ await FS().deleteFile({ path:mediaPath(e), directory:'DATA' }); }catch(err){} }
+    else { try{ await idbDel(e.id); }catch(err){} if(objUrls[e.id]){ URL.revokeObjectURL(objUrls[e.id]); delete objUrls[e.id]; } }
+    media = media.filter(m=>m.id!==e.id); if(cmpSel[0]===e.id)cmpSel[0]=null; if(cmpSel[1]===e.id)cmpSel[1]=null; saveMedia();
+  }
+  async function mediaShareEntry(e){
+    if(isNative && SH() && FS()){ try{ const u=await FS().getUri({ path:mediaPath(e), directory:'DATA' }); await SH().share({ title:'Мой прогресс', text:'Мой прогресс в отжиманиях 💪', url:u.uri }); }catch(err){} return; }
+    try{ if(navigator.share){ const blob=await idbGet(e.id);
+        if(blob && navigator.canShare){ const file=new File([blob], e.id+'.'+e.ext, {type: e.type==='video'?'video/mp4':'image/jpeg'});
+          if(navigator.canShare({files:[file]})){ await navigator.share({ files:[file], text:'Мой прогресс 💪' }); return; } }
+        await navigator.share({ text:'Мой прогресс в отжиманиях 💪' }); return; }
+    }catch(err){ if(err && err.name==='AbortError')return; }
+    alert('Поделиться можно из приложения на телефоне — там откроется системное окно «Поделиться».');
+  }
+  async function onMediaFile(ev){
+    const f = ev.target.files && ev.target.files[0]; ev.target.value='';
+    if(!f) return;
+    const isVid = /^video\//.test(f.type);
+    let ext = (f.name.split('.').pop()||'').toLowerCase(); if(!ext||ext.length>4) ext = isVid?'mp4':'jpg';
+    const id = 'm'+Date.now().toString(36)+(mediaSeq++).toString(36);
+    const entry = { id, type:isVid?'video':'image', ext, date:new Date().toISOString() };
+    try{ await mediaSaveBlob(id, ext, f); media.unshift(entry); saveMedia(); renderMedia(); }
+    catch(err){ alert('Не удалось сохранить файл. Возможно, он слишком большой.'); }
+  }
+  async function renderMedia(){
+    const grid=$('mediaGrid'), empty=$('mediaEmpty'), cmp=$('mediaCompare');
+    const has = media.length>0;
+    empty.style.display = (has && mediaMode==='grid') || (mediaMode==='compare' && media.some(m=>m.type==='image')) ? 'none' : (has?'none':'');
+    if(!has){ grid.innerHTML=''; grid.style.display='none'; cmp.classList.add('hidden'); return; }
+    if(mediaMode==='grid'){
+      cmp.classList.add('hidden'); grid.style.display='';
+      grid.innerHTML = media.map(e=>'<div class="mediacell" data-id="'+e.id+'">'+(e.type==='video'?'<span class="mvid">▶</span>':'')+'<div class="mdate">'+fmtMediaDate(e.date)+'</div></div>').join('');
+      for(const e of media){ const cell=grid.querySelector('.mediacell[data-id="'+e.id+'"]'); if(!cell)continue;
+        const src=await mediaSrc(e); const el = e.type==='video'?document.createElement('video'):document.createElement('img');
+        el.src=src; if(e.type==='video'){ el.muted=true; el.setAttribute('playsinline',''); } cell.insertBefore(el, cell.firstChild); }
+    } else {
+      grid.style.display='none'; cmp.classList.remove('hidden'); await renderCompare();
+    }
+  }
+  async function renderCompare(){
+    const strip=$('cmpStrip'); const imgs=media.filter(m=>m.type==='image');
+    strip.innerHTML = imgs.length? imgs.map(e=>'<div class="cs" data-id="'+e.id+'"></div>').join('') : '<div class="cmppick" style="padding:18px">Сначала добавь фото в «Ленте»</div>';
+    for(const e of imgs){ const c=strip.querySelector('.cs[data-id="'+e.id+'"]'); if(!c)continue; c.classList.toggle('used', cmpSel[0]===e.id||cmpSel[1]===e.id);
+      const src=await mediaSrc(e); const im=document.createElement('img'); im.src=src; c.appendChild(im); }
+    for(let s=0;s<2;s++){ const slot=document.querySelector('.cmpslot[data-slot="'+s+'"]'); if(!slot)continue;
+      slot.classList.toggle('active', cmpActive===s);
+      const old=slot.querySelector('img'); if(old)old.remove();
+      const pick=slot.querySelector('.cmppick'); const sel=cmpSel[s]; const e=sel&&media.find(m=>m.id===sel);
+      if(e){ const src=await mediaSrc(e); const im=document.createElement('img'); im.src=src; slot.appendChild(im); if(pick)pick.style.display='none'; }
+      else if(pick){ pick.style.display=''; } }
+  }
+  async function openMediaView(id){ const e=media.find(m=>m.id===id); if(!e)return; mediaViewId=id;
+    $('mediaViewTitle').textContent = e.type==='video'?'ВИДЕО':'ФОТО';
+    const body=$('mvBody'); body.innerHTML='';
+    const src=await mediaSrc(e); const el=e.type==='video'?document.createElement('video'):document.createElement('img');
+    el.src=src; if(e.type==='video'){ el.controls=true; el.setAttribute('playsinline',''); }
+    body.appendChild(el);
+    const d=document.createElement('div'); d.className='mvdate'; d.textContent=fmtMediaDate(e.date,true); body.appendChild(d);
+    $('mediaView').classList.add('open');
+  }
+  $('mediaAdd').addEventListener('click',()=>$('mediaFile').click());
+  $('mediaFile').addEventListener('change',onMediaFile);
+  $('mediaMode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; mediaMode=b.dataset.mm;
+    [...$('mediaMode').children].forEach(x=>x.classList.toggle('on',x.dataset.mm===mediaMode)); renderMedia(); });
+  $('mediaGrid').addEventListener('click',e=>{ const c=e.target.closest('.mediacell'); if(c)openMediaView(c.dataset.id); });
+  $('cmpStrip').addEventListener('click',e=>{ const c=e.target.closest('.cs'); if(!c)return; cmpSel[cmpActive]=c.dataset.id; cmpActive = cmpActive===0?1:0; renderCompare(); });
+  $('mediaCompare').addEventListener('click',e=>{ const s=e.target.closest('.cmpslot'); if(s){ cmpActive=+s.dataset.slot; renderCompare(); } });
+  $('mediaViewClose').addEventListener('click',()=>$('mediaView').classList.remove('open'));
+  $('mediaShare').addEventListener('click',()=>{ const e=media.find(m=>m.id===mediaViewId); if(e)mediaShareEntry(e); });
+  $('mediaDelete').addEventListener('click',async()=>{ const e=media.find(m=>m.id===mediaViewId); if(e&&confirm('Удалить это фото/видео? Отменить нельзя.')){ await mediaRemove(e); $('mediaView').classList.remove('open'); renderMedia(); } });
+
+  loadAll();loadMedia();loadVoiceManifest();showTab('train');showView('train');renderHello();render();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   if(!seen)$('onboard').classList.add('open');
 })();
