@@ -13,14 +13,15 @@
 <title>Счётчик отжиманий</title>
 <link rel="stylesheet" href="vendor/fonts/fonts.css">
 <style>
-  :root{--bg:#0a0b0d;--bg2:#111317;--ink:#f2f4f0;--muted:#6b7280;--line:#1d2026;
+  :root{--bg:#0a0b0d;--bg2:#111317;--ink:#f2f4f0;--muted:#868d99;--line:#1d2026;
     --work:#c8ff00;--rest:#ff7a18;--gold:#ffd23f;
     --surface1:#181b21;--surface2:#23262d;--surface3:#3a3f47;--accent-ink:#000}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden}
+  html{--navh:calc(58px + env(safe-area-inset-bottom))}
   body{background:var(--bg);color:var(--ink);font-family:'Oswald',sans-serif;
     -webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none}
-  #app{height:100dvh;display:flex;flex-direction:column}
+  #app{height:100dvh;display:flex;flex-direction:column;padding-bottom:var(--navh)}
 
   #bar{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;
     padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left));
@@ -151,7 +152,7 @@
   #action #primary{flex:1;background:var(--work);color:var(--accent-ink);border-color:var(--work)}
 
   #stats{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);
-    background:var(--bg2);padding-bottom:env(safe-area-inset-bottom);
+    background:var(--bg2);
     padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
   .cell{padding:10px 4px 12px;text-align:center;border-right:1px solid var(--line)}
   .cell:last-child{border-right:none}
@@ -165,7 +166,7 @@
   .overlay.open{transform:translateY(0)}
   .phead{display:flex;align-items:center;padding:max(14px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line)}
   .phead h2{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;flex:1}
-  .pbody{flex:1;overflow-y:auto;padding:16px 16px 30px}
+  .pbody{flex:1;overflow-y:auto;padding:16px 16px calc(30px + var(--navh))}
   .grp{margin-bottom:22px}
   .grp h3{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
   .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
@@ -222,8 +223,22 @@
   .tabbar button{flex:1;padding:12px 2px;border:none;background:transparent;color:var(--muted);
     font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:0;cursor:pointer;border-bottom:2px solid transparent;line-height:1.2}
   .tabbar button.on{color:var(--ink);border-bottom-color:var(--work)}
+  /* ---- нижний таб-бар (редизайн этап 2) ---- */
+  #bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--navh);
+    display:flex;background:var(--bg2);border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);
+    padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  #bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    min-height:44px;border:none;background:transparent;color:var(--muted);cursor:pointer;padding:6px 2px;
+    font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:.3px;transition:color .15s}
+  #bottomnav button .bi{font-size:21px;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .15s,transform .12s}
+  #bottomnav button.on{color:var(--work)}
+  #bottomnav button.on .bi{filter:none;transform:translateY(-1px)}
+  #bottomnav button:active .bi{transform:scale(.88)}
+  /* модальные оверлеи (итоги/тест/разминка/онбординг) — поверх таб-бара; страницы (#panel) — под ним */
+  #summary,#test,#warmup,#onboard{z-index:45}
   /* темы — каждая это один блок из 12 переменных, всё остальное в приложении уже завязано на них */
-  body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#828a93;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a;
+  body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#626a74;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a;
     --surface1:#eef1ea;--surface2:#e2e6db;--surface3:#c5cbbb;--accent-ink:#fff}
   body.theme-sunset{--bg:#150e0a;--bg2:#1d1410;--ink:#f7ede6;--muted:#a08874;--line:#2c2019;--work:#ff6b4a;--rest:#ffb238;--gold:#ffd23f;
     --surface1:#241a14;--surface2:#2f221a;--surface3:#453224;--accent-ink:#000}
@@ -233,7 +248,7 @@
     --surface1:#221934;--surface2:#2d2244;--surface3:#453362;--accent-ink:#000}
   body.theme-crimson{--bg:#0c0505;--bg2:#170909;--ink:#f7ecec;--muted:#a17f7f;--line:#2c1414;--work:#ff3b3b;--rest:#ff9142;--gold:#ffd23f;
     --surface1:#1e0d0d;--surface2:#2a1313;--surface3:#452020;--accent-ink:#000}
-  body.theme-mint{--bg:#eafaf3;--bg2:#ffffff;--ink:#123328;--muted:#6f9686;--line:#d3ece2;--work:#00a884;--rest:#e08a2a;--gold:#c99a1b;
+  body.theme-mint{--bg:#eafaf3;--bg2:#ffffff;--ink:#123328;--muted:#567d6d;--line:#d3ece2;--work:#00a884;--rest:#e08a2a;--gold:#c99a1b;
     --surface1:#e3f5ee;--surface2:#d3ece2;--surface3:#aed7c7;--accent-ink:#fff}
   body.theme-graphite{--bg:#0e0e0f;--bg2:#17171a;--ink:#f2f2f2;--muted:#888a8f;--line:#2a2a2e;--work:#e8e8ea;--rest:#9a9ca1;--gold:#c8c9cd;
     --surface1:#1e1e21;--surface2:#28282c;--surface3:#3e3e43;--accent-ink:#000}
@@ -331,7 +346,7 @@
   .wkstrip{display:flex;gap:5px;justify-content:center;margin-top:4px}
   .wkstrip .wd{width:30px;text-align:center;font-family:'Oswald';font-weight:600;font-size:13px;color:var(--muted)}
   .wkstrip .wd .dot{width:8px;height:8px;border-radius:50%;background:var(--surface2);margin:4px auto 0}
-  .wkstrip .wd.train .dot{background:var(--work)} .wkstrip .wd.done .dot{background:var(--gold)}
+  .wkstrip .wd.train .dot{background:var(--muted)} .wkstrip .wd.done .dot{background:var(--gold)}
   .wkstrip .wd.today{color:var(--ink)}
 
   /* Хваты */
@@ -342,12 +357,32 @@
   .gripcard .gc{flex:1;min-width:0}
   .gripcard .gn{font-family:'Bebas Neue';font-size:21px;letter-spacing:.5px;color:var(--ink);line-height:1}
   .gripcard .gt{display:inline-block;font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;
-    color:var(--work);background:color-mix(in srgb,var(--work) 10%,transparent);border:1px solid color-mix(in srgb,var(--work) 35%,var(--bg));border-radius:6px;padding:2px 7px;margin-top:5px;text-transform:uppercase}
+    color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,transparent);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--bg));border-radius:6px;padding:2px 7px;margin-top:5px;text-transform:uppercase}
   .gripcard .gd{font-family:'Oswald';font-weight:400;font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:6px}
   .gripcard .gd b{color:var(--ink);font-weight:500}
-  .griplvl{font-family:'Bebas Neue';font-size:20px;letter-spacing:1.5px;color:var(--work);
+  .griplvl{font-family:'Bebas Neue';font-size:20px;letter-spacing:1.5px;color:var(--ink);
     margin:20px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--glass-brd,var(--line))}
   .griplvl:first-child{margin-top:2px}
+  /* ---- хваты по подходам (настройка) ---- */
+  .setgrips{margin:2px 0 20px}
+  .sgttl{font-family:'Bebas Neue';font-size:20px;letter-spacing:1px;color:var(--ink);margin-bottom:4px}
+  .setgrips .sgsub{font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted);line-height:1.4;margin-bottom:12px}
+  .sgrow{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .sgnum{flex:0 0 auto;min-width:74px;font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+  .sgnum b{display:inline-block;min-width:20px;font-family:'Bebas Neue';font-size:19px;letter-spacing:0;color:var(--work)}
+  .sgsel{flex:1;min-width:0;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:11px;
+    padding:10px 11px;font-family:'Oswald';font-weight:500;font-size:14px;-webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+  .sgtgt{font-family:'Oswald';font-weight:600;font-size:11.5px;letter-spacing:.4px;color:var(--gold);text-transform:uppercase;
+    margin:-3px 0 12px 85px}
+  /* кнопки назначения на карточке хвата */
+  .gasg{display:flex;align-items:center;gap:5px;margin-top:9px;flex-wrap:wrap}
+  .gasg .gasgl{font-family:'Oswald';font-weight:600;font-size:12px;letter-spacing:.3px;color:var(--muted);text-transform:uppercase;margin-right:3px}
+  .gasg button{width:31px;height:31px;padding:0;border-radius:9px;border:1px solid var(--line);background:var(--surface1);
+    color:var(--muted);font-family:'Bebas Neue';font-size:16px;line-height:1;cursor:pointer;transition:transform .08s}
+  .gasg button.on{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
+  .gasg button:active{transform:scale(.9)}
 
   /* планшеты/широкие экраны — не растягиваем на всю ширину */
   @media (min-width:700px){
@@ -453,7 +488,7 @@
       <div class="lockdot" id="lock" title="Экран не гаснет"></div>
       <button class="iconbtn hidden" id="musicBtn" title="Открыть музыку">🎵</button>
       <button class="iconbtn hidden" id="pauseBtn" style="color:var(--work)">⏸</button>
-      <button class="iconbtn" id="gear">⚙</button>
+      <button class="iconbtn hidden" id="gear">⚙</button>
       <button class="iconbtn hidden" id="finish">ФИНИШ</button>
     </div>
   </div>
@@ -503,17 +538,23 @@
     <div class="cell rest"><div class="k">Отдых</div><div class="v" id="sRest">00:00</div></div>
   </div>
 
+  <!-- Нижняя навигация -->
+  <nav id="bottomnav">
+    <button data-view="train" class="on"><span class="bi">🏋️</span><span class="bl">Тренировка</span></button>
+    <button data-view="grips"><span class="bi">🤚</span><span class="bl">Хваты</span></button>
+    <button data-view="progress"><span class="bi">📊</span><span class="bl">Прогресс</span></button>
+    <button data-view="more"><span class="bi">⚙️</span><span class="bl">Ещё</span></button>
+  </nav>
+
 </div>
 
 <!-- Настройки -->
 <div id="panel" class="overlay">
-  <div class="phead"><h2>НАСТРОЙКИ</h2><button class="iconbtn" id="close">ЗАКРЫТЬ</button></div>
+  <div class="phead"><h2 id="panelTitle">НАСТРОЙКИ</h2><button class="iconbtn" id="close">ЗАКРЫТЬ</button></div>
   <div class="tabbar" id="tabbar">
-    <button data-tab="train" class="on">🏋 Тренировка</button>
-    <button data-tab="grips">🤚 Хваты</button>
+    <button data-tab="train" class="on">⚙ Основное</button>
     <button data-tab="sound">🔊 Звук</button>
     <button data-tab="theme">🎨 Тема</button>
-    <button data-tab="hist">📊 История</button>
   </div>
   <div class="pbody">
     <div class="grp" data-tab="train">
@@ -643,8 +684,9 @@
     <div class="grp" data-tab="grips">
       <h3>Варианты отжиманий · 50</h3>
       <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:12px">Меняй хваты и положения, чтобы прорабатывать разные мышцы и беречь суставы. Разбито по уровням. Схема — вид сверху, ты лежишь лицом вниз.</div>
+      <div class="setgrips" id="setGripPanel"></div>
       <div id="gripList"></div>
-      <div class="row" style="margin-top:16px"><label>Подсказывать хват голосом<br><span style="font-size:13.5px;color:var(--muted)">в режиме «Программа» — свой хват на каждый подход</span></label><div class="tgl" id="gripVoice"></div></div>
+      <div class="row" style="margin-top:16px"><label>Хваты по подходам<br><span style="font-size:13.5px;color:var(--muted)">в режиме «Программа» — показывать и озвучивать назначенный хват в каждом подходе</span></label><div class="tgl" id="gripVoice"></div></div>
     </div>
   </div>
 </div>
@@ -728,7 +770,7 @@
   let mode='program', week=0, programRest=60000;
   let goal=0, restThreshold=4000, targetRest=0;
   let soundOn=true, vibeOn=true, voiceOn=true;
-  let voiceName='dmitry', voiceEnergy='hype';
+  let voiceName='svetlana', voiceEnergy='hype';
   let countOn=true, lastCountSec=99, counting=false;
   let cheerLead=3, metroOn=false, metroSec=1.5, lastMetro=0, metroHi=false;
   let startMax=7, autoProg=true, autoAdjust=false;
@@ -998,19 +1040,20 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,inputMode,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
     if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
       restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-      voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+      voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'svetlana';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
       cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;
       startMax=c.startMax||7;autoProg=c.autoProg!==false;autoAdjust=!!c.autoAdjust;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
       reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
       amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';formCheckOn=!!c.formCheckOn;
+      if(Array.isArray(c.setGrips)&&c.setGrips.length===SET_COUNT)setGrips=c.setGrips.map(v=>{v=+v;return(Number.isInteger(v)&&v>=0&&v<GRIPS.length)?v:0;});
       musicApp=c.musicApp||'off';musicCustomUrl=c.musicCustomUrl||'';}
     applyTheme();
     PLAN=buildPlan(startMax);if(week>51)week=51;
@@ -1268,22 +1311,56 @@
   ];
   function renderGrips(){
     const el=$('gripList');if(!el||el.children.length)return;
-    const card=g=>'<div class="gripcard"><div class="dia">'+gripSVG(g.hands)+'</div>'+
-      '<div class="gc"><div class="gn">'+g.name+'</div><span class="gt">'+g.target+'</span><div class="gd">'+g.desc+'</div></div></div>';
+    const card=(g,gi)=>'<div class="gripcard"><div class="dia">'+gripSVG(g.hands)+'</div>'+
+      '<div class="gc"><div class="gn">'+g.name+'</div><span class="gt">'+g.target+'</span><div class="gd">'+g.desc+'</div>'+
+      '<div class="gasg"><span class="gasgl">В подход:</span>'+
+      [0,1,2,3,4].map(s=>'<button data-grip="'+gi+'" data-set="'+s+'">'+(s+1)+'</button>').join('')+
+      '</div></div></div>';
     el.innerHTML=['Новичок','Средний','Продвинутый'].map(lv=>{
-      const items=GRIPS.filter(g=>g.lvl===lv);if(!items.length)return '';
-      return '<div class="griplvl">'+lv+' · '+items.length+'</div>'+items.map(card).join('');
+      const items=GRIPS.map((g,i)=>[g,i]).filter(gi=>gi[0].lvl===lv);if(!items.length)return '';
+      return '<div class="griplvl">'+lv+' · '+items.length+'</div>'+items.map(gi=>card(gi[0],gi[1])).join('');
     }).join('');
+    el.querySelectorAll('.gasg button').forEach(b=>{
+      b.addEventListener('click',()=>{setGrips[+b.dataset.set]=+b.dataset.grip;persist();syncGripAssignUI();});
+    });
+    syncGripAssignUI();
   }
-  // ротация хватов по 5 подходам программы
-  const SET_GRIPS=[
-    {lab:'Классический',say:'классический хват'},
-    {lab:'Широкий',say:'широкий хват'},
-    {lab:'Алмазный',say:'узкий, алмазный хват'},
-    {lab:'Классический',say:'классический хват'},
-    {lab:'На кулаках',say:'на кулаках'},
-  ];
-  const gripForSet=i=>SET_GRIPS[((i%SET_GRIPS.length)+SET_GRIPS.length)%SET_GRIPS.length];
+  // ---- хваты по подходам (настройка) ----
+  const SET_COUNT=5;
+  const gripIdxByName=n=>{const i=GRIPS.findIndex(g=>g.name===n);return i<0?0:i;};
+  // дефолтная раскладка (та же ротация, что была жёстко зашита)
+  const DEFAULT_SET_GRIPS=['Классический','Широкий','Алмазный','Классический','На кулаках'].map(gripIdxByName);
+  let setGrips=DEFAULT_SET_GRIPS.slice();
+  // фразы для голоса — только те хваты, для которых есть предзаписанный клип (edge-tts). Остальные — визуально.
+  const GRIP_SAY={'Классический':'классический хват','Широкий':'широкий хват','Алмазный':'узкий, алмазный хват','На кулаках':'на кулаках'};
+  const gripForSet=i=>GRIPS[setGrips[((i%SET_COUNT)+SET_COUNT)%SET_COUNT]]||GRIPS[0];
+  const gripSay=g=>GRIP_SAY[g&&g.name]||null;
+  function renderSetGrips(){
+    const el=$('setGripPanel');if(!el||el.children.length)return;
+    const groups=['Новичок','Средний','Продвинутый'].map(lv=>
+      '<optgroup label="'+lv+'">'+GRIPS.map((g,i)=>g.lvl===lv?'<option value="'+i+'">'+g.name+'</option>':'').join('')+'</optgroup>'
+    ).join('');
+    let h='<div class="sgttl">Хват на каждый подход</div>'+
+      '<div class="sgsub">Назначь своё положение рук каждому из 5 подходов программы — или жми цифры прямо на карточках ниже. Действует, когда включён тумблер под каталогом.</div>';
+    for(let s=0;s<SET_COUNT;s++){
+      h+='<div class="sgrow"><div class="sgnum">Подход <b>'+(s+1)+'</b></div>'+
+         '<select class="sgsel" data-set="'+s+'">'+groups+'</select></div>'+
+         '<div class="sgtgt" data-tgt="'+s+'"></div>';
+    }
+    el.innerHTML=h;
+    el.querySelectorAll('.sgsel').forEach(sel=>{
+      sel.addEventListener('change',e=>{setGrips[+e.target.dataset.set]=+e.target.value;persist();syncGripAssignUI();});
+    });
+    syncGripAssignUI();
+  }
+  function syncGripAssignUI(){
+    const panel=$('setGripPanel');
+    if(panel){
+      panel.querySelectorAll('.sgsel').forEach(sel=>{const s=+sel.dataset.set;if(+sel.value!==setGrips[s])sel.value=setGrips[s];});
+      panel.querySelectorAll('.sgtgt').forEach(t=>{const g=GRIPS[setGrips[+t.dataset.tgt]];t.textContent=g?g.target:'';});
+    }
+    document.querySelectorAll('.gasg button').forEach(b=>{b.classList.toggle('on',setGrips[+b.dataset.set]===+b.dataset.grip);});
+  }
 
 
   // ---- старт сессии / повтор ----
@@ -1298,7 +1375,7 @@
     if(mode==='amrap'){amrapEndTime=t+amrapMin*60000;$('amrapTimer').style.display='block';}
     lastTick=t;lastTap=t;setIndex=0;phase='work';restAlert=false;goalHit=false;lastCountSec=99;lastMetro=t;metroHi=false;lockScreen();render();
     if(inputMode!=='tap')startCamera();
-    if(mode==='program'&&gripVoiceOn)setTimeout(()=>{if(started&&!finished&&!counting)say('Первый подход — '+gripForSet(0).say+'.',true);},1100);}
+    if(mode==='program'&&gripVoiceOn)setTimeout(()=>{if(started&&!finished&&!counting){const sp=gripSay(gripForSet(0));if(sp)say('Первый подход — '+sp+'.',true);}},1100);}
 
   // голосовой отсчёт 3·2·1 перед стартом
   function startCountdown(done){
@@ -1381,7 +1458,7 @@
     if(mode==='program'){
       if(setIndex>=PLAN[week].length-1){phase='done';repsThisSet=0;finishWorkout();return;}
       setIndex++;phase='rest';restStart=t;restAlert=false;repsThisSet=0;lastCountSec=99;
-      if(gripVoiceOn)say('Отдых. Следующий подход — '+gripForSet(setIndex).say+'.');else sayRest();
+      if(gripVoiceOn){const sp=gripSay(gripForSet(setIndex));if(sp)say('Отдых. Следующий подход — '+sp+'.');else sayRest();}else sayRest();
       beep(420);buzz([0,60,40,60]);
     }else{repsThisSet=0;}
     render();
@@ -1450,7 +1527,7 @@
           elCount.classList.remove('alert');topcount.textContent=ms2(left);elCap.textContent=left>=60?'ДО ПОДХОДА':'СЕКУНД ДО ПОДХОДА';}
         else{elState.textContent='ПОРА!';elState.className='state rest';elCount.textContent='ПОРА';
           elCount.classList.add('alert');topcount.textContent='!';elCap.textContent='КОСНИСЬ — НОВЫЙ ПОДХОД';}
-        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · цель <b>'+PLAN[week][setIndex]+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).lab+'</b>':'');
+        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · цель <b>'+PLAN[week][setIndex]+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
       }else{
         const sec=Math.floor(gap/1000);
         if(targetRest>0){const left=Math.ceil((targetRest-gap)/1000);
@@ -1472,7 +1549,7 @@
       }else{goalwrap.classList.remove('show');
         elState.textContent=started?'РАБОТА':'ГОТОВ';elState.className=started?'state work':'state';}
       if(started){
-        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).lab+'</b>':'');
+        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
         else if(mode==='amrap')elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b> за время';
         else elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b>';
       }
@@ -1720,6 +1797,21 @@
   try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);}catch(e){}
   function showTab(name){[...document.querySelectorAll('.grp[data-tab]')].forEach(g=>g.style.display=g.dataset.tab===name?'':'none');
     [...$('tabbar').children].forEach(b=>b.classList.toggle('on',b.dataset.tab===name));}
+  // ---- нижняя навигация (редизайн этап 2): 4 вкладки, страницы переиспользуют группы оверлея ----
+  let currentView='train', moreSub='train';
+  function showView(view){
+    currentView=view;
+    [...$('bottomnav').children].forEach(b=>b.classList.toggle('on',b.dataset.view===view));
+    if(view==='train'){ $('panel').classList.remove('open'); if(!started)renderHello(); return; }
+    // остальные три — как «страницы» в оверлее #panel
+    syncControls();renderGraph();renderHist();
+    const tb=$('tabbar'), title=$('panelTitle');
+    if(view==='grips'){ tb.style.display='none'; title.textContent='Хваты'; showTab('grips'); }
+    else if(view==='progress'){ tb.style.display='none'; title.textContent='Прогресс'; showTab('hist'); }
+    else { tb.style.display=''; title.textContent='Настройки'; showTab(moreSub); }
+    $('panel').classList.add('open');
+    const pb=document.querySelector('#panel .pbody');if(pb)pb.scrollTop=0;
+  }
   function syncControls(){
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
     [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
@@ -1743,7 +1835,7 @@
     $('tempoV').classList.toggle('on',tempoVoiceOn);
     $('warm').classList.toggle('on',warmupOn);
     $('gripVoice').classList.toggle('on',gripVoiceOn);
-    renderGrips();
+    renderGrips();renderSetGrips();syncGripAssignUI();
     $('remind').classList.toggle('on',remindOn);
     $('remTime').value=reminderTime;
     if(!$('days').children.length){
@@ -1802,8 +1894,9 @@
     showGraphTip._t=setTimeout(()=>tip.classList.remove('show'),1800);
   }
   $('graph').addEventListener('click',e=>{const b=e.target.closest('.b');if(b)showGraphTip(b);});
-  $('gear').addEventListener('click',()=>{syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
-  $('close').addEventListener('click',()=>{$('panel').classList.remove('open');if(!started)renderHello();});
+  $('gear').addEventListener('click',()=>showView('more'));
+  $('close').addEventListener('click',()=>showView('train'));
+  $('bottomnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showView(b.dataset.view);});
   $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;syncControls();persist();if(!started)renderHello();});
   $('inputMode').addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
@@ -1948,16 +2041,16 @@
     const c=$('testCount');c.textContent=testReps;c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');
     buzz(28);beep(880);say(String(testReps));}
   $('testBtn').addEventListener('click',openTest);
-  $('testClose').addEventListener('click',()=>$('test').classList.remove('open'));
+  $('testClose').addEventListener('click',()=>{$('test').classList.remove('open');showView('train');});
   $('testTap').addEventListener('pointerdown',testTapFn);
   $('testUndo').addEventListener('click',()=>{if(testReps>0){testReps--;$('testCount').textContent=testReps;buzz(20);}});
   $('testDone').addEventListener('click',()=>{
-    if(testReps<1){$('test').classList.remove('open');return;}
+    if(testReps<1){$('test').classList.remove('open');showView('train');return;}
     const m=Math.max(1,Math.min(60,testReps));
     const np=buildPlan(m);
     if(confirm('Твой максимум: '+testReps+'.\nПересчитать программу под этот уровень?\nНеделя 1 станет: '+np[0].join('·')+' (до '+np[51].join('·')+' к 52-й неделе), и ты начнёшь с недели 1.')){
       startMax=m;PLAN=np;week=0;mode='program';if(testReps>pr)pr=testReps;persist();
-      $('test').classList.remove('open');renderHello();
+      $('test').classList.remove('open');showView('train');
       alert('Готово! Программа пересчитана под максимум '+testReps+'. Удачи! 💪');
     }
   });
@@ -1965,7 +2058,7 @@
   // ---- Бэкап ----
   $('exportBtn').addEventListener('click',()=>{
     const data={v:2,history,pr,
-      cfg:{mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,inputMode,formCheckOn,musicApp,musicCustomUrl},
+      cfg:{mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,formCheckOn,musicApp,musicCustomUrl},
       ach:[...earnedAchieve]};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -1990,13 +2083,13 @@
     }catch(err){alert('Не удалось прочитать файл.');}e.target.value='';};
     r.readAsText(f);});
 
-  $('tabbar').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab);});
+  $('tabbar').addEventListener('click',e=>{const b=e.target.closest('button');if(b){moreSub=b.dataset.tab;showTab(moreSub);}});
   $('theme').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;theme=b.dataset.th;applyTheme();syncControls();persist();});
   function closeOnboard(){try{localStorage.setItem('pushup_onboarded','1');}catch(e){}$('onboard').classList.remove('open');}
   $('obGo').addEventListener('click',closeOnboard);
   $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
 
-  loadAll();loadVoiceManifest();showTab('train');renderHello();render();
+  loadAll();loadVoiceManifest();showTab('train');showView('train');renderHello();render();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   if(!seen)$('onboard').classList.add('open');
 })();
