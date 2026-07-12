@@ -1,6 +1,6 @@
 {
 	"appId": "com.otzhimaniya.app",
-	"appName": "Счёт отжиманий",
+	"appName": "Умный счётчик отжиманий",
 	"webDir": "www",
 	"android": {
 		"allowMixedContent": true

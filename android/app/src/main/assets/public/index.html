@@ -11,56 +11,63 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>Счётчик отжиманий</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
 <style>
-  :root{--bg:#0a0b0d;--bg2:#111317;--ink:#f2f4f0;--muted:#6b7280;--line:#1d2026;
-    --work:#c8ff00;--rest:#ff7a18;--gold:#ffd23f}
+  :root{--bg:#0a0b0d;--bg2:#111317;--ink:#f2f4f0;--muted:#868d99;--line:#1d2026;
+    --work:#c8ff00;--rest:#ff7a18;--gold:#ffd23f;
+    --surface1:#181b21;--surface2:#23262d;--surface3:#3a3f47;--accent-ink:#000}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overflow:hidden}
+  html{--navh:calc(58px + env(safe-area-inset-bottom))}
   body{background:var(--bg);color:var(--ink);font-family:'Oswald',sans-serif;
     -webkit-user-select:none;user-select:none;touch-action:manipulation;overscroll-behavior:none}
-  #app{height:100dvh;display:flex;flex-direction:column}
+  #app{height:100dvh;display:flex;flex-direction:column;padding-bottom:var(--navh)}
 
-  #bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;
-    padding:max(10px,env(safe-area-inset-top)) 12px 10px;border-bottom:1px solid var(--line);
+  #bar{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:7px;
+    padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left));
+    border-bottom:1px solid var(--line);
     background:linear-gradient(180deg,var(--bg2),transparent);z-index:5}
+  #barctl{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
   .brand{font-family:'Bebas Neue';font-size:20px;letter-spacing:1.5px;line-height:1}
   .brand b{color:var(--work)}
   #bar .spacer{flex:1}
   .iconbtn{background:var(--bg2);border:1px solid var(--line);color:var(--ink);height:36px;padding:0 11px;
-    border-radius:10px;font-family:'Oswald';font-weight:600;font-size:12px;letter-spacing:.5px;cursor:pointer;
+    border-radius:10px;font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;white-space:nowrap}
   .iconbtn:active{transform:scale(.94)}
-  #finish{color:#000;background:var(--work);border-color:var(--work)}
+  #finish{color:var(--accent-ink);background:var(--work);border-color:var(--work)}
   #gear{font-size:23px;width:48px;padding:0;line-height:1}
   #gear:active{transform:scale(.92)}
-  .lockdot{width:8px;height:8px;border-radius:50%;background:#3a3f47;transition:.3s;flex:0 0 auto}
+  .lockdot{width:8px;height:8px;border-radius:50%;background:var(--surface3);transition:.3s;flex:0 0 auto}
   .lockdot.on{background:var(--work);box-shadow:0 0 10px var(--work)}
 
   #tap{position:relative;flex:1;cursor:pointer;overflow:hidden;
-    background:radial-gradient(120% 80% at 50% 45%,#15171c 0%,var(--bg) 72%)}
-  #tap.rest{background:radial-gradient(120% 80% at 50% 45%,#1c1510 0%,var(--bg) 72%)}
+    background:radial-gradient(120% 80% at 50% 45%,var(--bg2) 0%,var(--bg) 72%)}
+  #tap.rest{background:radial-gradient(120% 80% at 50% 45%,color-mix(in srgb,var(--bg2) 85%,var(--rest) 15%) 0%,var(--bg) 72%)}
   #flash{position:absolute;inset:0;opacity:0;pointer-events:none;mix-blend-mode:screen;background:var(--work)}
   #flash.go{animation:fl .28s ease-out}
   #flash.goal{background:var(--gold)}
   @keyframes fl{0%{opacity:.5}100%{opacity:0}}
 
   #topcount{position:absolute;top:6px;left:0;right:0;text-align:center;transform:rotate(180deg);
-    font-family:'Bebas Neue';font-size:clamp(40px,12vmin,90px);line-height:.8;color:#2c313a;
+    font-family:'Bebas Neue';font-size:clamp(40px,12vmin,90px);line-height:.8;color:color-mix(in srgb,var(--muted) 55%,var(--bg2));
     letter-spacing:-1px;pointer-events:none;transition:color .2s}
   #cd{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;
-    background:rgba(8,9,11,.72);color:var(--work);font-family:'Bebas Neue';line-height:.8;
+    background:color-mix(in srgb,var(--bg) 78%,transparent);color:var(--work);font-family:'Bebas Neue';line-height:.8;
     font-size:clamp(150px,52vmin,380px);text-align:center;letter-spacing:-2px;padding:0 12px}
   #cd.pop{animation:cdpop .42s cubic-bezier(.2,.9,.3,1)}
   @keyframes cdpop{0%{transform:scale(.4);opacity:0}45%{opacity:1}100%{transform:scale(1);opacity:1}}
-  .cdbtn{margin-top:6px;padding:14px 22px;border-radius:14px;border:none;background:var(--work);color:#000;
+  .cdbtn{margin-top:6px;padding:14px 22px;border-radius:14px;border:none;background:var(--work);color:var(--accent-ink);
     font-family:'Oswald';font-weight:700;letter-spacing:1.5px;font-size:15px;cursor:pointer;text-transform:uppercase}
   .cdbtn:active{transform:scale(.96)}
-  .orline{font-family:'Oswald';font-weight:300;font-size:13px;color:var(--muted);letter-spacing:.5px}
-  #tap.work #topcount{color:#4a5a00}
-  #tap.rest #topcount{color:#5a3210}
+  .orline{font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);letter-spacing:.5px}
+  #tap.work #topcount{color:color-mix(in srgb,var(--work) 35%,var(--bg2))}
+  #tap.rest #topcount{color:color-mix(in srgb,var(--rest) 35%,var(--bg2))}
+
+  /* плавный переход между стартовым экраном и активной тренировкой */
+  #hello,.core{transition:opacity .2s ease,transform .2s ease}
+  #hello.leave,.core.leave{opacity:0;transform:scale(.97)}
+  #hello.enter-from,.core.enter-from{opacity:0;transform:scale(1.03)}
 
   .core{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:0 16px;pointer-events:none}
@@ -68,224 +75,438 @@
     height:1.25em;line-height:1.25;transition:color .25s}
   .state.work{color:var(--work)} .state.rest{color:var(--rest)} .state.ready{color:var(--gold)}
   .count{font-family:'Bebas Neue';font-size:clamp(140px,44vmin,320px);line-height:.85;letter-spacing:-2px;
-    color:#eef0ec;transition:transform .09s ease-out,color .2s;height:.85em;display:flex;align-items:center;justify-content:center}
+    color:var(--ink);transition:transform .09s ease-out,color .2s;height:.85em;display:flex;align-items:center;justify-content:center}
   #tap.work .count{color:var(--work)} #tap.rest .count{color:var(--rest)}
-  .count.bump{transform:scale(1.06)}
+  .count.bump{animation:repPop .22s ease-out}
+  .count.bump-goal{animation:repPopGoal .32s ease-out}
+  @keyframes repPop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+  @keyframes repPopGoal{0%{transform:scale(1)}35%{transform:scale(1.24)}65%{transform:scale(1.04)}100%{transform:scale(1)}}
   .count.alert{animation:al .8s ease-in-out infinite}
   @keyframes al{0%,100%{opacity:1}50%{opacity:.35}}
 
   .goalwrap{height:24px;margin-top:14px;width:min(74vw,320px);opacity:0;transition:opacity .2s}
   .goalwrap.show{opacity:1}
-  .goalbar{height:8px;border-radius:4px;background:#23262d;overflow:hidden}
+  .goalbar{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden}
   .goalfill{height:100%;width:0;background:var(--work);border-radius:4px;transition:width .18s ease-out}
   .goalfill.done{background:var(--gold)}
-  .goallab{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:1.5px;color:var(--muted);margin-top:6px;text-transform:uppercase}
+  .goallab{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:1.5px;color:var(--muted);margin-top:6px;text-transform:uppercase}
 
   .caption{font-family:'Oswald';font-weight:500;letter-spacing:5px;font-size:13px;color:var(--muted);
     height:1.4em;line-height:1.4;margin-top:10px;text-transform:uppercase}
-  .setline{font-family:'Oswald';font-weight:500;letter-spacing:.5px;font-size:14px;color:var(--muted);
+  .setline{font-family:'Oswald';font-weight:500;letter-spacing:.5px;font-size:15px;color:var(--muted);
     margin-top:10px;line-height:1.4}
   .setline b{color:var(--ink)}
   .chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:9px;max-width:84vw}
   .chip{font-family:'Bebas Neue';font-size:16px;letter-spacing:.5px;color:var(--ink);
-    background:#1a1d23;border:1px solid var(--line);border-radius:7px;padding:2px 8px}
-  .chip.ok{border-color:#3a4a00;color:var(--work)}
-  .chip.miss{border-color:#3a2a10;color:var(--rest)}
+    background:var(--surface1);border:1px solid var(--line);border-radius:7px;padding:2px 8px}
+  .chip.ok{border-color:color-mix(in srgb,var(--work) 35%,var(--bg));color:var(--work)}
+  .chip.miss{border-color:color-mix(in srgb,var(--rest) 35%,var(--bg));color:var(--rest)}
 
   #hello{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
     text-align:center;padding:26px;gap:12px;overflow-y:auto}
   #hello .big{font-family:'Bebas Neue';font-size:clamp(30px,9vw,56px);letter-spacing:1px;line-height:.95}
   #hello .big span{color:var(--work)}
   #hello .meta{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
-  #hello .meta div{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  #hello .meta div{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
   #hello .meta b{display:block;font-family:'Bebas Neue';font-weight:400;font-size:26px;letter-spacing:0;color:var(--ink)}
   #hello .meta .w b{color:var(--work)}
   #hello .meta .g b{color:var(--gold)}
   .planbox{border:1px solid var(--line);border-radius:14px;background:var(--bg2);padding:14px 16px;max-width:340px}
-  .planbox .pt{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+  .planbox .pt{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
   .planbox .pn{display:flex;gap:7px;justify-content:center;margin-top:9px}
   .planbox .pn span{font-family:'Bebas Neue';font-size:30px;color:var(--ink);min-width:28px}
   .planbox .pn span.first{color:var(--work)}
-  .planbox .ps{font-family:'Oswald';font-weight:300;font-size:12px;color:var(--muted);margin-top:7px}
-  #hello p{font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);max-width:290px;line-height:1.5;letter-spacing:.3px}
+  .planbox .ps{font-family:'Oswald';font-weight:300;font-size:13px;color:var(--muted);margin-top:7px}
+  #hello p{font-family:'Oswald';font-weight:400;font-size:15px;color:var(--muted);max-width:290px;line-height:1.5;letter-spacing:.3px}
   #hello .pulse{font-family:'Oswald';font-weight:600;letter-spacing:3px;font-size:13px;color:var(--work);animation:pp 1.4s ease-in-out infinite}
   @keyframes pp{0%,100%{opacity:.35}50%{opacity:1}}
+  /* Герой-карточка главного экрана — фокус на сегодняшней тренировке, одна главная кнопка */
+  .herocard{width:min(90vw,360px);border-radius:20px;padding:17px 16px;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--work) 10%,transparent),color-mix(in srgb,var(--bg2) 60%,transparent) 55%);
+    -webkit-backdrop-filter:saturate(1.35) blur(13px);backdrop-filter:saturate(1.35) blur(13px);
+    border:1px solid color-mix(in srgb,var(--work) 28%,transparent);
+    box-shadow:0 12px 32px -16px color-mix(in srgb,var(--work) 35%,transparent),0 8px 24px -12px rgba(0,0,0,.55)}
+  .herohead{display:flex;align-items:center;justify-content:center;gap:9px}
+  .herotag{font-family:'Oswald';font-weight:700;font-size:12px;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--accent-ink);background:var(--work);border-radius:20px;padding:3px 11px}
+  .herometa{font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted)}
+  .herotitle{font-family:'Oswald';font-weight:600;font-size:16px;color:var(--ink);margin-top:12px;letter-spacing:.3px}
+  .heronums{display:flex;gap:7px;margin-top:11px;justify-content:center}
+  .heronums .hn{flex:1;max-width:58px;text-align:center;background:color-mix(in srgb,var(--ink) 5%,transparent);
+    border:1px solid var(--line);border-radius:11px;padding:8px 0;font-family:'Bebas Neue';font-size:27px;color:var(--ink)}
+  .heronums .hn.first{color:var(--work);border-color:color-mix(in srgb,var(--work) 40%,var(--line))}
+  .heronums .hn.big1{flex:0 0 auto;max-width:none;padding:4px 26px;font-size:44px}
+  .herosub{font-family:'Oswald';font-weight:400;font-size:13.5px;color:var(--muted);margin-top:10px;line-height:1.4}
+  .herocta{width:100%;margin-top:15px;height:52px;border:none;border-radius:14px;
+    background:var(--work);color:var(--accent-ink);font-family:'Oswald';font-weight:700;letter-spacing:1px;
+    font-size:16px;cursor:pointer;text-transform:uppercase;
+    box-shadow:0 10px 22px -10px color-mix(in srgb,var(--work) 60%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 30%,transparent)}
+  .herocta:active{transform:scale(.97)}
 
-  #action{flex:0 0 auto;display:flex;gap:8px;padding:9px 12px;border-top:1px solid var(--line);background:var(--bg2)}
-  #action button{height:50px;border-radius:12px;border:1px solid var(--line);background:#181b21;color:var(--ink);
+  #action{flex:0 0 auto;display:flex;gap:8px;padding:9px max(12px,env(safe-area-inset-right)) 9px max(12px,env(safe-area-inset-left));
+    border-top:1px solid var(--line);background:var(--bg2)}
+  #action button{height:50px;border-radius:12px;border:1px solid var(--line);background:var(--surface1);color:var(--ink);
     font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:15px;cursor:pointer;text-transform:uppercase}
   #action button:active{transform:scale(.97)}
-  #undo{width:64px;font-family:'Bebas Neue';font-size:24px;letter-spacing:0;color:var(--rest)}
-  #primary{flex:1;background:var(--work);color:#000;border-color:var(--work)}
+  #action #undo{width:64px;font-family:'Bebas Neue';font-size:24px;letter-spacing:0;color:var(--rest)}
+  #action #primary{flex:1;background:var(--work);color:var(--accent-ink);border-color:var(--work)}
 
   #stats{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);
-    background:var(--bg2);padding-bottom:env(safe-area-inset-bottom)}
+    background:var(--bg2);
+    padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
   .cell{padding:10px 4px 12px;text-align:center;border-right:1px solid var(--line)}
   .cell:last-child{border-right:none}
-  .cell .k{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase}
+  .cell .k{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase}
   .cell .v{font-family:'Bebas Neue';font-size:28px;line-height:1;margin-top:3px}
   .cell.work .v{color:var(--work)} .cell.rest .v{color:var(--rest)}
 
   /* оверлеи */
-  .overlay{position:fixed;inset:0;z-index:30;background:rgba(8,9,11,.92);backdrop-filter:blur(6px);
+  .overlay{position:fixed;inset:0;z-index:30;overflow-x:hidden;background:color-mix(in srgb,var(--bg) 93%,transparent);backdrop-filter:blur(6px);
     display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
   .overlay.open{transform:translateY(0)}
   .phead{display:flex;align-items:center;padding:max(14px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line)}
   .phead h2{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;flex:1}
-  .pbody{flex:1;overflow-y:auto;padding:16px 16px 30px}
+  .pbody{flex:1;overflow-y:auto;padding:16px 16px calc(30px + var(--navh))}
   .grp{margin-bottom:22px}
-  .grp h3{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+  .grp h3{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
   .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
   .row label{font-family:'Oswald';font-weight:400;font-size:15px;color:var(--ink)}
   .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg2)}
   .seg button{background:transparent;border:none;color:var(--muted);font-family:'Oswald';font-weight:600;
     font-size:13px;padding:8px 12px;cursor:pointer;letter-spacing:.5px}
-  .seg button.on{background:var(--work);color:#000}
+  .seg button.on{background:var(--work);color:var(--accent-ink)}
   .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg2)}
   .stepper button{width:42px;height:38px;background:transparent;border:none;color:var(--work);font-size:22px;font-family:'Bebas Neue';cursor:pointer}
   .stepper .val{min-width:58px;text-align:center;font-family:'Bebas Neue';font-size:22px;color:var(--ink)}
-  .tgl{width:50px;height:30px;border-radius:16px;background:#23262d;border:1px solid var(--line);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
+  .tgl{width:50px;height:30px;border-radius:16px;background:var(--surface2);border:1px solid var(--line);position:relative;cursor:pointer;transition:.2s;flex:0 0 auto}
   .tgl.on{background:var(--work)}
   .tgl::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
   .tgl.on::after{left:23px}
   .vsel{max-width:62%;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;
     padding:8px 10px;font-family:'Oswald';font-weight:500;font-size:13px;cursor:pointer}
-  .weekprev{font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+  .weekprev{font-family:'Oswald';font-weight:400;font-size:14px;color:var(--muted);margin-top:4px}
   .weekprev b{color:var(--work);font-family:'Bebas Neue';font-size:18px}
   .freeonly,.progonly{transition:opacity .2s}
   .hist{display:flex;flex-direction:column;gap:1px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
   .hrow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.3fr;gap:8px;padding:10px 12px;background:var(--bg2);align-items:baseline}
-  .hrow.head{background:#16181d;font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
-  .hrow.today{background:#1a1f10}
+  .hrow.head{background:var(--surface1);font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .hrow.today{background:color-mix(in srgb,var(--bg2) 85%,var(--work) 15%)}
   .hrow .d{font-family:'Oswald';font-weight:500;font-size:14px;color:var(--ink)}
   .hrow .n{font-family:'Bebas Neue';font-size:20px;color:var(--work)}
   .hrow .s{font-family:'Bebas Neue';font-size:20px;color:var(--ink)}
   .hrow .t{font-family:'Oswald';font-size:13px;color:var(--muted)}
-  .empty{padding:18px;text-align:center;color:var(--muted);font-family:'Oswald';font-weight:300;font-size:14px}
+  .empty{padding:18px;text-align:center;color:var(--muted);font-family:'Oswald';font-weight:300;font-size:15px}
   .danger{width:100%;margin-top:6px;padding:12px;border-radius:10px;background:transparent;border:1px solid #3a1d1d;
     color:#ff5a5a;font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:13px;cursor:pointer}
 
   /* итоговый экран */
   #sumbody{flex:1;overflow-y:auto;padding:20px 18px 30px;text-align:center}
-  .record{display:inline-block;font-family:'Oswald';font-weight:700;letter-spacing:2px;font-size:12px;color:#000;
+  .record{display:inline-block;font-family:'Oswald';font-weight:700;letter-spacing:2px;font-size:13px;color:var(--accent-ink);
     background:var(--gold);padding:5px 12px;border-radius:20px;margin-bottom:14px;text-transform:uppercase}
   .sumbig{font-family:'Bebas Neue';font-size:clamp(90px,30vmin,150px);line-height:.8;color:var(--work)}
-  .sumcap{font-family:'Oswald';font-weight:500;letter-spacing:4px;font-size:12px;color:var(--muted);text-transform:uppercase;margin-bottom:18px}
+  .sumcap{font-family:'Oswald';font-weight:500;letter-spacing:4px;font-size:13px;color:var(--muted);text-transform:uppercase;margin-bottom:18px}
   .summet{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
   .summet div{border:1px solid var(--line);border-radius:12px;background:var(--bg2);padding:12px 6px}
-  .summet .k{font-family:'Oswald';font-weight:500;font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .summet .k{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
   .summet .v{font-family:'Bebas Neue';font-size:30px;margin-top:3px;color:var(--ink)}
-  .sumnote{font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);margin:6px 0 18px;line-height:1.5}
+  .sumnote{font-family:'Oswald';font-weight:400;font-size:15px;color:var(--muted);margin:6px 0 18px;line-height:1.5}
   .sumnote b{color:var(--ink)}
   .sumbtns{display:flex;flex-direction:column;gap:10px;max-width:380px;margin:0 auto}
   .sumbtns button{height:52px;border-radius:12px;font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:15px;cursor:pointer;border:1px solid var(--line);text-transform:uppercase}
-  #save{background:var(--work);color:#000;border-color:var(--work)}
-  #nextweek{background:var(--gold);color:#000;border-color:var(--gold)}
-  #share{background:#181b21;color:var(--ink)}
+  #save{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
+  #nextweek{background:var(--gold);color:var(--accent-ink);border-color:var(--gold)}
+  #share{background:var(--surface1);color:var(--ink)}
   #discard{background:transparent;color:#ff5a5a;border-color:#3a1d1d}
   .hidden{display:none!important}
   /* вкладки настроек */
   .tabbar{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--bg2)}
   .tabbar button{flex:1;padding:12px 2px;border:none;background:transparent;color:var(--muted);
-    font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:0;cursor:pointer;border-bottom:2px solid transparent;line-height:1.2}
+    font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:0;cursor:pointer;border-bottom:2px solid transparent;line-height:1.2}
   .tabbar button.on{color:var(--ink);border-bottom-color:var(--work)}
-  /* светлая тема */
-  body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#828a93;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a}
-  body.light #tap{background:radial-gradient(120% 80% at 50% 45%,#ffffff 0%,var(--bg) 72%)}
-  body.light #tap.rest{background:radial-gradient(120% 80% at 50% 45%,#fff3e6 0%,var(--bg) 72%)}
-  body.light #testTap{background:radial-gradient(120% 80% at 50% 45%,#fffdf2 0%,var(--bg) 72%)}
-  body.light #cd{background:rgba(255,255,255,.8)}
-  body.light .count{color:#15181b}
-  body.light #topcount{color:#cdd3c2} body.light #tap.work #topcount{color:#aebd6a} body.light #tap.rest #topcount{color:#e0a877}
-  body.light .chip{background:#eef1ea} body.light .hrow{background:#fff}
-  body.light .hrow.head{background:#f2f4ee} body.light .hrow.today{background:#f3f7e3}
-  body.light #action button,body.light #undo,body.light #share{background:#eef1ea}
-  body.light .goalbar{background:#e2e6db} body.light .tgl{background:#d6dbcd} body.light .lockdot{background:#c5cbbb}
-  body.light .daybanner.rest{background:#e7eae2} body.light .wkstrip .wd .dot{background:#cdd3c2}
-  body.light .overlay{background:rgba(236,239,232,.95)}
-  body.light .wuitem .box{color:#fff} body.light .stepper button{color:var(--work)}
+  /* ---- нижний таб-бар (редизайн этап 2) ---- */
+  #bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--navh);
+    display:flex;background:var(--bg2);border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);
+    padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+  #bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    min-height:44px;border:none;background:transparent;color:var(--muted);cursor:pointer;padding:6px 1px;
+    font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:0;white-space:nowrap;transition:color .15s}
+  #bottomnav button .bi{font-size:20px;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .15s,transform .12s}
+  #bottomnav button.on{color:var(--work)}
+  #bottomnav button.on .bi{filter:none;transform:translateY(-1px)}
+  #bottomnav button:active .bi{transform:scale(.88)}
+  /* модальные оверлеи (итоги/тест/разминка/онбординг) — поверх таб-бара; страницы (#panel) — под ним */
+  #summary,#test,#warmup,#onboard,#mediaView{z-index:45}
+  /* темы — каждая это один блок из 12 переменных, всё остальное в приложении уже завязано на них */
+  body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#626a74;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a;
+    --surface1:#eef1ea;--surface2:#e2e6db;--surface3:#c5cbbb;--accent-ink:#fff}
+  body.theme-sunset{--bg:#150e0a;--bg2:#1d1410;--ink:#f7ede6;--muted:#a08874;--line:#2c2019;--work:#ff6b4a;--rest:#ffb238;--gold:#ffd23f;
+    --surface1:#241a14;--surface2:#2f221a;--surface3:#453224;--accent-ink:#000}
+  body.theme-ocean{--bg:#061418;--bg2:#0c1f26;--ink:#e6f6f8;--muted:#6f97a0;--line:#152c33;--work:#2fe0d0;--rest:#ff8a5c;--gold:#ffd23f;
+    --surface1:#0f262e;--surface2:#173540;--surface3:#25505c;--accent-ink:#000}
+  body.theme-violet{--bg:#120c1a;--bg2:#1b1327;--ink:#f1ecf9;--muted:#9587ad;--line:#291d3a;--work:#b478ff;--rest:#ff7ab8;--gold:#ffd23f;
+    --surface1:#221934;--surface2:#2d2244;--surface3:#453362;--accent-ink:#000}
+  body.theme-crimson{--bg:#0c0505;--bg2:#170909;--ink:#f7ecec;--muted:#a17f7f;--line:#2c1414;--work:#ff3b3b;--rest:#ff9142;--gold:#ffd23f;
+    --surface1:#1e0d0d;--surface2:#2a1313;--surface3:#452020;--accent-ink:#000}
+  body.theme-mint{--bg:#eafaf3;--bg2:#ffffff;--ink:#123328;--muted:#567d6d;--line:#d3ece2;--work:#00a884;--rest:#e08a2a;--gold:#c99a1b;
+    --surface1:#e3f5ee;--surface2:#d3ece2;--surface3:#aed7c7;--accent-ink:#fff}
+  body.theme-graphite{--bg:#0e0e0f;--bg2:#17171a;--ink:#f2f2f2;--muted:#888a8f;--line:#2a2a2e;--work:#e8e8ea;--rest:#9a9ca1;--gold:#c8c9cd;
+    --surface1:#1e1e21;--surface2:#28282c;--surface3:#3e3e43;--accent-ink:#000}
+  body.theme-rose{--bg:#160c11;--bg2:#20131a;--ink:#f9ecf2;--muted:#a884a4;--line:#301b28;--work:#ff5fa8;--rest:#ff9142;--gold:#ffd23f;
+    --surface1:#26161f;--surface2:#33202b;--surface3:#4d2f3f;--accent-ink:#000}
+  body.theme-midnight{--bg:#070b18;--bg2:#0e1526;--ink:#e8edf9;--muted:#7c88ab;--line:#182036;--work:#4d8dff;--rest:#ff8a5c;--gold:#ffd23f;
+    --surface1:#101a30;--surface2:#182640;--surface3:#28395c;--accent-ink:#000}
+  /* сетка сэмплов тем в настройках */
+  .themegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+  .themegrid button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border:1px solid var(--line);
+    border-radius:10px;background:var(--bg2);cursor:pointer;font-family:'Oswald';font-weight:500;font-size:13px;color:var(--muted)}
+  .themegrid button.on{border-color:var(--work);color:var(--ink)}
+  .themegrid .sw{width:26px;height:26px;border-radius:50%;border:1px solid rgba(128,128,128,.35);
+    background:linear-gradient(135deg,var(--sb) 50%,var(--sw) 50%)}
 
   /* Пауза */
-  #pauseBar{display:none;align-items:center;gap:6px;padding:5px 10px;background:rgba(200,255,0,.08);border-bottom:1px solid #2a3300}
-  #pauseBar .pt{font-family:'Oswald';font-weight:600;font-size:11px;letter-spacing:1.5px;color:var(--work);text-transform:uppercase;flex:1}
+  #pauseBar{display:none;align-items:center;gap:6px;padding:5px 10px;background:color-mix(in srgb,var(--work) 8%,transparent);
+    border-bottom:1px solid color-mix(in srgb,var(--work) 25%,var(--bg))}
+  #pauseBar .pt{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:1.5px;color:var(--work);text-transform:uppercase;flex:1}
   #pauseBar .pd{font-family:'Bebas Neue';font-size:18px;color:var(--work)}
-  #pauseResume{background:var(--work);color:#000;border:none;border-radius:8px;padding:5px 14px;font-family:'Oswald';font-weight:700;font-size:12px;letter-spacing:1px;cursor:pointer}
+  #pauseResume{background:var(--work);color:var(--accent-ink);border:none;border-radius:8px;padding:5px 14px;font-family:'Oswald';font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer}
   #tap.paused{pointer-events:none}
   #tap.paused #pauseOverlay{display:block}
   #pauseOverlay{position:absolute;inset:0;z-index:9;display:none;background:rgba(10,11,13,.6);backdrop-filter:blur(4px)}
   #pauseIcon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;
     display:none;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
   #pauseIcon .pp{font-family:'Bebas Neue';font-size:clamp(80px,26vmin,160px);color:var(--work);line-height:.9;letter-spacing:3px;opacity:.9}
-  #pauseIcon .pl{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+  #pauseIcon .pl{font-family:'Oswald';font-weight:500;font-size:14px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
   #tap.paused #pauseIcon{display:flex}
 
   /* AMRAP */
   #amrapTimer{display:none;position:absolute;bottom:18px;left:0;right:0;text-align:center;pointer-events:none;z-index:4}
   #amrapTimer .at{font-family:'Bebas Neue';font-size:clamp(26px,8vw,48px);color:var(--rest);letter-spacing:2px;line-height:1}
-  #amrapTimer .al{font-family:'Oswald';font-weight:500;font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  #amrapTimer .al{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
   #amrapTimer.warn .at{color:#ff4444;animation:al .5s ease-in-out infinite}
 
   /* Камера-режим: PIP превью + статус */
-  #camPip{position:absolute;bottom:96px;right:14px;width:92px;height:122px;border-radius:12px;overflow:hidden;
+  #camPip{position:absolute;bottom:96px;right:max(14px,env(safe-area-inset-right));width:92px;height:122px;border-radius:12px;overflow:hidden;
     z-index:4;background:#000;border:2px solid var(--line);transition:border-color .2s}
   #camPip.hidden{display:none}
   #camPip.ok{border-color:var(--work)} #camPip.lost{border-color:var(--gold)} #camPip.error{border-color:var(--rest)}
   #camPip video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
   #camStatus{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;font-family:'Oswald';font-weight:600;
-    font-size:9px;letter-spacing:.3px;color:#fff;background:rgba(0,0,0,.55);text-align:center;line-height:1.3}
+    font-size:13px;letter-spacing:.3px;color:#fff;background:rgba(0,0,0,.55);text-align:center;line-height:1.3}
+  #camCalibRing{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;--pct:0;
+    background:conic-gradient(var(--work) calc(var(--pct)*1%),rgba(255,255,255,.25) 0);
+    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));
+    mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));
+    transition:background .1s linear}
+  #camCalibRing.hidden{display:none}
 
   /* Ачивки тост */
-  #achieveToast{position:fixed;top:max(70px,calc(env(safe-area-inset-top)+62px));left:50%;
-    transform:translateX(-50%) translateY(-10px);z-index:200;background:var(--bg2);
+  #achieveToast{position:fixed;top:max(100px,calc(env(safe-area-inset-top) + 72px));left:50%;
+    transform:translateX(-50%) translateY(-16px);z-index:200;
+    background:color-mix(in srgb,var(--bg2) 74%,transparent);
+    -webkit-backdrop-filter:saturate(1.35) blur(13px);backdrop-filter:saturate(1.35) blur(13px);
+    background-image:var(--glass-hi);
     border:1px solid var(--gold);border-radius:14px;padding:11px 16px;
-    display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .3s,transform .3s;
+    display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .3s,transform .4s cubic-bezier(.34,1.56,.64,1);
     pointer-events:none;min-width:200px;max-width:88vw;box-shadow:0 4px 24px rgba(0,0,0,.4)}
   #achieveToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #confettiCanvas{position:fixed;inset:0;z-index:250;pointer-events:none}
+  #graphTip{position:fixed;z-index:210;background:var(--glass-2);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border:1px solid var(--glass-brd);border-radius:8px;
+    padding:5px 9px;font-family:'Oswald';font-weight:600;font-size:13px;color:var(--ink);opacity:0;
+    transform:translate(-50%,calc(-100% - 8px));transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}
+  #graphTip.show{opacity:1;transform:translate(-50%,calc(-100% - 14px))}
   #achieveToast .ae{font-size:26px;line-height:1;flex:0 0 auto}
   #achieveToast .at2{font-family:'Oswald';font-weight:600;font-size:14px;color:var(--ink);line-height:1.3}
-  #achieveToast .as2{font-family:'Oswald';font-weight:300;font-size:11px;color:var(--muted);margin-top:2px}
+  #achieveToast .as2{font-family:'Oswald';font-weight:400;font-size:13.5px;color:var(--muted);margin-top:2px}
   .achbadge{font-size:20px;cursor:default;line-height:1;display:inline-block;transition:transform .15s}
   .achbadge:hover{transform:scale(1.3)}
   #testTap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;padding:0 16px;
-    background:radial-gradient(120% 80% at 50% 45%,#1c1a10 0%,var(--bg) 72%)}
+    background:radial-gradient(120% 80% at 50% 45%,color-mix(in srgb,var(--bg2) 85%,var(--gold) 15%) 0%,var(--bg) 72%)}
   #testAction{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line);padding-bottom:max(12px,env(safe-area-inset-bottom))}
   #testAction button{height:54px;border-radius:12px;border:1px solid var(--line);font-family:'Oswald';font-weight:600;letter-spacing:1px;font-size:15px;cursor:pointer;text-transform:uppercase}
-  #testUndo{width:70px;background:#181b21;color:var(--rest);font-family:'Bebas Neue';font-size:24px}
-  #testDone{flex:1;background:var(--gold);color:#000;border-color:var(--gold)}
+  #testUndo{width:70px;background:var(--surface1);color:var(--rest);font-family:'Bebas Neue';font-size:24px}
+  #testDone{flex:1;background:var(--gold);color:var(--accent-ink);border-color:var(--gold)}
   .bars{display:flex;align-items:flex-end;gap:3px;height:84px;padding:6px 0 4px}
   .bars .b{flex:1;min-width:4px;background:var(--work);border-radius:3px 3px 0 0;opacity:.85;transition:height .2s}
   .bars .b.today{background:var(--gold);opacity:1}
-  .glabel{display:flex;justify-content:space-between;font-family:'Oswald';font-weight:400;font-size:10px;color:var(--muted);margin:0 0 12px}
-  .gtitle{font-family:'Oswald';font-weight:500;font-size:11px;letter-spacing:1px;color:var(--muted);margin-bottom:2px}
+  .glabel{display:flex;justify-content:space-between;font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted);margin:0 0 12px}
+  .gtitle{font-family:'Oswald';font-weight:500;font-size:13px;letter-spacing:1px;color:var(--muted);margin-bottom:2px}
   .wuitem{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg2);margin-bottom:8px;cursor:pointer}
-  .wuitem .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:18px;color:#000}
+  .wuitem .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue';font-size:18px;color:var(--accent-ink)}
   .wuitem.on{border-color:var(--work)} .wuitem.on .box{background:var(--work);border-color:var(--work)}
   .wuitem .tx{font-family:'Oswald';font-weight:500;font-size:15px;color:var(--ink);line-height:1.25}
-  .wuitem .tx span{display:block;font-weight:300;font-size:12px;color:var(--muted)}
-  .daychip{width:42px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);font-family:'Oswald';font-weight:600;font-size:12px;cursor:pointer}
-  .daychip.on{background:var(--work);color:#000;border-color:var(--work)}
+  .wuitem .tx span{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+  .daychip{width:42px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);font-family:'Oswald';font-weight:600;font-size:13px;cursor:pointer}
+  .daychip.on{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
   .daybanner{font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;padding:7px 14px;border-radius:20px;display:inline-block}
-  .daybanner.train{background:rgba(200,255,0,.14);color:var(--work)}
-  .daybanner.rest{background:#1a1d23;color:var(--muted)}
+  .daybanner.train{background:color-mix(in srgb,var(--work) 14%,transparent);color:var(--work)}
+  .daybanner.rest{background:var(--surface1);color:var(--muted)}
   .wkstrip{display:flex;gap:5px;justify-content:center;margin-top:4px}
-  .wkstrip .wd{width:30px;text-align:center;font-family:'Oswald';font-weight:600;font-size:10px;color:var(--muted)}
-  .wkstrip .wd .dot{width:8px;height:8px;border-radius:50%;background:#2c313a;margin:4px auto 0}
-  .wkstrip .wd.train .dot{background:var(--work)} .wkstrip .wd.done .dot{background:var(--gold)}
+  .wkstrip .wd{width:30px;text-align:center;font-family:'Oswald';font-weight:600;font-size:13px;color:var(--muted)}
+  .wkstrip .wd .dot{width:8px;height:8px;border-radius:50%;background:var(--surface2);margin:4px auto 0}
+  .wkstrip .wd.train .dot{background:var(--muted)} .wkstrip .wd.done .dot{background:var(--gold)}
   .wkstrip .wd.today{color:var(--ink)}
 
   /* Хваты */
   .gripcard{display:flex;gap:13px;align-items:flex-start;padding:13px;border:1px solid var(--line);
     border-radius:14px;background:var(--bg2);margin-bottom:11px}
-  .gripcard .dia{flex:0 0 92px;width:92px;height:72px;border-radius:10px;background:#15171c;border:1px solid var(--line);overflow:hidden}
-  body.light .gripcard .dia{background:#f2f4ee}
+  .gripcard .dia{flex:0 0 92px;width:92px;height:72px;border-radius:10px;background:var(--surface1);border:1px solid var(--line);overflow:hidden}
   .gripcard .dia svg{display:block;width:100%;height:100%}
   .gripcard .gc{flex:1;min-width:0}
   .gripcard .gn{font-family:'Bebas Neue';font-size:21px;letter-spacing:.5px;color:var(--ink);line-height:1}
-  .gripcard .gt{display:inline-block;font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:.5px;
-    color:var(--work);background:rgba(200,255,0,.1);border:1px solid #3a4a00;border-radius:6px;padding:2px 7px;margin-top:5px;text-transform:uppercase}
-  body.light .gripcard .gt{background:rgba(95,125,0,.12)}
-  .gripcard .gd{font-family:'Oswald';font-weight:300;font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:6px}
+  .gripcard .gt{display:inline-block;font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;
+    color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,transparent);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--bg));border-radius:6px;padding:2px 7px;margin-top:5px;text-transform:uppercase}
+  .gripcard .gd{font-family:'Oswald';font-weight:400;font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:6px}
   .gripcard .gd b{color:var(--ink);font-weight:500}
+  .griplvl{font-family:'Bebas Neue';font-size:20px;letter-spacing:1.5px;color:var(--ink);
+    margin:20px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--glass-brd,var(--line))}
+  .griplvl:first-child{margin-top:2px}
+  /* ---- хваты по подходам (настройка) ---- */
+  .setgrips{margin:2px 0 20px}
+  .sgttl{font-family:'Bebas Neue';font-size:20px;letter-spacing:1px;color:var(--ink);margin-bottom:4px}
+  .setgrips .sgsub{font-family:'Oswald';font-weight:400;font-size:13px;color:var(--muted);line-height:1.4;margin-bottom:12px}
+  .sgrow{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .sgnum{flex:0 0 auto;min-width:74px;font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+  .sgnum b{display:inline-block;min-width:20px;font-family:'Bebas Neue';font-size:19px;letter-spacing:0;color:var(--work)}
+  .sgsel{flex:1;min-width:0;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:11px;
+    padding:10px 11px;font-family:'Oswald';font-weight:500;font-size:14px;-webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+  .sgtgt{font-family:'Oswald';font-weight:600;font-size:11.5px;letter-spacing:.4px;color:var(--gold);text-transform:uppercase;
+    margin:-3px 0 12px 85px}
+  /* кнопки назначения на карточке хвата */
+  .gasg{display:flex;align-items:center;gap:5px;margin-top:9px;flex-wrap:wrap}
+  .gasg .gasgl{font-family:'Oswald';font-weight:600;font-size:12px;letter-spacing:.3px;color:var(--muted);text-transform:uppercase;margin-right:3px}
+  .gasg button{width:31px;height:31px;padding:0;border-radius:9px;border:1px solid var(--line);background:var(--surface1);
+    color:var(--muted);font-family:'Bebas Neue';font-size:16px;line-height:1;cursor:pointer;transition:transform .08s}
+  .gasg button.on{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
+  .gasg button:active{transform:scale(.9)}
+  /* ---- галерея прогресса (фото/видео) ---- */
+  .mediatools{display:flex;gap:10px;align-items:stretch;margin-bottom:16px;flex-wrap:wrap}
+  .mediatools .cdbtn{margin-top:0;flex:1 1 180px}
+  .mediaempty{text-align:center;color:var(--muted);font-family:'Oswald';font-size:14.5px;padding:40px 12px;line-height:1.6}
+  .mediagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .mediacell{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface1);border:1px solid var(--line);cursor:pointer}
+  .mediacell img,.mediacell video{width:100%;height:100%;object-fit:cover;display:block}
+  .mediacell .mdate{position:absolute;left:0;right:0;bottom:0;z-index:1;font-family:'Oswald';font-weight:600;font-size:10.5px;color:#fff;
+    background:linear-gradient(transparent,rgba(0,0,0,.74));padding:14px 5px 5px;text-align:center;letter-spacing:.3px}
+  .mediacell .mvid{position:absolute;top:6px;right:7px;z-index:1;font-size:14px;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}
+  /* просмотр одного элемента */
+  .mvbody{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 16px;gap:12px}
+  .mvbody img,.mvbody video{max-width:100%;max-height:68vh;border-radius:14px;background:#000}
+  .mvbody .mvdate{font-family:'Oswald';font-weight:600;font-size:15px;color:var(--muted);letter-spacing:.5px}
+  .mvactions{display:flex;gap:8px;padding:12px 14px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--bg2)}
+  .mvactions button{flex:1;height:48px}
+  /* сравнение до/после */
+  .mediacompare{display:flex;flex-direction:column;gap:12px}
+  .cmprow{display:flex;gap:8px}
+  .cmpslot{flex:1;aspect-ratio:3/4;border-radius:14px;border:1px dashed var(--line);background:var(--surface1);overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .cmpslot.active{border-color:var(--work);border-style:solid}
+  .cmpslot img{width:100%;height:100%;object-fit:cover}
+  .cmplabel{position:absolute;top:6px;left:6px;z-index:2;font-family:'Bebas Neue';font-size:15px;letter-spacing:1px;color:var(--work);
+    background:color-mix(in srgb,var(--bg) 68%,transparent);padding:1px 9px;border-radius:6px}
+  .cmppick{color:var(--muted);font-family:'Oswald';font-size:12.5px;text-align:center;padding:0 6px}
+  .cmpstriplabel{font-family:'Oswald';font-size:12.5px;color:var(--muted);text-align:center}
+  .cmpstrip{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+  .cmpstrip .cs{flex:0 0 62px;height:80px;border-radius:10px;overflow:hidden;border:1px solid var(--line);cursor:pointer;background:var(--surface1)}
+  .cmpstrip .cs img{width:100%;height:100%;object-fit:cover}
+  .cmpstrip .cs.used{outline:2px solid var(--work);outline-offset:-2px}
+
+  /* планшеты/широкие экраны — не растягиваем на всю ширину */
+  @media (min-width:700px){
+    #app{max-width:520px;margin:0 auto;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+  }
+  /* телефон в альбомной ориентации — тесно по высоте, уменьшаем и уплотняем */
+  @media (orientation:landscape) and (max-height:500px){
+    .count{font-size:clamp(80px,26vmin,200px)}
+    .state{font-size:clamp(14px,4vw,20px);letter-spacing:3px;height:1.1em}
+    .caption{margin-top:4px;font-size:13px}
+    .setline{margin-top:4px}
+    .goalwrap{margin-top:6px;height:20px}
+    .chips{margin-top:5px}
+    #hello{padding:12px;gap:6px}
+    #hello .big{font-size:clamp(22px,6vw,34px)}
+    #hello .meta b{font-size:20px}
+    #cd{font-size:clamp(100px,38vmin,260px)}
+  }
+
+  /* ===== Стеклянный стиль (glassmorphism) — один слой поверх всех 10 тем =====
+     Все поверхности берут прозрачность от --bg2/--ink через color-mix, поэтому
+     автоматически подстраиваются под каждую тему, включая светлые. */
+  :root{
+    --glass:color-mix(in srgb,var(--bg2) 56%,transparent);
+    --glass-2:color-mix(in srgb,var(--bg2) 72%,transparent);
+    --glass-brd:color-mix(in srgb,var(--ink) 15%,transparent);
+    --glass-hi:linear-gradient(157deg,color-mix(in srgb,var(--ink) 8%,transparent),transparent 52%);
+    --glass-blur:saturate(1.35) blur(13px);
+    --glass-sh:0 8px 26px -12px rgba(0,0,0,.55),0 2px 7px -4px rgba(0,0,0,.4);
+    --glass-sh-sm:0 3px 12px -6px rgba(0,0,0,.5)}
+  /* Карточки — матовое стекло с мягким бликом сверху */
+  .planbox,.summet div,.wuitem,.gripcard{
+    background:var(--glass);background-image:var(--glass-hi);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border-color:var(--glass-brd);box-shadow:var(--glass-sh)}
+  .planbox,.gripcard{border-radius:18px}
+  .wuitem,.summet div{border-radius:15px}
+  /* Контейнеры-контролы */
+  .seg,.stepper,.vsel,.hist,.iconbtn{
+    background:var(--glass-2);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border-color:var(--glass-brd);box-shadow:var(--glass-sh-sm)}
+  .seg,.stepper,.vsel{border-radius:13px}
+  .iconbtn{border-radius:12px}
+  .hist{border-radius:14px}
+  .hrow{background:var(--glass)}
+  .hrow.head{background:var(--glass-2)}
+  /* Мелкие чипы — лёгкое стекло без тени */
+  .chip,.daychip,.themegrid button{
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-color:var(--glass-brd)}
+  /* Нижние кнопки действий */
+  #action button,.sumbtns button,#testAction button{
+    border-radius:14px;box-shadow:var(--glass-sh-sm)}
+  #action button:not(#primary),#share,#testUndo{
+    background:var(--glass-2);
+    -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+    border-color:var(--glass-brd)}
+  /* Акцентные кнопки — глянцевый блик поверх сплошного цвета */
+  #action #primary,#save,#nextweek,#finish,#testDone,.cdbtn,#pauseResume{
+    box-shadow:var(--glass-sh),inset 0 1px 0 color-mix(in srgb,#fff 30%,transparent)}
+  /* Панель настроек/итога — крупное фростед-стекло над приложением */
+  .overlay{background:color-mix(in srgb,var(--bg) 80%,transparent);
+    -webkit-backdrop-filter:saturate(1.3) blur(18px);backdrop-filter:saturate(1.3) blur(18px)}
+
+  /* ===== Анимации нового стеклянного интерфейса ===== */
+  @keyframes glassIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+  /* содержимое настроек/итога всплывает лесенкой при открытии панели */
+  .overlay.open .pbody>.grp,.overlay.open #sumbody>*{animation:glassIn .4s cubic-bezier(.22,1,.36,1) both}
+  .overlay.open .pbody>.grp:nth-child(2){animation-delay:.04s}
+  .overlay.open .pbody>.grp:nth-child(3){animation-delay:.08s}
+  .overlay.open .pbody>.grp:nth-child(4){animation-delay:.12s}
+  .overlay.open .pbody>.grp:nth-child(5){animation-delay:.16s}
+  .overlay.open .pbody>.grp:nth-child(n+6){animation-delay:.2s}
+  /* стартовая карточка программы мягко всплывает */
+  #hello .planbox{animation:glassIn .5s cubic-bezier(.22,1,.36,1) both}
+  /* тактильный отклик стеклянных элементов на нажатие */
+  .wuitem:active,.daychip:active,.themegrid button:active,.chip:active,
+  .seg button:active,.stepper button:active,.gripcard:active{transform:scale(.96)}
+  /* глянцевый блик пробегает по акцентной кнопке при нажатии */
+  #action #primary,#save,#nextweek,#testDone,.cdbtn{position:relative;overflow:hidden}
+  #action #primary::after,#save::after,#nextweek::after,#testDone::after,.cdbtn::after{
+    content:"";position:absolute;top:0;left:-60%;width:50%;height:100%;pointer-events:none;
+    background:linear-gradient(100deg,transparent,color-mix(in srgb,#fff 45%,transparent),transparent);
+    transform:skewX(-18deg);opacity:0}
+  #action #primary:active::after,#save:active::after,#nextweek:active::after,
+  #testDone:active::after,.cdbtn:active::after{animation:sheen .55s ease-out}
+  @keyframes sheen{0%{left:-60%;opacity:0}30%{opacity:1}100%{left:130%;opacity:0}}
+  @media (prefers-reduced-motion:reduce){
+    .overlay.open .pbody>.grp,.overlay.open #sumbody>*,#hello .planbox{animation:none}
+    #action #primary:active::after,#save:active::after,#nextweek:active::after,
+    #testDone:active::after,.cdbtn:active::after{animation:none}
+  }
 </style>
 </head>
 <body>
@@ -293,11 +514,13 @@
 
   <div id="bar">
     <div class="brand">СЧЁТ<b>•</b>ОТЖИМАНИЙ</div>
-    <div class="spacer"></div>
-    <div class="lockdot" id="lock" title="Экран не гаснет"></div>
-    <button class="iconbtn hidden" id="pauseBtn" style="color:var(--work)">⏸</button>
-    <button class="iconbtn" id="gear">⚙</button>
-    <button class="iconbtn hidden" id="finish">ФИНИШ</button>
+    <div id="barctl">
+      <div class="lockdot" id="lock" title="Экран не гаснет"></div>
+      <button class="iconbtn hidden" id="musicBtn" title="Открыть музыку">🎵</button>
+      <button class="iconbtn hidden" id="pauseBtn" style="color:var(--work)">⏸</button>
+      <button class="iconbtn hidden" id="gear">⚙</button>
+      <button class="iconbtn hidden" id="finish">ФИНИШ</button>
+    </div>
   </div>
 
   <!-- Пауза (бар под шапкой) -->
@@ -309,6 +532,8 @@
 
   <!-- Ачивки тост -->
   <div id="achieveToast"><span class="ae" id="aToastEmoji">🏅</span><div><div class="at2" id="aToastTitle"></div><div class="as2" id="aToastSub"></div></div></div>
+  <canvas id="confettiCanvas"></canvas>
+  <div id="graphTip"></div>
 
   <div id="tap">
     <div id="flash"></div>
@@ -317,7 +542,7 @@
     <div id="pauseOverlay"></div>
     <div id="pauseIcon"><div class="pp">II</div><div class="pl">Нажми для продолжения</div></div>
     <div id="amrapTimer"><div class="at" id="amrapCountdown">10:00</div><div class="al">ОСТАЛОСЬ ВРЕМЕНИ</div></div>
-    <div id="camPip" class="hidden"><video id="camVideo" muted playsinline autoplay></video><div id="camStatus"></div></div>
+    <div id="camPip" class="hidden"><video id="camVideo" muted playsinline autoplay></video><div id="camCalibRing" class="hidden"></div><div id="camStatus"></div></div>
 
     <div id="hello"></div>
 
@@ -343,16 +568,24 @@
     <div class="cell rest"><div class="k">Отдых</div><div class="v" id="sRest">00:00</div></div>
   </div>
 
+  <!-- Нижняя навигация -->
+  <nav id="bottomnav">
+    <button data-view="train" class="on"><span class="bi">🏋️</span><span class="bl">Тренировка</span></button>
+    <button data-view="grips"><span class="bi">🤚</span><span class="bl">Хваты</span></button>
+    <button data-view="progress"><span class="bi">📊</span><span class="bl">Прогресс</span></button>
+    <button data-view="media"><span class="bi">📸</span><span class="bl">Галерея</span></button>
+    <button data-view="more"><span class="bi">⚙️</span><span class="bl">Ещё</span></button>
+  </nav>
+
 </div>
 
 <!-- Настройки -->
 <div id="panel" class="overlay">
-  <div class="phead"><h2>НАСТРОЙКИ</h2><button class="iconbtn" id="close">ЗАКРЫТЬ</button></div>
+  <div class="phead"><h2 id="panelTitle">НАСТРОЙКИ</h2><button class="iconbtn" id="close">ЗАКРЫТЬ</button></div>
   <div class="tabbar" id="tabbar">
-    <button data-tab="train" class="on">🏋 Тренировка</button>
-    <button data-tab="grips">🤚 Хваты</button>
+    <button data-tab="train" class="on">⚙ Основное</button>
     <button data-tab="sound">🔊 Звук</button>
-    <button data-tab="hist">📊 История</button>
+    <button data-tab="theme">🎨 Тема</button>
   </div>
   <div class="pbody">
     <div class="grp" data-tab="train">
@@ -360,9 +593,10 @@
       <div class="row"><label>Тип тренировки</label>
         <div class="seg" id="mode"><button data-m="program" class="on">Программа</button><button data-m="free">Свободно</button><button data-m="amrap">На время</button></div>
       </div>
-      <div class="row"><label>Способ счёта<br><span style="font-size:11px;color:var(--muted)">тап носом · камера · оба вместе</span></label>
+      <div class="row"><label>Способ счёта<br><span style="font-size:13.5px;color:var(--muted)">тап носом · камера · оба вместе</span></label>
         <div class="seg" id="inputMode"><button data-im="tap" class="on">Тап</button><button data-im="camera">Камера</button><button data-im="both">Оба</button></div>
       </div>
+      <div class="row"><label>Проверка техники (бета)<br><span style="font-size:13.5px;color:var(--muted)">только фронтальная камера — оценивает глубину и симметрию приблизительно</span></label><div class="tgl" id="formCheck"></div></div>
     </div>
     <div class="grp progonly" data-tab="train" id="grpProg">
       <h3>Программа · 52 недели</h3>
@@ -370,10 +604,11 @@
         <div class="stepper"><button id="wMinus">−</button><div class="val" id="wVal">1</div><button id="wPlus">+</button></div>
       </div>
       <div class="weekprev" id="wPrev"></div>
-      <div class="row" style="margin-top:14px"><label>Отдых между подходами<br><span style="font-size:11px;color:var(--muted)">15 сек – 5 мин</span></label>
+      <div class="row" style="margin-top:14px"><label>Отдых между подходами<br><span style="font-size:13.5px;color:var(--muted)">15 сек – 5 мин</span></label>
         <div class="stepper"><button id="prMinus">−</button><div class="val" id="prVal">1:00</div><button id="prPlus">+</button></div>
       </div>
-      <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:11px;color:var(--muted)">когда закрыты все 5 целей</span></label><div class="tgl on" id="auto"></div></div>
+      <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:13.5px;color:var(--muted)">когда закрыты все 5 целей</span></label><div class="tgl on" id="auto"></div></div>
+      <div class="row"><label>Авто-подбор нагрузки<br><span style="font-size:13.5px;color:var(--muted)">2 тренировки подряд ≥115% — план чуть растёт; &lt;80% — повторяем неделю</span></label><div class="tgl" id="autoAdjust"></div></div>
       <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">🎯 День теста · пересчитать под себя</button>
       <div class="weekprev" id="maxInfo" style="margin-top:8px"></div>
     </div>
@@ -385,7 +620,7 @@
       <div class="row"><label>Пауза = отдых, после</label>
         <div class="seg" id="thr"><button data-t="3">3с</button><button data-t="4" class="on">4с</button><button data-t="5">5с</button><button data-t="6">6с</button></div>
       </div>
-      <div class="row"><label>Таймер отдыха<br><span style="font-size:11px;color:var(--muted)">выкл / до 3 мин</span></label>
+      <div class="row"><label>Таймер отдыха<br><span style="font-size:13.5px;color:var(--muted)">выкл / до 3 мин</span></label>
         <div class="stepper"><button id="trMinus">−</button><div class="val" id="trVal">выкл</div><button id="trPlus">+</button></div>
       </div>
     </div>
@@ -396,19 +631,35 @@
       <div class="row"><label>Энергия голоса</label>
         <div class="seg" id="vibe2"><button data-e="calm">спокойно</button><button data-e="hype" class="on">драйв</button><button data-e="beast">зверь</button></div>
       </div>
-      <div class="row"><label>Отсчёт 3·2·1<br><span style="font-size:11px;color:var(--muted)">голосом перед подходом</span></label><div class="tgl on" id="count"></div></div>
+      <div class="row"><label>Отсчёт 3·2·1<br><span style="font-size:13.5px;color:var(--muted)">голосом перед подходом</span></label><div class="tgl on" id="count"></div></div>
       <div class="row"><label>Звук</label><div class="tgl on" id="sound"></div></div>
       <div class="row"><label>Вибрация</label><div class="tgl on" id="vibe"></div></div>
     </div>
     <div class="grp" data-tab="sound">
       <h3>Темп и подбадривание</h3>
-      <div class="row"><label>Подбадривать<br><span style="font-size:11px;color:var(--muted)">за N повторов до цели</span></label>
+      <div class="row"><label>Подбадривать<br><span style="font-size:13.5px;color:var(--muted)">за N повторов до цели</span></label>
         <div class="stepper"><button id="clMinus">−</button><div class="val" id="clVal">3</div><button id="clPlus">+</button></div>
       </div>
       <div class="row"><label>Метроном темпа</label><div class="tgl" id="metro"></div></div>
-      <div class="row"><label>Голос темпа<br><span style="font-size:11px;color:var(--muted)">командует «вниз-вверх»</span></label><div class="tgl" id="tempoV"></div></div>
+      <div class="row"><label>Голос темпа<br><span style="font-size:13.5px;color:var(--muted)">командует «вниз-вверх»</span></label><div class="tgl" id="tempoV"></div></div>
       <div class="row"><label>Удар каждые</label>
         <div class="stepper"><button id="msMinus">−</button><div class="val" id="msVal">1.5 с</div><button id="msPlus">+</button></div>
+      </div>
+    </div>
+    <div class="grp" data-tab="sound">
+      <h3>Музыка</h3>
+      <div class="row"><label>Приложение<br><span style="font-size:13.5px;color:var(--muted)">кнопка 🎵 откроет его прямо из тренировки</span></label>
+        <select id="musicApp" class="vsel">
+          <option value="off">Выкл</option>
+          <option value="spotify">Spotify</option>
+          <option value="yandex">Яндекс Музыка</option>
+          <option value="vk">VK Музыка</option>
+          <option value="ytmusic">YouTube Music</option>
+          <option value="custom">Своя ссылка</option>
+        </select>
+      </div>
+      <div class="row hidden" id="musicCustomRow"><label>Ссылка/схема<br><span style="font-size:13.5px;color:var(--muted)">например vkmusic:// или https://…</span></label>
+        <input type="text" id="musicCustomUrl" class="vsel" placeholder="myapp://" style="max-width:170px">
       </div>
     </div>
     <div class="grp" data-tab="train">
@@ -422,18 +673,28 @@
       <div class="weekprev" id="remStatus" style="margin-top:0"></div>
       <div class="weekprev" id="schedInfo" style="margin-top:4px"></div>
     </div>
-    <div class="grp" data-tab="sound">
+    <div class="grp" data-tab="theme">
       <h3>Оформление</h3>
-      <div class="row"><label>Тема</label>
-        <div class="seg" id="theme"><button data-th="dark" class="on">Тёмная</button><button data-th="light">Светлая</button><button data-th="auto">Авто</button></div>
+      <div class="themegrid" id="theme">
+        <button data-th="dark" class="on"><span class="sw" style="--sb:#0a0b0d;--sw:#c8ff00"></span>Тёмная</button>
+        <button data-th="light"><span class="sw" style="--sb:#ecefe8;--sw:#5f7d00"></span>Светлая</button>
+        <button data-th="sunset"><span class="sw" style="--sb:#150e0a;--sw:#ff6b4a"></span>Закат</button>
+        <button data-th="ocean"><span class="sw" style="--sb:#061418;--sw:#2fe0d0"></span>Океан</button>
+        <button data-th="violet"><span class="sw" style="--sb:#120c1a;--sw:#b478ff"></span>Виолет</button>
+        <button data-th="crimson"><span class="sw" style="--sb:#0c0505;--sw:#ff3b3b"></span>Багровый</button>
+        <button data-th="mint"><span class="sw" style="--sb:#eafaf3;--sw:#00a884"></span>Мята</button>
+        <button data-th="graphite"><span class="sw" style="--sb:#0e0e0f;--sw:#e8e8ea"></span>Графит</button>
+        <button data-th="rose"><span class="sw" style="--sb:#160c11;--sw:#ff5fa8"></span>Роза</button>
+        <button data-th="midnight"><span class="sw" style="--sb:#070b18;--sw:#4d8dff"></span>Полночь</button>
+        <button data-th="auto"><span class="sw" style="--sb:#0a0b0d;--sw:#ecefe8"></span>Авто</button>
       </div>
     </div>
     <div class="grp" data-tab="train" id="grpAmrap" style="display:none">
       <h3>На время · максимум повторов</h3>
-      <div class="row"><label>Длительность<br><span style="font-size:11px;color:var(--muted)">1 – 60 минут</span></label>
+      <div class="row"><label>Длительность<br><span style="font-size:13.5px;color:var(--muted)">1 – 60 минут</span></label>
         <div class="stepper"><button id="amMinus">−</button><div class="val" id="amVal">10 мин</div><button id="amPlus">+</button></div>
       </div>
-      <div style="font-family:'Oswald';font-weight:300;font-size:13px;color:var(--muted);line-height:1.5">
+      <div style="font-family:'Oswald';font-weight:400;font-size:14px;color:var(--muted);line-height:1.5">
         Жми до упора — обратный отсчёт идёт, пока идёт время. Можешь отдыхать между подходами. Итог: максимум повторов за отведённое время.
       </div>
     </div>
@@ -452,11 +713,42 @@
 
     <!-- Хваты -->
     <div class="grp" data-tab="grips">
-      <h3>Хваты отжиманий</h3>
-      <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:12px">Меняй хваты, чтобы прорабатывать разные мышцы и беречь суставы. Схема — вид сверху, ты лежишь лицом вниз.</div>
+      <h3>Варианты отжиманий · 50</h3>
+      <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:12px">Меняй хваты и положения, чтобы прорабатывать разные мышцы и беречь суставы. Разбито по уровням. Схема — вид сверху, ты лежишь лицом вниз.</div>
+      <div class="setgrips" id="setGripPanel"></div>
       <div id="gripList"></div>
-      <div class="row" style="margin-top:16px"><label>Подсказывать хват голосом<br><span style="font-size:11px;color:var(--muted)">в режиме «Программа» — свой хват на каждый подход</span></label><div class="tgl" id="gripVoice"></div></div>
+      <div class="row" style="margin-top:16px"><label>Хваты по подходам<br><span style="font-size:13.5px;color:var(--muted)">в режиме «Программа» — показывать и озвучивать назначенный хват в каждом подходе</span></label><div class="tgl" id="gripVoice"></div></div>
     </div>
+
+    <!-- Галерея прогресса -->
+    <div class="grp" data-tab="media">
+      <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:14px">Добавляй фото и видео своих результатов и следи, как меняешься. Всё хранится только на твоём телефоне — ничего не загружается в сеть.</div>
+      <div class="mediatools">
+        <button class="cdbtn" id="mediaAdd">＋ Добавить фото / видео</button>
+        <div class="seg" id="mediaMode"><button data-mm="grid" class="on">Лента</button><button data-mm="compare">До / После</button></div>
+      </div>
+      <input type="file" id="mediaFile" accept="image/*,video/*" style="display:none">
+      <div id="mediaEmpty" class="mediaempty">Пока пусто. Добавь первое фото прогресса 📸</div>
+      <div id="mediaGrid" class="mediagrid"></div>
+      <div id="mediaCompare" class="mediacompare hidden">
+        <div class="cmprow">
+          <div class="cmpslot active" data-slot="0"><div class="cmplabel">До</div><div class="cmppick">выбери фото ниже</div></div>
+          <div class="cmpslot" data-slot="1"><div class="cmplabel">После</div><div class="cmppick">выбери фото ниже</div></div>
+        </div>
+        <div class="cmpstriplabel">Нажми слот, затем фото из ленты ниже</div>
+        <div class="cmpstrip" id="cmpStrip"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Просмотр фото/видео -->
+<div id="mediaView" class="overlay">
+  <div class="phead"><h2 id="mediaViewTitle">ФОТО</h2><button class="iconbtn" id="mediaViewClose">ЗАКРЫТЬ</button></div>
+  <div class="mvbody" id="mvBody"></div>
+  <div class="mvactions">
+    <button class="iconbtn" id="mediaShare">↗ Поделиться</button>
+    <button class="danger" id="mediaDelete">🗑 Удалить</button>
   </div>
 </div>
 
@@ -473,7 +765,7 @@
     <div class="state" style="margin-bottom:6px">МАКСИМУМ ЗА ПОДХОД</div>
     <div class="count" id="testCount" style="color:var(--gold)">0</div>
     <div class="caption">КАСАЙСЯ НОСОМ ДО ОТКАЗА</div>
-    <p style="font-family:'Oswald';font-weight:300;font-size:14px;color:var(--muted);max-width:300px;margin:14px auto 0;line-height:1.5">Отожмись максимум раз за один подход. Нажми «Готово», когда больше не можешь — программа пересчитается под твой уровень.</p>
+    <p style="font-family:'Oswald';font-weight:400;font-size:15px;color:var(--muted);max-width:300px;margin:14px auto 0;line-height:1.5">Отожмись максимум раз за один подход. Нажми «Готово», когда больше не можешь — программа пересчитается под твой уровень.</p>
   </div>
   <div id="testAction"><button id="testUndo">−1</button><button id="testDone">ГОТОВО ▸</button></div>
 </div>
@@ -490,8 +782,8 @@
 
 <!-- Онбординг -->
 <div id="onboard" class="overlay">
-  <div class="pbody" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;max-width:420px;margin:0 auto">
-    <div style="font-family:'Bebas Neue';font-size:46px;letter-spacing:1px;line-height:1">СЧЁТ<b style="color:var(--work)">•</b>ОТЖИМАНИЙ</div>
+  <div class="pbody" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;width:100%;max-width:420px;margin:0 auto;box-sizing:border-box;overflow-wrap:break-word">
+    <div style="font-family:'Bebas Neue';font-size:clamp(26px,9vw,46px);letter-spacing:1px;line-height:1">СЧЁТ<b style="color:var(--work)">•</b>ОТЖИМАНИЙ</div>
     <div style="font-family:'Oswald';font-weight:300;font-size:15px;color:var(--muted);line-height:1.5">Счётчик-тренер по отжиманиям. Коротко, как это работает:</div>
     <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin:6px 0">
       <div class="wuitem on"><div class="box">1</div><div class="tx">Положи телефон на пол<span>касайся носом экрана — каждое касание = повтор</span></div></div>
@@ -502,7 +794,7 @@
     <div class="orline">Есть режим счёта по камере (без касания) — включи в Настройки → Тренировка → Способ счёта</div>
     <button class="cdbtn" id="obTest" style="width:100%;background:var(--gold)">🎯 Замерить мой максимум</button>
     <button class="cdbtn" id="obGo" style="width:100%">Поехали ▸</button>
-    <div class="orline">Совет: добавь на экран «Домой» — откроется как приложение</div>
+    <div class="orline" id="pwaHint">Совет: добавь на экран «Домой» — откроется как приложение</div>
   </div>
 </div>
 
@@ -539,13 +831,17 @@
   let mode='program', week=0, programRest=60000;
   let goal=0, restThreshold=4000, targetRest=0;
   let soundOn=true, vibeOn=true, voiceOn=true;
-  let voiceName='dmitry', voiceEnergy='hype';
+  let voiceName='svetlana', voiceEnergy='hype';
   let countOn=true, lastCountSec=99, counting=false;
   let cheerLead=3, metroOn=false, metroSec=1.5, lastMetro=0, metroHi=false;
-  let startMax=7, autoProg=true;
+  let startMax=7, autoProg=true, autoAdjust=false;
   let tempoVoiceOn=false, warmupOn=true, warmupDone=false;
   let gripVoiceOn=false;
   let inputMode='tap'; // 'tap' | 'camera' | 'both'
+  let formCheckOn=false; // бета: разбор техники по камере (PoseLandmarker вместо FaceLandmarker)
+  let musicApp='off', musicCustomUrl='';
+  const MUSIC_PRESETS={spotify:'spotify:',yandex:'yandexmusic://',vk:'vkmusic://',ytmusic:'youtubemusic://'};
+  function musicUrl(){return musicApp==='custom'?musicCustomUrl:(MUSIC_PRESETS[musicApp]||'');}
   let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
   let theme='dark';
   let amrapMin=10; // AMRAP длительность в минутах
@@ -616,30 +912,56 @@
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.01);
     g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.09));o.start(t);o.stop(t+(dur||.1));}catch(e){}}
   const buzz=p=>{if(vibeOn&&navigator.vibrate)try{navigator.vibrate(p);}catch(e){}};
+  // короткая мелодичная последовательность нот (цель/ачивка/рекорд) — точный тайминг через AudioContext, не setTimeout
+  function chime(notes){
+    if(!soundOn)return;
+    try{
+      actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==='suspended')actx.resume();
+      const t0=actx.currentTime;
+      notes.forEach(n=>{
+        const o=actx.createOscillator(),g=actx.createGain();
+        o.type=n.type||'sine';o.frequency.value=n.f;o.connect(g);g.connect(actx.destination);
+        const t=t0+(n.t||0), dur=n.dur||.12;
+        g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.2,t+.01);
+        g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur+.02);
+      });
+    }catch(e){}
+  }
   function click(hi){if(!metroOn)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
     if(actx.state==='suspended')actx.resume();const o=actx.createOscillator(),g=actx.createGain();
     o.type='sine';o.frequency.value=hi?900:560;o.connect(g);g.connect(actx.destination);const t=actx.currentTime;
     g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.005);
     g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.start(t);o.stop(t+.06);}catch(e){}}
 
-  // ---- КАМЕРА (счёт по носу через MediaPipe FaceLandmarker) ----
-  const camVideo=$('camVideo'), camPip=$('camPip'), camStatusEl=$('camStatus');
-  let faceLandmarker=null, camInitPromise=null;
+  // ---- КАМЕРА (счёт по носу через FaceLandmarker, либо разбор техники через PoseLandmarker) ----
+  const camVideo=$('camVideo'), camPip=$('camPip'), camStatusEl=$('camStatus'), camCalibRing=$('camCalibRing');
+  let faceLandmarker=null, faceInitPromise=null;
+  let poseLandmarker=null, poseInitPromise=null, poseModeActive=false;
   let camStream=null, camRaf=0, camActive=false, camReady=false, camError='';
   let lastInference=0, camState='up', smoothedDist=0, upBaseline=0, calibUntil=0, camLastFaceT=0;
+  let repMinElbow=999, formTipUntil=0, formTipCount=0;
   const CAM_INFER_MS=80, CAM_DOWN=1.18, CAM_UP=1.06, CAM_EMA=0.35, CAM_BASE_EMA=0.06, CAM_CALIB_MS=1500, CAM_LOST_MS=1500;
+  const FORM_SHALLOW_DEG=100, FORM_ASYM_DIFF=0.045, FORM_TIP_EVERY=4;
 
   function setCamStatus(cls,text){
     if(!camPip)return;
+    if(now()<formTipUntil&&cls!=='error')return; // не перекрываем подсказку по технике
     camPip.classList.remove('ok','lost','error');
     if(cls)camPip.classList.add(cls);
     if(camStatusEl)camStatusEl.textContent=text;
   }
+  function formTip(text){
+    say(text);
+    if(camPip){camPip.classList.remove('ok','lost','error');camPip.classList.add('ok');}
+    if(camStatusEl)camStatusEl.textContent='💡 '+text;
+    formTipUntil=now()+2500;
+  }
 
   async function ensureFaceLandmarker(){
     if(faceLandmarker)return faceLandmarker;
-    if(camInitPromise)return camInitPromise;
-    camInitPromise=(async()=>{
+    if(faceInitPromise)return faceInitPromise;
+    faceInitPromise=(async()=>{
       const {FaceLandmarker,FilesetResolver}=await import('./vendor/mediapipe/tasks-vision/vision_bundle.mjs');
       const fileset=await FilesetResolver.forVisionTasks('./vendor/mediapipe/tasks-vision/wasm');
       const opts=d=>({baseOptions:{modelAssetPath:'./vendor/mediapipe/models/face_landmarker.task',delegate:d},
@@ -648,7 +970,22 @@
       catch(e){faceLandmarker=await FaceLandmarker.createFromOptions(fileset,opts('CPU'));}
       return faceLandmarker;
     })();
-    return camInitPromise;
+    return faceInitPromise;
+  }
+
+  async function ensurePoseLandmarker(){
+    if(poseLandmarker)return poseLandmarker;
+    if(poseInitPromise)return poseInitPromise;
+    poseInitPromise=(async()=>{
+      const {PoseLandmarker,FilesetResolver}=await import('./vendor/mediapipe/tasks-vision/vision_bundle.mjs');
+      const fileset=await FilesetResolver.forVisionTasks('./vendor/mediapipe/tasks-vision/wasm');
+      const opts=d=>({baseOptions:{modelAssetPath:'./vendor/mediapipe/models/pose_landmarker_lite.task',delegate:d},
+        runningMode:'VIDEO',numPoses:1,outputSegmentationMasks:false});
+      try{poseLandmarker=await PoseLandmarker.createFromOptions(fileset,opts('GPU'));}
+      catch(e){poseLandmarker=await PoseLandmarker.createFromOptions(fileset,opts('CPU'));}
+      return poseLandmarker;
+    })();
+    return poseInitPromise;
   }
 
   async function startCamera(){
@@ -656,7 +993,9 @@
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
       camError='unsupported';setCamStatus('error','⚠️ камера не поддерживается');return;
     }
+    poseModeActive=formCheckOn;
     camActive=true;camReady=false;camError='';camState='up';smoothedDist=0;upBaseline=0;
+    repMinElbow=999;formTipUntil=0;formTipCount=0;
     if(camPip)camPip.classList.remove('hidden');
     setCamStatus('lost','⏳ включаю камеру…');
     try{
@@ -664,9 +1003,10 @@
       if(!camActive){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;return;} // режим сменили, пока ждали разрешение
       camVideo.srcObject=camStream;
       await camVideo.play().catch(()=>{});
-      await ensureFaceLandmarker();
+      await (poseModeActive?ensurePoseLandmarker():ensureFaceLandmarker());
       if(!camActive)return;
       camReady=true;calibUntil=now()+CAM_CALIB_MS;camLastFaceT=now();
+      if(camCalibRing){camCalibRing.style.setProperty('--pct',0);camCalibRing.classList.remove('hidden');}
       setCamStatus('lost','🧭 калибровка…');
       camRaf=requestAnimationFrame(camLoop);
     }catch(err){
@@ -681,35 +1021,70 @@
     if(camStream){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;}
     if(camVideo)camVideo.srcObject=null;
     if(camPip)camPip.classList.add('hidden');
+    if(camCalibRing)camCalibRing.classList.add('hidden');
   }
 
-  // гистерезис по межзрачковому расстоянию: приближение лица к камере = "вниз", отдаление = "вверх" → повтор
+  // угол в локте (плечо-локоть-запястье), градусы
+  function elbowAngleDeg(shoulder,elbow,wrist){
+    const v1x=shoulder.x-elbow.x, v1y=shoulder.y-elbow.y;
+    const v2x=wrist.x-elbow.x, v2y=wrist.y-elbow.y;
+    const m1=Math.hypot(v1x,v1y), m2=Math.hypot(v2x,v2y);
+    if(!m1||!m2)return 180;
+    const cos=Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/(m1*m2)));
+    return Math.acos(cos)*180/Math.PI;
+  }
+
+  // гистерезис по дистанции: глаза (счёт по лицу) или плечи (режим "проверка техники").
+  // В режиме позы дополнительно на нижней точке цикла считаем угол в локте (глубина) и перекос плеч (симметрия).
   function camLoop(t){
     if(!camActive)return;
     camRaf=requestAnimationFrame(camLoop);
-    if(!camReady||!faceLandmarker||!camVideo||camVideo.readyState<2)return;
+    const model=poseModeActive?poseLandmarker:faceLandmarker;
+    if(!camReady||!model||!camVideo||camVideo.readyState<2)return;
     if(t-lastInference<CAM_INFER_MS)return;
     lastInference=t;
-    let res;try{res=faceLandmarker.detectForVideo(camVideo,t);}catch(e){return;}
-    const lm=res&&res.faceLandmarks&&res.faceLandmarks[0];
-    if(!lm){
-      if(now()-camLastFaceT>CAM_LOST_MS)setCamStatus('lost','🔴 не вижу лицо');
+    let res;try{res=model.detectForVideo(camVideo,t);}catch(e){return;}
+    let dist=null, elbow=null, asym=null;
+    if(poseModeActive){
+      const lm=res&&res.landmarks&&res.landmarks[0];
+      if(lm){
+        const ls=lm[11],rs=lm[12],le=lm[13],re=lm[14],lw=lm[15],rw=lm[16];
+        dist=Math.hypot(ls.x-rs.x,ls.y-rs.y);
+        elbow=Math.min(elbowAngleDeg(ls,le,lw),elbowAngleDeg(rs,re,rw));
+        asym=Math.abs(ls.y-rs.y);
+      }
+    }else{
+      const lm=res&&res.faceLandmarks&&res.faceLandmarks[0];
+      if(lm){const a=lm[33],b=lm[263];dist=Math.hypot(a.x-b.x,a.y-b.y);} // внешние уголки глаз
+    }
+    if(dist==null){
+      if(now()-camLastFaceT>CAM_LOST_MS)setCamStatus('lost',poseModeActive?'🔴 не вижу тело':'🔴 не вижу лицо');
       return;
     }
     camLastFaceT=now();
-    const a=lm[33],b=lm[263]; // внешние уголки глаз
-    const dist=Math.hypot(a.x-b.x,a.y-b.y);
     smoothedDist=smoothedDist?smoothedDist+(dist-smoothedDist)*CAM_EMA:dist;
     if(now()<calibUntil||!upBaseline){
       upBaseline=upBaseline?upBaseline+(smoothedDist-upBaseline)*0.3:smoothedDist;
       setCamStatus('lost','🧭 калибровка… руки прямые');
+      if(camCalibRing)camCalibRing.style.setProperty('--pct',Math.max(0,Math.min(100,100-(calibUntil-now())/CAM_CALIB_MS*100)));
       return;
     }
+    if(camCalibRing&&!camCalibRing.classList.contains('hidden'))camCalibRing.classList.add('hidden');
     if(smoothedDist<=upBaseline*CAM_UP)upBaseline+=(smoothedDist-upBaseline)*CAM_BASE_EMA;
     const ratio=smoothedDist/upBaseline;
-    if(camState==='up'&&ratio>=CAM_DOWN){camState='down';setCamStatus('ok','⬇ вниз');}
-    else if(camState==='down'&&ratio<=CAM_UP){camState='up';setCamStatus('ok','⬆ есть!');registerRep(now());}
-    else setCamStatus('ok','🟢 слежу');
+    if(camState==='up'&&ratio>=CAM_DOWN){
+      camState='down';repMinElbow=999;setCamStatus('ok','⬇ вниз');
+    }else if(camState==='down'){
+      if(poseModeActive&&elbow!=null)repMinElbow=Math.min(repMinElbow,elbow);
+      if(ratio<=CAM_UP){
+        camState='up';setCamStatus('ok','⬆ есть!');registerRep(now());
+        if(poseModeActive){
+          formTipCount++;
+          if(repMinElbow>FORM_SHALLOW_DEG&&formTipCount%FORM_TIP_EVERY===0)formTip('Опускайся ниже');
+          else if(asym!=null&&asym>FORM_ASYM_DIFF&&formTipCount%FORM_TIP_EVERY===0)formTip('Держи корпус ровно');
+        }
+      }
+    }else setCamStatus('ok','🟢 слежу');
   }
 
   let wl=null;
@@ -726,19 +1101,21 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,inputMode}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
     if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
       restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-      voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
+      voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'svetlana';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
       cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;
-      startMax=c.startMax||7;autoProg=c.autoProg!==false;
+      startMax=c.startMax||7;autoProg=c.autoProg!==false;autoAdjust=!!c.autoAdjust;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
       reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
-      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';}
+      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';formCheckOn=!!c.formCheckOn;
+      if(Array.isArray(c.setGrips)&&c.setGrips.length===SET_COUNT)setGrips=c.setGrips.map(v=>{v=+v;return(Number.isInteger(v)&&v>=0&&v<GRIPS.length)?v:0;});
+      musicApp=c.musicApp||'off';musicCustomUrl=c.musicCustomUrl||'';}
     applyTheme();
     PLAN=buildPlan(startMax);if(week>51)week=51;
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
@@ -748,6 +1125,15 @@
     workMs:committed.workMs+exerciseMs,restMs:committed.restMs+restMs,best:Math.max(committed.best,sessMax())};persist();}
   function streak(){let n=0,d=new Date();for(;;){const k=tkey(d);const r=history[k];
     if(r&&r.reps>0){n++;d.setDate(d.getDate()-1);}else if(k===tkey()){d.setDate(d.getDate()-1);}else break;}return n;}
+  // авто-подбор нагрузки: тренд % выполнения плана за последние 2 тренировки программы
+  function perfTrend(){
+    const keys=Object.keys(history).filter(k=>history[k]&&typeof history[k].perf==='number').sort();
+    if(keys.length<2)return null;
+    const last2=keys.slice(-2).map(k=>history[k].perf);
+    if(last2.every(p=>p>=115))return 'up';
+    if(last2.every(p=>p<80))return 'down';
+    return null;
+  }
   const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const DOW_ORDER=[1,2,3,4,5,6,0]; // Пн..Вс
   const isTrain=dow=>trainingDays.includes(dow);
@@ -804,6 +1190,16 @@
     {id:'pr',emoji:'🏆',title:'Личный рекорд',sub:'Лучший результат обновлён',check:()=>sessMax()>pr&&sessMax()>0},
     {id:'best30',emoji:'🎯',title:'30 за подход',sub:'Тридцать без остановки — отлично',check:()=>sessMax()>=30},
     {id:'best50',emoji:'🥇',title:'50 за подход',sub:'Полтинник без остановки — зверь!',check:()=>sessMax()>=50},
+    {id:'best75',emoji:'🦾',title:'75 за подход',sub:'Семьдесят пять без остановки',check:()=>sessMax()>=75},
+    {id:'best100',emoji:'💯',title:'100 за подход',sub:'Сотня в одном подходе — легенда',check:()=>sessMax()>=100},
+    {id:'rep150',emoji:'💥',title:'150 за день',sub:'Полторы сотни за тренировку',check:()=>reps+committed.reps>=150},
+    {id:'rep300',emoji:'🚀',title:'300 за день',sub:'Триста повторов за раз',check:()=>reps+committed.reps>=300},
+    {id:'rep500',emoji:'👑',title:'500 за день',sub:'Пятьсот за тренировку — космос',check:()=>reps+committed.reps>=500},
+    {id:'set8',emoji:'🧱',title:'8 подходов',sub:'Восемь подходов за тренировку',check:()=>sets.length+committed.sets>=8},
+    {id:'set12',emoji:'🏛',title:'12 подходов',sub:'Дюжина подходов за раз',check:()=>sets.length+committed.sets>=12},
+    {id:'streak14',emoji:'📅',title:'2 недели подряд',sub:'14 дней серии — сильно',check:()=>streak()>=14},
+    {id:'streak30',emoji:'💎',title:'Месяц подряд',sub:'30 дней серии — железная воля',check:()=>streak()>=30},
+    {id:'streak100',emoji:'🔱',title:'100 дней подряд',sub:'Сотня дней серии — ты не человек',check:()=>streak()>=100},
   ];
   let earnedAchieve=new Set();
   function loadAchievements(){try{const a=JSON.parse(localStorage.getItem('pushup_achieve'));if(Array.isArray(a))earnedAchieve=new Set(a);}catch(e){}}
@@ -814,7 +1210,42 @@
     const el=$('achieveToast');el.classList.add('show');
     if(toastTimer)clearTimeout(toastTimer);
     toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
-    beep(1320,.12);setTimeout(()=>beep(990,.1),130);buzz([0,40,50,40]);
+    chime([{f:880,dur:.1},{f:1108,t:.09,dur:.1},{f:1318,t:.18,dur:.18}]);buzz([0,40,50,40]);
+  }
+  // конфетти на новый рекорд / закрытую неделю — чистый canvas, цвета берутся из активной темы
+  let confettiRaf=0;
+  function confettiBurst(count){
+    const canvas=$('confettiCanvas');if(!canvas)return;
+    try{
+      const ctx=canvas.getContext('2d');if(!ctx)return;
+      const dpr=window.devicePixelRatio||1;
+      canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const cs=getComputedStyle(document.body);
+      const colors=['--work','--rest','--gold'].map(v=>cs.getPropertyValue(v).trim()).filter(Boolean);
+      const n=count||60, parts=[];
+      for(let i=0;i<n;i++){
+        parts.push({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.3,
+          vx:(Math.random()-0.5)*3,vy:2+Math.random()*3,rot:Math.random()*Math.PI*2,vr:(Math.random()-0.5)*0.3,
+          size:5+Math.random()*5,color:colors[i%colors.length]||'#c8ff00',life:0,maxLife:90+Math.random()*40});
+      }
+      if(confettiRaf)cancelAnimationFrame(confettiRaf);
+      function tick(){
+        ctx.clearRect(0,0,innerWidth,innerHeight);
+        let alive=false;
+        for(const p of parts){
+          if(p.life>=p.maxLife)continue;
+          alive=true;p.life++;p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.rot+=p.vr;
+          const fade=1-Math.max(0,(p.life-p.maxLife*0.7))/(p.maxLife*0.3);
+          ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+          ctx.globalAlpha=Math.max(0,Math.min(1,fade));ctx.fillStyle=p.color;
+          ctx.fillRect(-p.size/2,-p.size*0.3,p.size,p.size*0.6);
+          ctx.restore();
+        }
+        if(alive)confettiRaf=requestAnimationFrame(tick);else ctx.clearRect(0,0,innerWidth,innerHeight);
+      }
+      confettiRaf=requestAnimationFrame(tick);
+    }catch(e){}
   }
   function checkAchievements(){
     ACHIEVEMENTS.forEach(a=>{if(!earnedAchieve.has(a.id)&&a.check()){earnedAchieve.add(a.id);saveAchievements();showAchieveToast(a);}});
@@ -851,52 +1282,161 @@
   const DIAMOND='<path d="M60 30 L66.5 40 L60 50 L53.5 40 Z" fill="none" stroke="var(--gold)" stroke-width="1.1" opacity=".85"/>';
   const PIKE='<path d="M50 72 L60 62 L70 72" fill="none" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>'+
              '<path d="M60 62 L60 56 M57 59 L60 56 L63 59" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round"/>';
+  // — пометки положений тела/движения (вид сверху), рисуются поверх базовых рук —
+  const knees='<path d="M50 63 Q47 75 55 79 M70 63 Q73 75 65 79" fill="none" stroke="var(--line)" stroke-width="5" stroke-linecap="round"/><circle cx="55" cy="80" r="3" fill="var(--muted)"/><circle cx="65" cy="80" r="3" fill="var(--muted)"/>';
+  const incHands='<line x1="28" y1="25" x2="92" y2="25" stroke="var(--work)" stroke-width="1.8" opacity=".7"/><path d="M60 25 V18 M56 22 L60 18 L64 22" stroke="var(--work)" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+  const decFeet='<line x1="49" y1="80" x2="71" y2="80" stroke="var(--rest)" stroke-width="1.8"/><path d="M60 79 V71 M56 74 L60 70 L64 74" stroke="var(--rest)" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+  const wall='<line x1="15" y1="8" x2="15" y2="82" stroke="var(--muted)" stroke-width="2.4" opacity=".6"/>';
+  const clap='<path d="M34 20 Q40 13 46 20 M74 20 Q80 13 86 20" fill="none" stroke="var(--gold)" stroke-width="1.3" stroke-linecap="round"/>';
+  const plate='<circle cx="60" cy="43" r="9" fill="none" stroke="var(--gold)" stroke-width="2"/><circle cx="60" cy="43" r="2.4" fill="var(--gold)"/>';
+  const pause='<g fill="var(--gold)"><rect x="55.5" y="39" width="2.4" height="9" rx="1"/><rect x="62.1" y="39" width="2.4" height="9" rx="1"/></g>';
+  const slow='<circle cx="60" cy="44" r="5.5" fill="none" stroke="var(--gold)" stroke-width="1.2"/><path d="M60 44 V40 M60 44 L63 45.5" stroke="var(--gold)" stroke-width="1.1" fill="none" stroke-linecap="round"/>';
+  const scap='<path d="M42 23 l-5 3 5 3 M78 23 l5 3 -5 3" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
+  const arc='<path d="M62 29 A17 17 0 0 1 85 41" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round"/><path d="M85 41 l-1.5 -4.2 4.5 1 z" fill="var(--gold)"/>';
+  const sideArrow='<path d="M34 51 H86" stroke="var(--gold)" stroke-width="1.2"/><path d="M34 51 l4.5 -3 v6 z M86 51 l-4.5 -3 v6 z" fill="var(--gold)"/>';
+  const elbow='<line x1="40" y1="33" x2="40" y2="47" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/><line x1="80" y1="33" x2="80" y2="47" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>';
+  const lift='<path d="M52 66 V58 M48 62 L52 58 L56 62 M68 66 V58 M64 62 L68 58 L72 62" fill="none" stroke="var(--rest)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>';
+  const handUp='<path d="M60 60 V30 M54 38 L60 30 L66 38" fill="none" stroke="var(--work)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+  const boom='<path d="M40 22 V13 M36 18 L40 13 L44 18 M80 22 V13 M76 18 L80 13 L84 18" fill="none" stroke="var(--rest)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>';
+  const bars='<rect x="33" y="40" width="14" height="2.6" rx="1.3" fill="var(--gold)" opacity=".85"/><rect x="73" y="40" width="14" height="2.6" rx="1.3" fill="var(--gold)" opacity=".85"/>';
+  const rings='<circle cx="40" cy="34" r="7.5" fill="none" stroke="var(--gold)" stroke-width="1.5"/><circle cx="80" cy="34" r="7.5" fill="none" stroke="var(--gold)" stroke-width="1.5"/>';
+  const spider='<path d="M73 60 Q92 58 90 45" fill="none" stroke="var(--line)" stroke-width="5" stroke-linecap="round"/>';
+  const armAlong='<line x1="46" y1="30" x2="52" y2="60" stroke="var(--line)" stroke-width="4" stroke-linecap="round"/>';
+  const oneArm=hand(60,34,0,1)+armAlong;
+  const oneFist=fist(60,34)+armAlong;
+  const archer='<line x1="74" y1="30" x2="94" y2="33" stroke="var(--line)" stroke-width="3.2" stroke-linecap="round"/>'+hand(44,35,0,1)+hand(96,33,80,-1);
+  // базовые наборы рук
+  const G_cl=hand(40,34,0,1)+hand(80,34,0,-1);
+  const G_wi=hand(26,35,-14,1)+hand(94,35,14,-1);
+  const G_na=hand(51,34,0,1)+hand(69,34,0,-1);
+  const G_di=DIAMOND+hand(53,41,38,1)+hand(67,41,-38,-1);
+  const G_fi=fist(40,34)+fist(80,34);
+  const G_re=hand(40,32,180,-1)+hand(80,32,180,1);
+  const G_st=hand(38,28,0,1)+hand(82,41,0,-1);
+  const G_ps=hand(45,46,0,1)+hand(75,46,0,-1);
 
   const GRIPS=[
-    {name:'Классический',target:'Грудь + трицепс',
-     hands:hand(40,34,0,1)+hand(80,34,0,-1),
-     desc:'Кисти под плечами, на ширине плеч. Локти идут назад под ~45°, тело — прямая линия от головы до пят. <b>База</b> для любого уровня.'},
-    {name:'Широкий',target:'Акцент на грудь',
-     hands:hand(28,34,-12,1)+hand(92,34,12,-1),
-     desc:'Кисти заметно шире плеч, пальцы чуть наружу. Сильнее грузит <b>грудные</b>. Не разводи локти на 90° — береги плечо.'},
-    {name:'Алмазный (узкий)',target:'Акцент на трицепс',
-     hands:DIAMOND+hand(53,41,38,1)+hand(67,41,-38,-1),
-     desc:'Ладони вместе под грудью: большие и указательные пальцы образуют ромб. Локти прижаты. Грузит <b>трицепс</b> — снижай число повторов.'},
-    {name:'На кулаках',target:'Бережёт запястья',
-     hands:fist(40,34)+fist(80,34),
-     desc:'Опора на кулаки (костяшки указательного и среднего), запястье прямое. Хорош при <b>боли в запястьях</b>. Подложи мягкий коврик.'},
-    {name:'«Домиком» (пика)',target:'Плечи · дельты',
-     hands:hand(42,34,0,1)+hand(78,34,0,-1)+PIKE,
-     desc:'Таз вверх, тело — буква «Л», смотришь на ноги. Опускайся макушкой к полу между ладоней. Подводка к <b>отжиманиям в стойке</b>.'},
-    {name:'Обратный (пальцы к себе)',target:'Бицепс · предплечья',
-     hands:hand(40,32,180,-1)+hand(80,32,180,1),
-     desc:'Пальцы развёрнуты к ногам. Непривычная нагрузка на <b>бицепс и предплечья</b>. Начинай с малого и не проваливайся резко — нагрузка на запястья.'},
+    // ——— НОВИЧОК ———
+    {lvl:'Новичок',name:'От стены',target:'Разминочные',hands:G_cl+wall,desc:'Стоя, руки в стену, тело прямое. Самый лёгкий старт — почувствуй движение.'},
+    {lvl:'Новичок',name:'С колен',target:'Облегчённые',hands:G_cl+knees,desc:'Колени на полу, короче рычаг. Держи прямую линию от колен до головы.'},
+    {lvl:'Новичок',name:'Наклонные (стол)',target:'Облегчённые',hands:G_cl+incHands,desc:'Руки на столе или подоконнике. Чем выше опора — тем легче.'},
+    {lvl:'Новичок',name:'Наклонные (скамья)',target:'Грудь',hands:G_cl+incHands,desc:'Опора ниже стола — тяжелее. Ступень к отжиманиям от пола.'},
+    {lvl:'Новичок',name:'Классический',target:'Грудь + трицепс',hands:G_cl,desc:'Кисти под плечами, локти назад ~45°, тело прямое. <b>База</b> для всех.'},
+    {lvl:'Новичок',name:'Широкий',target:'Акцент на грудь',hands:G_wi,desc:'Кисти шире плеч, пальцы чуть наружу. Грузит грудные. Локти не на 90°.'},
+    {lvl:'Новичок',name:'Узкий',target:'Акцент на трицепс',hands:G_na,desc:'Кисти уже плеч, локти вдоль тела. Больше нагрузки на трицепс.'},
+    {lvl:'Новичок',name:'На кулаках',target:'Бережёт запястья',hands:G_fi,desc:'Опора на костяшки, запястье прямое. При боли в запястьях. Подложи коврик.'},
+    {lvl:'Новичок',name:'С паузой внизу',target:'Контроль',hands:G_cl+pause,desc:'Внизу замри на 1–2 сек без опоры о пол. Убирает раскачку и читинг.'},
+    {lvl:'Новичок',name:'Негативные',target:'Сила',hands:G_cl+slow,desc:'Только медленный спуск 3–5 сек, вверх — как удобно (хоть с колен).'},
+    {lvl:'Новичок',name:'Алмазный с колен',target:'Трицепс',hands:G_di+knees,desc:'Ромб из ладоней, но с колен — облегчённая нагрузка на трицепс.'},
+    {lvl:'Новичок',name:'Широкий с колен',target:'Грудь',hands:G_wi+knees,desc:'Широкие кисти с колен — мягкий вход в нагрузку на грудные.'},
+    {lvl:'Новичок',name:'Скапулярные',target:'Лопатки',hands:G_cl+scap,desc:'Руки прямые, только сводишь и разводишь лопатки. Здоровье плеч.'},
+    {lvl:'Новичок',name:'«Кобра»',target:'Растяжка · грудь',hands:G_cl+slow,desc:'Из положения лёжа выпрямляешь руки, таз на полу, грудь тянется вверх.'},
+    {lvl:'Новичок',name:'Пика с колен',target:'Плечи',hands:G_cl+PIKE+knees,desc:'Таз вверх с колен, макушкой к полу. Мягкая подводка к нагрузке на плечи.'},
+    {lvl:'Новичок',name:'Темп 3-1-3',target:'Контроль',hands:G_cl+slow,desc:'3 сек вниз, 1 пауза, 3 вверх. Техника и время под нагрузкой важнее числа.'},
+    {lvl:'Новичок',name:'Планка-удержание',target:'Кор',hands:G_cl+pause,desc:'Не опускайся — держи идеальную планку на прямых руках 20–40 сек.'},
+    // ——— СРЕДНИЙ ———
+    {lvl:'Средний',name:'Алмазный',target:'Трицепс',hands:G_di,desc:'Ладони вместе под грудью, ромб из пальцев, локти прижаты. Меньше повторов.'},
+    {lvl:'Средний',name:'Обратный хват',target:'Бицепс · предплечья',hands:G_re,desc:'Пальцы развёрнуты к ногам. Непривычная нагрузка — начинай с малого.'},
+    {lvl:'Средний',name:'«Домиком» (пика)',target:'Плечи · дельты',hands:G_cl+PIKE,desc:'Таз вверх, тело «Λ», опускайся макушкой между ладоней. К стойке на руках.'},
+    {lvl:'Средний',name:'Пика с возвышения',target:'Плечи',hands:G_cl+PIKE+decFeet,desc:'Ноги на скамье — таз выше, плечи грузятся заметно сильнее.'},
+    {lvl:'Средний',name:'С наклоном вниз',target:'Верх груди',hands:G_cl+decFeet,desc:'Ноги на возвышении. Акцент на верх груди и передние дельты.'},
+    {lvl:'Средний',name:'Разновысокие руки',target:'Координация',hands:G_st,desc:'Одна кисть выше другой, потом меняешь. Готовит к асимметричной нагрузке.'},
+    {lvl:'Средний',name:'Псевдо-планш',target:'Плечи · кор',hands:G_ps,desc:'Кисти у пояса, пальцы назад, корпус подан вперёд. Подводка к планшу.'},
+    {lvl:'Средний',name:'Человек-паук',target:'Кор · грудь',hands:G_cl+spider,desc:'На спуске колено тянется к локтю сбоку. Подключает косые мышцы.'},
+    {lvl:'Средний',name:'На пальцах',target:'Кисти · предплечья',hands:G_cl,desc:'Опора на подушечки пальцев, а не ладонь. Мощный хват — только без боли.'},
+    {lvl:'Средний',name:'Касание плеча',target:'Кор · стабильность',hands:G_cl+arc,desc:'Вверху коснись ладонью противоположного плеча. Убирает раскачку таза.'},
+    {lvl:'Средний',name:'Типрайтер',target:'Грудь',hands:G_wi+sideArrow,desc:'Внизу перекатывайся от одной руки к другой вдоль пола, как каретка.'},
+    {lvl:'Средний',name:'Т-отжимание',target:'Кор · плечи',hands:G_cl+arc,desc:'После жима развернись в бок, рука вверх — тело образует букву «Т».'},
+    {lvl:'Средний',name:'Хинду',target:'Плечи · спина',hands:G_cl+PIKE,desc:'Волной: от пики ныряешь грудью вперёд-вверх, затем обратно. Мобильность.'},
+    {lvl:'Средний',name:'С хлопком',target:'Взрывная сила',hands:G_cl+clap,desc:'Оттолкнись так, чтобы успеть хлопнуть в ладоши. Мягко принимай вес.'},
+    {lvl:'Средний',name:'С отягощением',target:'Сила',hands:G_cl+plate,desc:'Блин или рюкзак на спине. Меньше повторов, больше нагрузки.'},
+    {lvl:'Средний',name:'«Лучник»',target:'Сила · грудь',hands:archer,desc:'Вес на одну руку, вторая прямая в сторону. Мост к отжиманиям на одной руке.'},
+    {lvl:'Средний',name:'Глубокие на упорах',target:'Грудь · амплитуда',hands:G_cl+bars,desc:'Кисти на брусках или книгах — грудь опускается ниже ладоней, больше растяжка.'},
+    // ——— ПРОДВИНУТЫЙ ———
+    {lvl:'Продвинутый',name:'На одной руке',target:'Максимум силы',hands:oneArm,desc:'Ноги шире для баланса, корпус почти не скручивай. Вершина сложности.'},
+    {lvl:'Продвинутый',name:'Одной рукой (узко)',target:'Сила',hands:oneArm,desc:'Ноги ближе друг к другу — меньше опоры, вся нагрузка на одну руку.'},
+    {lvl:'Продвинутый',name:'Стойка у стены (негатив)',target:'Плечи',hands:G_cl+handUp,desc:'Вверх ногами у стены, только медленный спуск. Подводка к жиму в стойке.'},
+    {lvl:'Продвинутый',name:'В стойке на руках',target:'Плечи',hands:G_cl+handUp,desc:'Полная амплитуда вверх ногами у стены. Жмёшь вес тела вертикально.'},
+    {lvl:'Продвинутый',name:'Планш-наклон',target:'Плечи · кор',hands:G_ps+lift,desc:'Псевдо-планш с сильным наклоном вперёд — вес почти весь на кистях.'},
+    {lvl:'Продвинутый',name:'Глубокий псевдо-планш',target:'Плечи',hands:G_ps+bars,desc:'На упорах: грудь ниже кистей, корпус далеко вперёд. Жёстко на плечи.'},
+    {lvl:'Продвинутый',name:'Взрывные с отрывом',target:'Мощность',hands:G_cl+boom,desc:'Оттолкнись так, чтобы ладони оторвались от пола. Развивает силу толчка.'},
+    {lvl:'Продвинутый',name:'С хлопком за спиной',target:'Мощность',hands:G_cl+clap,desc:'Успей хлопнуть за спиной — нужен очень мощный вылет вверх.'},
+    {lvl:'Продвинутый',name:'Супермен',target:'Мощность · кор',hands:G_cl+boom+clap,desc:'В полёте вытяни руки и ноги. Только для очень сильных.'},
+    {lvl:'Продвинутый',name:'«90 градусов»',target:'Экстрим',hands:G_ps+handUp,desc:'Взрывом выходишь почти в вертикаль на прямых руках. Элемент силачей.'},
+    {lvl:'Продвинутый',name:'Тигровые',target:'Трицепс',hands:G_na+elbow,desc:'Со сфинкса (на локтях) выжимаешься на кисти. Жёсткая нагрузка на трицепс.'},
+    {lvl:'Продвинутый',name:'Человек-паук взрывной',target:'Мощность',hands:G_cl+spider+boom,desc:'Спайдермен с отрывом от пола. Координация и мощность разом.'},
+    {lvl:'Продвинутый',name:'Архер на упорах',target:'Сила · амплитуда',hands:archer+bars,desc:'Лучник на брусках — больше глубина и растяжка, заметно тяжелее.'},
+    {lvl:'Продвинутый',name:'Одной рукой на кулаке',target:'Сила · запястье',hands:oneFist,desc:'Одна рука, опора на кулак. Береги запястье — только с крепким хватом.'},
+    {lvl:'Продвинутый',name:'На петлях (TRX)',target:'Стабильность',hands:G_cl+rings,desc:'Кисти в петлях — они гуляют, мощно включаются мышцы-стабилизаторы.'},
+    {lvl:'Продвинутый',name:'На кольцах',target:'Сила · стабильность',hands:G_cl+rings,desc:'Кольца добавляют нестабильность и свободный разворот кистей. Очень тяжело.'},
   ];
   function renderGrips(){
     const el=$('gripList');if(!el||el.children.length)return;
-    el.innerHTML=GRIPS.map(g=>'<div class="gripcard"><div class="dia">'+gripSVG(g.hands)+'</div>'+
-      '<div class="gc"><div class="gn">'+g.name+'</div><span class="gt">'+g.target+'</span><div class="gd">'+g.desc+'</div></div></div>').join('');
+    const card=(g,gi)=>'<div class="gripcard"><div class="dia">'+gripSVG(g.hands)+'</div>'+
+      '<div class="gc"><div class="gn">'+g.name+'</div><span class="gt">'+g.target+'</span><div class="gd">'+g.desc+'</div>'+
+      '<div class="gasg"><span class="gasgl">В подход:</span>'+
+      [0,1,2,3,4].map(s=>'<button data-grip="'+gi+'" data-set="'+s+'">'+(s+1)+'</button>').join('')+
+      '</div></div></div>';
+    el.innerHTML=['Новичок','Средний','Продвинутый'].map(lv=>{
+      const items=GRIPS.map((g,i)=>[g,i]).filter(gi=>gi[0].lvl===lv);if(!items.length)return '';
+      return '<div class="griplvl">'+lv+' · '+items.length+'</div>'+items.map(gi=>card(gi[0],gi[1])).join('');
+    }).join('');
+    el.querySelectorAll('.gasg button').forEach(b=>{
+      b.addEventListener('click',()=>{setGrips[+b.dataset.set]=+b.dataset.grip;persist();syncGripAssignUI();});
+    });
+    syncGripAssignUI();
   }
-  // ротация хватов по 5 подходам программы
-  const SET_GRIPS=[
-    {lab:'Классический',say:'классический хват'},
-    {lab:'Широкий',say:'широкий хват'},
-    {lab:'Алмазный',say:'узкий, алмазный хват'},
-    {lab:'Классический',say:'классический хват'},
-    {lab:'На кулаках',say:'на кулаках'},
-  ];
-  const gripForSet=i=>SET_GRIPS[((i%SET_GRIPS.length)+SET_GRIPS.length)%SET_GRIPS.length];
+  // ---- хваты по подходам (настройка) ----
+  const SET_COUNT=5;
+  const gripIdxByName=n=>{const i=GRIPS.findIndex(g=>g.name===n);return i<0?0:i;};
+  // дефолтная раскладка (та же ротация, что была жёстко зашита)
+  const DEFAULT_SET_GRIPS=['Классический','Широкий','Алмазный','Классический','На кулаках'].map(gripIdxByName);
+  let setGrips=DEFAULT_SET_GRIPS.slice();
+  // фразы для голоса — предзаписанные клипы (edge-tts) для ВСЕХ 50 хватов, оба голоса (Дмитрий/Светлана)
+  const GRIP_SAY={"От стены":"от стены","С колен":"с колен","Наклонные (стол)":"наклонные от стола","Наклонные (скамья)":"наклонные от скамьи","Классический":"классический хват","Широкий":"широкий хват","Узкий":"узкий хват","На кулаках":"на кулаках","С паузой внизу":"с паузой внизу","Негативные":"негативные","Алмазный с колен":"алмазный с колен","Широкий с колен":"широкий с колен","Скапулярные":"скапулярные","«Кобра»":"кобра","Пика с колен":"пика с колен","Темп 3-1-3":"в темпе три-один-три","Планка-удержание":"планка, удержание","Алмазный":"алмазный хват","Обратный хват":"обратный хват","«Домиком» (пика)":"домиком, пика","Пика с возвышения":"пика с возвышения","С наклоном вниз":"с наклоном вниз","Разновысокие руки":"разновысокие руки","Псевдо-планш":"псевдопланш","Человек-паук":"человек-паук","На пальцах":"на пальцах","Касание плеча":"с касанием плеча","Типрайтер":"типрайтер","Т-отжимание":"тэ-отжимание","Хинду":"хинду","С хлопком":"с хлопком","С отягощением":"с отягощением","«Лучник»":"лучник","Глубокие на упорах":"глубокие на упорах","На одной руке":"на одной руке","Одной рукой (узко)":"одной рукой, узко","Стойка у стены (негатив)":"стойка у стены, негатив","В стойке на руках":"в стойке на руках","Планш-наклон":"планш с наклоном","Глубокий псевдо-планш":"глубокий псевдопланш","Взрывные с отрывом":"взрывные с отрывом","С хлопком за спиной":"с хлопком за спиной","Супермен":"супермен","«90 градусов»":"девяносто градусов","Тигровые":"тигровые","Человек-паук взрывной":"человек-паук взрывной","Архер на упорах":"лучник на упорах","Одной рукой на кулаке":"одной рукой на кулаке","На петлях (TRX)":"на петлях","На кольцах":"на кольцах"};
+  const gripForSet=i=>GRIPS[setGrips[((i%SET_COUNT)+SET_COUNT)%SET_COUNT]]||GRIPS[0];
+  const gripSay=g=>GRIP_SAY[g&&g.name]||null;
+  function renderSetGrips(){
+    const el=$('setGripPanel');if(!el||el.children.length)return;
+    const groups=['Новичок','Средний','Продвинутый'].map(lv=>
+      '<optgroup label="'+lv+'">'+GRIPS.map((g,i)=>g.lvl===lv?'<option value="'+i+'">'+g.name+'</option>':'').join('')+'</optgroup>'
+    ).join('');
+    let h='<div class="sgttl">Хват на каждый подход</div>'+
+      '<div class="sgsub">Назначь своё положение рук каждому из 5 подходов программы — или жми цифры прямо на карточках ниже. Действует, когда включён тумблер под каталогом.</div>';
+    for(let s=0;s<SET_COUNT;s++){
+      h+='<div class="sgrow"><div class="sgnum">Подход <b>'+(s+1)+'</b></div>'+
+         '<select class="sgsel" data-set="'+s+'">'+groups+'</select></div>'+
+         '<div class="sgtgt" data-tgt="'+s+'"></div>';
+    }
+    el.innerHTML=h;
+    el.querySelectorAll('.sgsel').forEach(sel=>{
+      sel.addEventListener('change',e=>{setGrips[+e.target.dataset.set]=+e.target.value;persist();syncGripAssignUI();});
+    });
+    syncGripAssignUI();
+  }
+  function syncGripAssignUI(){
+    const panel=$('setGripPanel');
+    if(panel){
+      panel.querySelectorAll('.sgsel').forEach(sel=>{const s=+sel.dataset.set;if(+sel.value!==setGrips[s])sel.value=setGrips[s];});
+      panel.querySelectorAll('.sgtgt').forEach(t=>{const g=GRIPS[setGrips[+t.dataset.tgt]];t.textContent=g?g.target:'';});
+    }
+    document.querySelectorAll('.gasg button').forEach(b=>{b.classList.toggle('on',setGrips[+b.dataset.set]===+b.dataset.grip);});
+  }
 
 
   // ---- старт сессии / повтор ----
-  function startSession(t){started=true;finished=false;hello.classList.add('hidden');core.classList.remove('hidden');
+  function startSession(t){started=true;finished=false;
+    hello.classList.add('leave');
+    setTimeout(()=>{hello.classList.add('hidden');hello.classList.remove('leave');},200);
+    core.classList.remove('hidden');core.classList.add('enter-from');
+    setTimeout(()=>core.classList.remove('enter-from'),20);
     topcount.classList.remove('hidden');action.classList.remove('hidden');finishBtn.classList.remove('hidden');
     $('pauseBtn').classList.remove('hidden');
     // AMRAP: установить таймер
     if(mode==='amrap'){amrapEndTime=t+amrapMin*60000;$('amrapTimer').style.display='block';}
     lastTick=t;lastTap=t;setIndex=0;phase='work';restAlert=false;goalHit=false;lastCountSec=99;lastMetro=t;metroHi=false;lockScreen();render();
     if(inputMode!=='tap')startCamera();
-    if(mode==='program'&&gripVoiceOn)setTimeout(()=>{if(started&&!finished&&!counting)say('Первый подход — '+gripForSet(0).say+'.',true);},1100);}
+    if(mode==='program'&&gripVoiceOn)setTimeout(()=>{if(started&&!finished&&!counting){const sp=gripSay(gripForSet(0));if(sp)say('Первый подход — '+sp+'.',true);}},1100);}
 
   // голосовой отсчёт 3·2·1 перед стартом
   function startCountdown(done){
@@ -958,11 +1498,11 @@
     if(mode==='amrap'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;}
     if(repsThisSet===0)goalHit=false;
     reps++;repsThisSet++;lastTap=t;
-    elCount.classList.remove('bump');void elCount.offsetWidth;elCount.classList.add('bump');
-    flash.classList.remove('go','goal');void flash.offsetWidth;
     const target=mode==='program'?PLAN[week][setIndex]:goal;
     const hitNow=target>0&&repsThisSet>=target&&!goalHit;
-    if(hitNow){goalHit=true;flash.classList.add('go','goal');buzz([0,40,30,40,30,90]);beep(1320,.18);}
+    elCount.classList.remove('bump','bump-goal');void elCount.offsetWidth;elCount.classList.add(hitNow?'bump-goal':'bump');
+    flash.classList.remove('go','goal');void flash.offsetWidth;
+    if(hitNow){goalHit=true;flash.classList.add('go','goal');buzz([0,40,30,40,30,90]);chime([{f:880,dur:.09},{f:1320,t:.08,dur:.16}]);}
     else{flash.classList.add('go');buzz(28);beep(880);}
     // голос: подбадривание на финише подхода
     const rem=target>0?target-repsThisSet:99;
@@ -977,9 +1517,9 @@
     const target=mode==='program'?PLAN[week][setIndex]:goal;
     sets.push({reps:repsThisSet,target:target||null});
     if(mode==='program'){
-      if(setIndex>=PLAN[week].length-1){phase='done';finishWorkout();return;}
+      if(setIndex>=PLAN[week].length-1){phase='done';repsThisSet=0;finishWorkout();return;}
       setIndex++;phase='rest';restStart=t;restAlert=false;repsThisSet=0;lastCountSec=99;
-      if(gripVoiceOn)say('Отдых. Следующий подход — '+gripForSet(setIndex).say+'.');else sayRest();
+      if(gripVoiceOn){const sp=gripSay(gripForSet(setIndex));if(sp)say('Отдых. Следующий подход — '+sp+'.');else sayRest();}else sayRest();
       beep(420);buzz([0,60,40,60]);
     }else{repsThisSet=0;}
     render();
@@ -1048,7 +1588,7 @@
           elCount.classList.remove('alert');topcount.textContent=ms2(left);elCap.textContent=left>=60?'ДО ПОДХОДА':'СЕКУНД ДО ПОДХОДА';}
         else{elState.textContent='ПОРА!';elState.className='state rest';elCount.textContent='ПОРА';
           elCount.classList.add('alert');topcount.textContent='!';elCap.textContent='КОСНИСЬ — НОВЫЙ ПОДХОД';}
-        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · цель <b>'+PLAN[week][setIndex]+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).lab+'</b>':'');
+        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · цель <b>'+PLAN[week][setIndex]+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
       }else{
         const sec=Math.floor(gap/1000);
         if(targetRest>0){const left=Math.ceil((targetRest-gap)/1000);
@@ -1070,7 +1610,7 @@
       }else{goalwrap.classList.remove('show');
         elState.textContent=started?'РАБОТА':'ГОТОВ';elState.className=started?'state work':'state';}
       if(started){
-        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).lab+'</b>':'');
+        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
         else if(mode==='amrap')elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b> за время';
         else elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b>';
       }
@@ -1090,37 +1630,37 @@
   // ---- стартовый экран ----
   function renderHello(){
     const today=committed.reps, st=streak();
-    let h=inputMode==='camera'?'<div class="big">СЧЁТ <span>КАМЕРОЙ</span></div>':'<div class="big">КАСАЙСЯ <span>НОСОМ</span></div>';
-    h+='<div class="meta"><div class="g">Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
-       '<div>Сегодня<b>'+today+'</b></div><div class="w">Рекорд<b>'+pr+'</b></div></div>';
-    // расписание
     const cells=weekCells();const doneWk=cells.filter(c=>c.done).length;const todayTrain=isTrain(new Date().getDay());
-    h+='<div class="daybanner '+(todayTrain?'train':'rest')+'">'+
-       (trainedToday()?'Сегодня тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'Сегодня — день отдыха · восстанавливайся')+'</div>';
-    h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
-    h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · следующая: '+nextTrain())+'</div>';
-    const posHint=inputMode==='tap'?'Положи телефон на пол.':inputMode==='camera'?'Поставь телефон так, чтобы камера видела лицо.':'Положи телефон на пол — или поставь так, чтобы камера видела лицо.';
-    const touchHint=inputMode==='camera'?'Опускайся и поднимайся перед камерой':inputMode==='both'?'Касайся носом экрана или двигайся перед камерой':'Касайся носом';
-    const pushHint=inputMode==='camera'?'опускайся и поднимайся':inputMode==='both'?'жми или двигайся перед камерой':'жми';
+    const modeLabel=inputMode==='camera'?'счёт камерой':inputMode==='both'?'тап или камера':'касайся носом';
+    // содержимое героя зависит от режима
+    let heroTag,heroMeta,heroTitle,heroNums,heroSub;
     if(mode==='program'){
-      h+='<div class="planbox"><div class="pt">Программа · неделя '+(week+1)+' из 52</div><div class="pn">'+
-        PLAN[week].map((n,i)=>'<span'+(i===0?' class="first"':'')+'>'+n+'</span>').join('')+
-        '</div><div class="ps">5 подходов · всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+'</div></div>';
-      h+='<p>'+posHint+' '+touchHint+' — счёт идёт к цели подхода ('+PLAN[week][0]+'). После цели включится отдых с обратным отсчётом.</p>';
+      heroTag='Сегодня';heroMeta='неделя '+(week+1)+' из 52';heroTitle='Тренировка · 5 подходов';
+      heroNums=PLAN[week].map((n,i)=>'<span class="hn'+(i===0?' first':'')+'">'+n+'</span>').join('');
+      heroSub='всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+' · '+modeLabel;
     }else if(mode==='amrap'){
-      h+='<div class="planbox"><div class="pt">На время · максимум повторов</div>'+
-        '<div class="pn"><span class="first">'+amrapMin+'</span></div>'+
-        '<div class="ps">минут · жми до упора · можно отдыхать между подходами</div></div>';
-      h+='<p>'+posHint+' Обратный отсчёт идёт — '+pushHint+' максимум раз за '+amrapMin+' мин. Отжался, отдохни, '+pushHint+' снова.</p>';
+      heroTag='На время';heroMeta=amrapMin+' мин';heroTitle='Максимум повторов';
+      heroNums='<span class="hn first big1">'+amrapMin+'</span>';
+      heroSub='минут без плана · '+modeLabel;
     }else{
-      h+='<p>'+posHint+' '+touchHint+' = одно повторение. Свободный режим без плана.</p>';
+      heroTag='Свободно';heroMeta='без плана';heroTitle='Считай в своём темпе';
+      heroNums='<span class="hn first big1">∞</span>';
+      heroSub=modeLabel;
     }
-    if(countOn){
-      h+='<button id="cdStart" class="cdbtn">▶ Старт с отсчётом 3·2·1</button>';
-      h+='<div class="orline">или просто коснись носом — начнётся сразу</div>';
-    }else{
-      h+='<div class="pulse">▾ КОСНИСЬ ЭКРАНА ▾</div>';
-    }
+    let h='<div class="daybanner '+(todayTrain?'train':'rest')+'">'+
+      (trainedToday()?'Тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'День отдыха · восстанавливайся')+'</div>';
+    // ГЕРОЙ: фокус экрана + встроенная главная кнопка
+    h+='<div class="herocard"><div class="herohead"><span class="herotag">'+heroTag+'</span><span class="herometa">'+heroMeta+'</span></div>'+
+       '<div class="herotitle">'+heroTitle+'</div><div class="heronums">'+heroNums+'</div><div class="herosub">'+heroSub+'</div>';
+    if(countOn){h+='<button id="cdStart" class="herocta">▶ Поехали</button>';}
+    else{h+='<div class="pulse" style="margin-top:14px">▾ Коснись экрана, чтобы начать ▾</div>';}
+    h+='</div>';
+    if(countOn)h+='<div class="orline">или просто коснись экрана — начнётся сразу</div>';
+    // вспомогательная статистика (приглушённо: серия/сегодня — нейтрально, рекорд — золото)
+    h+='<div class="meta"><div>Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
+       '<div>Сегодня<b>'+today+'</b></div><div class="g">Рекорд<b>'+pr+'</b></div></div>';
+    h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
+    h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · след.: '+nextTrain())+'</div>';
     hello.innerHTML=h;
     const sb=hello.querySelector('#cdStart');
     if(sb)sb.addEventListener('pointerdown',ev=>{ev.stopPropagation();ev.preventDefault();doStart(true);});
@@ -1137,9 +1677,9 @@
     const avg=nSets?Math.round(total/nSets):0;
     const tempo=exerciseMs>0?Math.round(total/(exerciseMs/60000)):0;
     const newPR=best>pr;
-    let note='', fullDone=false;
+    let note='', fullDone=false, pct=null;
     if(mode==='program'){
-      const planned=planSum(week), pct=Math.round(total/planned*100);
+      const planned=planSum(week); pct=Math.round(total/planned*100);
       fullDone=phase==='done'||(nSets>=5&&all.every((s,i)=>s.reps>=PLAN[week][i]));
       note='Неделя <b>'+(week+1)+'</b> · план '+planned+' повт. · выполнено <b>'+pct+'%</b>'+
         (fullDone?' — неделя пройдена! 💪':' — добей все 5 целей, чтобы открыть следующую.');
@@ -1178,11 +1718,16 @@
     html+='<button id="discard">Удалить тренировку</button></div>';
     $('sumbody').innerHTML=html;
     $('summary').classList.add('open');
+    if(newPR||fullDone){
+      setTimeout(()=>confettiBurst(newPR&&fullDone?90:60),150);
+      chime([{f:660,t:0,dur:.22,type:'triangle'},{f:990,t:0,dur:.22,type:'triangle'},
+             {f:880,t:.14,dur:.3,type:'triangle'},{f:1318,t:.14,dur:.3,type:'triangle'}]);
+    }
     say(newPR?'Новый рекорд! Огонь!':pick(SAY_DONE),true);beep(990,.3);
 
     const sumText='💪 Отжимания\nВсего: '+total+' повт. · '+nSets+' подходов\nЛучший подход: '+best+' · работа '+fmt(exerciseMs)+
       (mode==='program'?'\nПрограмма: неделя '+(week+1):'')+(mode==='amrap'?'\nНа время '+amrapMin+' мин':'');
-    $('save').onclick=()=>commitSession(best,false);
+    $('save').onclick=()=>commitSession(best,false,pct);
     $('discard').onclick=()=>{if(confirm('Удалить тренировку без сохранения?'))discardSession();};
     $('share').onclick=async()=>{
       try{
@@ -1234,15 +1779,33 @@
           }catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='otzhimaniya.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}}
         },'image/png');
       }catch(err){try{if(navigator.share)await navigator.share({text:sumText});else{await navigator.clipboard.writeText(sumText);alert('Скопировано!');}}catch(e){}}
-    };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true);
+    };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true,pct);
   }
 
-  function commitSession(best,advance){
+  function commitSession(best,advance,pct){
     committed={reps:committed.reps+reps,sets:committed.sets+sets.length,
       workMs:committed.workMs+exerciseMs,restMs:committed.restMs+restMs,best:Math.max(committed.best,sessMax(),best)};
     if(best>pr)pr=best;
-    saveToday();persist();
-    if(advance&&week<51)week++;
+    saveToday();
+    if(mode==='program'&&pct!=null&&history[tkey()])history[tkey()].perf=pct;
+    persist();
+    if(advance&&week<51){
+      week++;
+      if(mode==='program'&&autoAdjust){
+        // "рост": цель подхода структурно нельзя перевыполнить (по её достижении сразу включается отдых),
+        // поэтому сигнал роста — реальный рекорд (pr, меряется в свободном режиме/«Дне теста») заметно выше базы плана
+        if(pr>=startMax*1.3&&startMax<60){
+          startMax=Math.min(60,Math.max(startMax+1,Math.round(pr*0.8)));PLAN=buildPlan(startMax);
+          showAchieveToast({emoji:'📈',title:'Нагрузка выросла',sub:'Твой рекорд заметно выше базы плана — план чуть повышен'});
+        }else{
+          const trend=perfTrend();
+          if(trend==='down'&&week>0){
+            week--;
+            showAchieveToast({emoji:'📉',title:'Повторим неделю',sub:'2 тренировки подряд <80% — закрепим текущую нагрузку'});
+          }
+        }
+      }
+    }
     persist();
     closeSession();
   }
@@ -1255,10 +1818,16 @@
     started=false;finished=false;reps=0;repsThisSet=0;sets=[];exerciseMs=0;restMs=0;lastTap=0;wasResting=false;
     setIndex=0;phase='work';goalHit=false;restAlert=false;lastCountSec=99;counting=false;warmupDone=false;
     paused=false;pauseMs=0;amrapEndTime=0;
-    tap.classList.remove('work','rest','paused');core.classList.add('hidden');topcount.classList.add('hidden');
-    action.classList.add('hidden');finishBtn.classList.add('hidden');$('pauseBtn').classList.add('hidden');
-    pauseBar.style.display='none';$('amrapTimer').style.display='none';
-    renderHello();hello.classList.remove('hidden');render();
+    tap.classList.remove('work','rest','paused');
+    core.classList.add('leave');
+    setTimeout(()=>{
+      core.classList.add('hidden');core.classList.remove('leave');topcount.classList.add('hidden');
+      action.classList.add('hidden');finishBtn.classList.add('hidden');$('pauseBtn').classList.add('hidden');
+      pauseBar.style.display='none';$('amrapTimer').style.display='none';
+      renderHello();hello.classList.remove('hidden');hello.classList.add('enter-from');
+      setTimeout(()=>hello.classList.remove('enter-from'),20);
+      render();
+    },200);
   }
 
   // ---- кнопки ----
@@ -1278,16 +1847,41 @@
     $('grpFree').style.opacity=mode==='free'?'1':'.35';
     $('grpAmrap').style.display=mode==='amrap'?'':'none';
   }
+  // 'auto' резолвится только в dark/light — у ОС нет сигнала, какая из цветных тем нравится пользователю
+  const THEME_IDS=['light','sunset','ocean','violet','crimson','mint','graphite','rose','midnight'];
   function applyTheme(){
     const isLight=theme==='light'||(theme==='auto'&&window.matchMedia('(prefers-color-scheme: light)').matches);
-    document.body.classList.toggle('light',isLight);
+    THEME_IDS.forEach(id=>document.body.classList.remove(id==='light'?'light':'theme-'+id));
+    if(isLight)document.body.classList.add('light');
+    else if(theme!=='dark'&&theme!=='auto')document.body.classList.add('theme-'+theme);
   }
   try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);}catch(e){}
   function showTab(name){[...document.querySelectorAll('.grp[data-tab]')].forEach(g=>g.style.display=g.dataset.tab===name?'':'none');
     [...$('tabbar').children].forEach(b=>b.classList.toggle('on',b.dataset.tab===name));}
+  // ---- нижняя навигация (редизайн этап 2): 4 вкладки, страницы переиспользуют группы оверлея ----
+  let currentView='train', moreSub='train';
+  function showView(view){
+    currentView=view;
+    [...$('bottomnav').children].forEach(b=>b.classList.toggle('on',b.dataset.view===view));
+    if(view==='train'){ $('panel').classList.remove('open'); if(!started)renderHello(); return; }
+    // остальные три — как «страницы» в оверлее #panel
+    syncControls();renderGraph();renderHist();
+    const tb=$('tabbar'), title=$('panelTitle');
+    if(view==='grips'){ tb.style.display='none'; title.textContent='Хваты'; showTab('grips'); }
+    else if(view==='progress'){ tb.style.display='none'; title.textContent='Прогресс'; showTab('hist'); }
+    else if(view==='media'){ tb.style.display='none'; title.textContent='Мой прогресс'; showTab('media'); renderMedia(); }
+    else { tb.style.display=''; title.textContent='Настройки'; showTab(moreSub); }
+    $('panel').classList.add('open');
+    const pb=document.querySelector('#panel .pbody');if(pb)pb.scrollTop=0;
+  }
   function syncControls(){
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
     [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
+    $('formCheck').classList.toggle('on',formCheckOn);
+    if($('musicApp').value!==musicApp)$('musicApp').value=musicApp;
+    $('musicCustomRow').classList.toggle('hidden',musicApp!=='custom');
+    $('musicCustomUrl').value=musicCustomUrl;
+    $('musicBtn').classList.toggle('hidden',musicApp==='off'||!musicUrl());
     $('wVal').textContent=week+1;
     $('wPrev').innerHTML='Подходы: '+PLAN[week].map(n=>'<b>'+n+'</b>').join(' · ')+' = '+planSum(week);
     $('prVal').textContent=ms2(programRest/1000);
@@ -1303,7 +1897,7 @@
     $('tempoV').classList.toggle('on',tempoVoiceOn);
     $('warm').classList.toggle('on',warmupOn);
     $('gripVoice').classList.toggle('on',gripVoiceOn);
-    renderGrips();
+    renderGrips();renderSetGrips();syncGripAssignUI();
     $('remind').classList.toggle('on',remindOn);
     $('remTime').value=reminderTime;
     if(!$('days').children.length){
@@ -1323,6 +1917,7 @@
       $('remStatus').textContent=rs;})();
     [...$('theme').children].forEach(b=>b.classList.toggle('on',b.dataset.th===theme));
     $('auto').classList.toggle('on',autoProg);
+    $('autoAdjust').classList.toggle('on',autoAdjust);
     $('maxInfo').innerHTML='Текущий уровень: максимум <b>'+startMax+'</b> · неделя 1 = '+PLAN[0].join('·');
     [...$('vibe2').children].forEach(b=>b.classList.toggle('on',b.dataset.e===voiceEnergy));
     if($('voiceSel').value!==voiceName)$('voiceSel').value=voiceName;
@@ -1345,12 +1940,25 @@
     if(keys.length<2){g.innerHTML='';return;}
     const max=Math.max(...keys.map(k=>history[k].reps));const tk=tkey();
     let bars=keys.map(k=>{const r=history[k];const hgt=Math.max(6,Math.round(r.reps/max*100));
-      return '<div class="b'+(k===tk?' today':'')+'" style="height:'+hgt+'%" title="'+dshort(k)+': '+r.reps+'"></div>';}).join('');
-    g.innerHTML='<div class="gtitle">Прогресс · повторов в день</div><div class="bars">'+bars+'</div>'+
+      return '<div class="b'+(k===tk?' today':'')+'" style="height:'+hgt+'%" data-date="'+k+'" data-reps="'+r.reps+'"></div>';}).join('');
+    g.innerHTML='<div class="gtitle">Прогресс · повторов в день (нажми на столбик)</div><div class="bars">'+bars+'</div>'+
       '<div class="glabel"><span>'+dshort(keys[0])+'</span><span>макс '+max+'</span><span>'+(keys[keys.length-1]===tk?'сегодня':dshort(keys[keys.length-1]))+'</span></div>';
   }
-  $('gear').addEventListener('click',()=>{syncControls();renderGraph();renderHist();$('panel').classList.add('open');});
-  $('close').addEventListener('click',()=>{$('panel').classList.remove('open');if(!started)renderHello();});
+  // тап по столбику графика — показать точную дату/число (hover всё равно не работает на телефоне)
+  function showGraphTip(el){
+    const tip=$('graphTip');if(!tip)return;
+    const rect=el.getBoundingClientRect();
+    tip.textContent=dshort(el.dataset.date)+': '+el.dataset.reps;
+    tip.style.left=(rect.left+rect.width/2)+'px';
+    tip.style.top=rect.top+'px';
+    tip.classList.add('show');
+    clearTimeout(showGraphTip._t);
+    showGraphTip._t=setTimeout(()=>tip.classList.remove('show'),1800);
+  }
+  $('graph').addEventListener('click',e=>{const b=e.target.closest('.b');if(b)showGraphTip(b);});
+  $('gear').addEventListener('click',()=>showView('more'));
+  $('close').addEventListener('click',()=>showView('train'));
+  $('bottomnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showView(b.dataset.view);});
   $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;syncControls();persist();if(!started)renderHello();});
   $('inputMode').addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
@@ -1358,13 +1966,18 @@
     if(started&&!paused){if(inputMode==='tap')stopCamera();else if(!camActive)startCamera();}
     if(!started)renderHello();
   });
+  $('formCheck').addEventListener('click',()=>{formCheckOn=!formCheckOn;syncControls();persist();});
+  $('musicApp').addEventListener('change',e=>{musicApp=e.target.value;syncControls();persist();});
+  $('musicCustomUrl').addEventListener('change',e=>{musicCustomUrl=e.target.value.trim();syncControls();persist();});
+  $('musicBtn').addEventListener('click',()=>{const u=musicUrl();if(!u)return;try{window.location.href=u;}catch(e){}});
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
   $('prPlus').addEventListener('click',()=>{programRest=Math.min(PR_MAX,programRest+PR_STEP);syncControls();persist();if(!started)renderHello();});
   $('prMinus').addEventListener('click',()=>{programRest=Math.max(PR_MIN,programRest-PR_STEP);syncControls();persist();if(!started)renderHello();});
-  $('gPlus').addEventListener('click',()=>{goal=Math.min(200,goal+1);syncControls();persist();});
-  $('gMinus').addEventListener('click',()=>{goal=Math.max(0,goal-1);syncControls();persist();});
+  const goalStep=g=>g>=100?10:g>=20?5:1;
+  $('gPlus').addEventListener('click',()=>{goal=Math.min(1000,goal+goalStep(goal));syncControls();persist();});
+  $('gMinus').addEventListener('click',()=>{goal=Math.max(0,goal-goalStep(goal-1));syncControls();persist();});
   $('amPlus').addEventListener('click',()=>{amrapMin=Math.min(60,amrapMin+1);syncControls();persist();});
   $('amMinus').addEventListener('click',()=>{amrapMin=Math.max(1,amrapMin-1);syncControls();persist();});
   $('thr').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;restThreshold=+b.dataset.t*1000;syncControls();persist();});
@@ -1385,6 +1998,8 @@
   // ===== УВЕДОМЛЕНИЯ (APK / PWA / браузер) =====
   const Cap = window.Capacitor;
   const isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
+  // в установленном APK подсказка «добавь на экран Домой» не нужна — прячем
+  if(isNative){const _ph=$('pwaHint');if(_ph)_ph.style.display='none';}
   const LN = () => (Cap && Cap.Plugins && Cap.Plugins.LocalNotifications) || null;
   let swReg = null;
   const NOTIF_TITLE='Пора отжиматься 💪';
@@ -1479,6 +2094,7 @@
   $('vibe').addEventListener('click',()=>{vibeOn=!vibeOn;syncControls();persist();if(vibeOn)buzz(40);});
   $('clearHist').addEventListener('click',()=>{if(confirm('Удалить всю историю и рекорд?')){history={};committed={reps:0,sets:0,workMs:0,restMs:0,best:0};pr=0;persist();renderGraph();renderHist();if(!started)renderHello();}});
   $('auto').addEventListener('click',()=>{autoProg=!autoProg;syncControls();persist();});
+  $('autoAdjust').addEventListener('click',()=>{autoAdjust=!autoAdjust;syncControls();persist();});
 
   // ---- День теста ----
   let testReps=0, testLast=0;
@@ -1487,23 +2103,25 @@
     const c=$('testCount');c.textContent=testReps;c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');
     buzz(28);beep(880);say(String(testReps));}
   $('testBtn').addEventListener('click',openTest);
-  $('testClose').addEventListener('click',()=>$('test').classList.remove('open'));
+  $('testClose').addEventListener('click',()=>{$('test').classList.remove('open');showView('train');});
   $('testTap').addEventListener('pointerdown',testTapFn);
   $('testUndo').addEventListener('click',()=>{if(testReps>0){testReps--;$('testCount').textContent=testReps;buzz(20);}});
   $('testDone').addEventListener('click',()=>{
-    if(testReps<1){$('test').classList.remove('open');return;}
+    if(testReps<1){$('test').classList.remove('open');showView('train');return;}
     const m=Math.max(1,Math.min(60,testReps));
     const np=buildPlan(m);
     if(confirm('Твой максимум: '+testReps+'.\nПересчитать программу под этот уровень?\nНеделя 1 станет: '+np[0].join('·')+' (до '+np[51].join('·')+' к 52-й неделе), и ты начнёшь с недели 1.')){
       startMax=m;PLAN=np;week=0;mode='program';if(testReps>pr)pr=testReps;persist();
-      $('test').classList.remove('open');renderHello();
+      $('test').classList.remove('open');showView('train');
       alert('Готово! Программа пересчитана под максимум '+testReps+'. Удачи! 💪');
     }
   });
 
   // ---- Бэкап ----
   $('exportBtn').addEventListener('click',()=>{
-    const data={v:1,history,pr,cfg:{mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg}};
+    const data={v:2,history,pr,
+      cfg:{mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,formCheckOn,musicApp,musicCustomUrl},
+      ach:[...earnedAchieve]};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
     a.download='otzhimaniya-backup-'+tkey()+'.json';document.body.appendChild(a);a.click();
@@ -1512,27 +2130,132 @@
   $('importBtn').addEventListener('click',()=>$('importFile').click());
   $('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
     r.onload=()=>{try{const d=JSON.parse(r.result);
-      if(d.history&&confirm('Импортировать данные из файла? Текущая история будет заменена.')){
-        history=d.history||{};pr=d.pr||0;const c=d.cfg||{};
-        startMax=c.startMax||7;week=c.week||0;mode=c.mode||'program';programRest=c.programRest||60000;
-        goal=c.goal||0;restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
-        soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
-        voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'dmitry';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
-        cheerLead=c.cheerLead==null?3:c.cheerLead;metroOn=!!c.metroOn;metroSec=c.metroSec||1.5;autoProg=c.autoProg!==false;
-        PLAN=buildPlan(startMax);if(week>51)week=51;
-        const t=history[tkey()];committed=t?{reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0}:{reps:0,sets:0,workMs:0,restMs:0,best:0};
-        persist();syncControls();renderGraph();renderHist();renderHello();alert('Импорт выполнен.');
+      if(d.history&&confirm('Импортировать данные из файла? Текущая история и настройки будут заменены.')){
+        // пишем бэкап в хранилище и перезагружаем тем же путём, что при старте — так восстановятся
+        // ВСЕ ключи конфига (тема, дни, напоминания, музыка и т.д.), а не только часть
+        localStorage.setItem('pushup_hist',JSON.stringify(d.history||{}));
+        localStorage.setItem('pushup_pr',d.pr||0);
+        if(d.cfg)localStorage.setItem('pushup_cfg',JSON.stringify(d.cfg));
+        if(Array.isArray(d.ach))localStorage.setItem('pushup_achieve',JSON.stringify(d.ach));
+        loadAll();loadAchievements();
+        if(!history[tkey()])committed={reps:0,sets:0,workMs:0,restMs:0,best:0};
+        syncControls();renderGraph();renderHist();renderHello();renderAchievements();
+        alert('Импорт выполнен.');
       }
     }catch(err){alert('Не удалось прочитать файл.');}e.target.value='';};
     r.readAsText(f);});
 
-  $('tabbar').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showTab(b.dataset.tab);});
+  $('tabbar').addEventListener('click',e=>{const b=e.target.closest('button');if(b){moreSub=b.dataset.tab;showTab(moreSub);}});
   $('theme').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;theme=b.dataset.th;applyTheme();syncControls();persist();});
   function closeOnboard(){try{localStorage.setItem('pushup_onboarded','1');}catch(e){}$('onboard').classList.remove('open');}
   $('obGo').addEventListener('click',closeOnboard);
   $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
 
-  loadAll();loadVoiceManifest();showTab('train');renderHello();render();
+  // ================= Галерея прогресса (фото/видео) =================
+  const FS = () => (Cap && Cap.Plugins && Cap.Plugins.Filesystem) || null;
+  const SH = () => (Cap && Cap.Plugins && Cap.Plugins.Share) || null;
+  const MEDIA_DIR = 'progress';
+  let media = [];               // метаданные: [{id,type:'image'|'video',ext,date}]
+  let mediaMode = 'grid';
+  let mediaSeq = 0, mediaViewId = null;
+  let cmpActive = 0; const cmpSel = [null, null];
+  const objUrls = {};           // браузер: id -> objectURL
+  const MONTHS = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  function fmtMediaDate(iso, full){ const d=new Date(iso); const s=d.getDate()+' '+MONTHS[d.getMonth()]; return full? s+' '+d.getFullYear() : s; }
+  function loadMedia(){ try{ media = JSON.parse(localStorage.getItem('pushup_media'))||[]; }catch(e){ media=[]; } }
+  function saveMedia(){ try{ localStorage.setItem('pushup_media', JSON.stringify(media)); }catch(e){} }
+  // --- IndexedDB (браузерный фолбэк для медиа-байтов) ---
+  let _mdb=null;
+  function mdb(){ return new Promise((res,rej)=>{ if(_mdb)return res(_mdb);
+    const r=indexedDB.open('pushup_media_db',1);
+    r.onupgradeneeded=()=>r.result.createObjectStore('m');
+    r.onsuccess=()=>{_mdb=r.result;res(_mdb);}; r.onerror=()=>rej(r.error); }); }
+  function idbPut(id,blob){ return mdb().then(db=>new Promise((res,rej)=>{ const t=db.transaction('m','readwrite'); t.objectStore('m').put(blob,id); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); })); }
+  function idbGet(id){ return mdb().then(db=>new Promise((res,rej)=>{ const t=db.transaction('m','readonly'); const q=t.objectStore('m').get(id); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); })); }
+  function idbDel(id){ return mdb().then(db=>new Promise((res,rej)=>{ const t=db.transaction('m','readwrite'); t.objectStore('m').delete(id); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); })); }
+  const mediaPath = e => MEDIA_DIR+'/'+e.id+'.'+e.ext;
+  function blobToB64(blob){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]); r.readAsDataURL(blob); }); }
+  async function mediaSaveBlob(id, ext, blob){
+    if(isNative && FS()){ const b64=await blobToB64(blob); await FS().writeFile({ path:MEDIA_DIR+'/'+id+'.'+ext, data:b64, directory:'DATA', recursive:true }); }
+    else { await idbPut(id, blob); }
+  }
+  async function mediaSrc(e){
+    if(isNative && FS()){ try{ const u=await FS().getUri({ path:mediaPath(e), directory:'DATA' }); return Cap.convertFileSrc(u.uri); }catch(err){ return ''; } }
+    if(objUrls[e.id]) return objUrls[e.id];
+    try{ const blob=await idbGet(e.id); if(!blob)return ''; const u=URL.createObjectURL(blob); objUrls[e.id]=u; return u; }catch(err){ return ''; }
+  }
+  async function mediaRemove(e){
+    if(isNative && FS()){ try{ await FS().deleteFile({ path:mediaPath(e), directory:'DATA' }); }catch(err){} }
+    else { try{ await idbDel(e.id); }catch(err){} if(objUrls[e.id]){ URL.revokeObjectURL(objUrls[e.id]); delete objUrls[e.id]; } }
+    media = media.filter(m=>m.id!==e.id); if(cmpSel[0]===e.id)cmpSel[0]=null; if(cmpSel[1]===e.id)cmpSel[1]=null; saveMedia();
+  }
+  async function mediaShareEntry(e){
+    if(isNative && SH() && FS()){ try{ const u=await FS().getUri({ path:mediaPath(e), directory:'DATA' }); await SH().share({ title:'Мой прогресс', text:'Мой прогресс в отжиманиях 💪', url:u.uri }); }catch(err){} return; }
+    try{ if(navigator.share){ const blob=await idbGet(e.id);
+        if(blob && navigator.canShare){ const file=new File([blob], e.id+'.'+e.ext, {type: e.type==='video'?'video/mp4':'image/jpeg'});
+          if(navigator.canShare({files:[file]})){ await navigator.share({ files:[file], text:'Мой прогресс 💪' }); return; } }
+        await navigator.share({ text:'Мой прогресс в отжиманиях 💪' }); return; }
+    }catch(err){ if(err && err.name==='AbortError')return; }
+    alert('Поделиться можно из приложения на телефоне — там откроется системное окно «Поделиться».');
+  }
+  async function onMediaFile(ev){
+    const f = ev.target.files && ev.target.files[0]; ev.target.value='';
+    if(!f) return;
+    const isVid = /^video\//.test(f.type);
+    let ext = (f.name.split('.').pop()||'').toLowerCase(); if(!ext||ext.length>4) ext = isVid?'mp4':'jpg';
+    const id = 'm'+Date.now().toString(36)+(mediaSeq++).toString(36);
+    const entry = { id, type:isVid?'video':'image', ext, date:new Date().toISOString() };
+    try{ await mediaSaveBlob(id, ext, f); media.unshift(entry); saveMedia(); renderMedia(); }
+    catch(err){ alert('Не удалось сохранить файл. Возможно, он слишком большой.'); }
+  }
+  async function renderMedia(){
+    const grid=$('mediaGrid'), empty=$('mediaEmpty'), cmp=$('mediaCompare');
+    const has = media.length>0;
+    empty.style.display = (has && mediaMode==='grid') || (mediaMode==='compare' && media.some(m=>m.type==='image')) ? 'none' : (has?'none':'');
+    if(!has){ grid.innerHTML=''; grid.style.display='none'; cmp.classList.add('hidden'); return; }
+    if(mediaMode==='grid'){
+      cmp.classList.add('hidden'); grid.style.display='';
+      grid.innerHTML = media.map(e=>'<div class="mediacell" data-id="'+e.id+'">'+(e.type==='video'?'<span class="mvid">▶</span>':'')+'<div class="mdate">'+fmtMediaDate(e.date)+'</div></div>').join('');
+      for(const e of media){ const cell=grid.querySelector('.mediacell[data-id="'+e.id+'"]'); if(!cell)continue;
+        const src=await mediaSrc(e); const el = e.type==='video'?document.createElement('video'):document.createElement('img');
+        el.src=src; if(e.type==='video'){ el.muted=true; el.setAttribute('playsinline',''); } cell.insertBefore(el, cell.firstChild); }
+    } else {
+      grid.style.display='none'; cmp.classList.remove('hidden'); await renderCompare();
+    }
+  }
+  async function renderCompare(){
+    const strip=$('cmpStrip'); const imgs=media.filter(m=>m.type==='image');
+    strip.innerHTML = imgs.length? imgs.map(e=>'<div class="cs" data-id="'+e.id+'"></div>').join('') : '<div class="cmppick" style="padding:18px">Сначала добавь фото в «Ленте»</div>';
+    for(const e of imgs){ const c=strip.querySelector('.cs[data-id="'+e.id+'"]'); if(!c)continue; c.classList.toggle('used', cmpSel[0]===e.id||cmpSel[1]===e.id);
+      const src=await mediaSrc(e); const im=document.createElement('img'); im.src=src; c.appendChild(im); }
+    for(let s=0;s<2;s++){ const slot=document.querySelector('.cmpslot[data-slot="'+s+'"]'); if(!slot)continue;
+      slot.classList.toggle('active', cmpActive===s);
+      const old=slot.querySelector('img'); if(old)old.remove();
+      const pick=slot.querySelector('.cmppick'); const sel=cmpSel[s]; const e=sel&&media.find(m=>m.id===sel);
+      if(e){ const src=await mediaSrc(e); const im=document.createElement('img'); im.src=src; slot.appendChild(im); if(pick)pick.style.display='none'; }
+      else if(pick){ pick.style.display=''; } }
+  }
+  async function openMediaView(id){ const e=media.find(m=>m.id===id); if(!e)return; mediaViewId=id;
+    $('mediaViewTitle').textContent = e.type==='video'?'ВИДЕО':'ФОТО';
+    const body=$('mvBody'); body.innerHTML='';
+    const src=await mediaSrc(e); const el=e.type==='video'?document.createElement('video'):document.createElement('img');
+    el.src=src; if(e.type==='video'){ el.controls=true; el.setAttribute('playsinline',''); }
+    body.appendChild(el);
+    const d=document.createElement('div'); d.className='mvdate'; d.textContent=fmtMediaDate(e.date,true); body.appendChild(d);
+    $('mediaView').classList.add('open');
+  }
+  $('mediaAdd').addEventListener('click',()=>$('mediaFile').click());
+  $('mediaFile').addEventListener('change',onMediaFile);
+  $('mediaMode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; mediaMode=b.dataset.mm;
+    [...$('mediaMode').children].forEach(x=>x.classList.toggle('on',x.dataset.mm===mediaMode)); renderMedia(); });
+  $('mediaGrid').addEventListener('click',e=>{ const c=e.target.closest('.mediacell'); if(c)openMediaView(c.dataset.id); });
+  $('cmpStrip').addEventListener('click',e=>{ const c=e.target.closest('.cs'); if(!c)return; cmpSel[cmpActive]=c.dataset.id; cmpActive = cmpActive===0?1:0; renderCompare(); });
+  $('mediaCompare').addEventListener('click',e=>{ const s=e.target.closest('.cmpslot'); if(s){ cmpActive=+s.dataset.slot; renderCompare(); } });
+  $('mediaViewClose').addEventListener('click',()=>$('mediaView').classList.remove('open'));
+  $('mediaShare').addEventListener('click',()=>{ const e=media.find(m=>m.id===mediaViewId); if(e)mediaShareEntry(e); });
+  $('mediaDelete').addEventListener('click',async()=>{ const e=media.find(m=>m.id===mediaViewId); if(e&&confirm('Удалить это фото/видео? Отменить нельзя.')){ await mediaRemove(e); $('mediaView').classList.remove('open'); renderMedia(); } });
+
+  loadAll();loadMedia();loadVoiceManifest();showTab('train');showView('train');renderHello();render();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   if(!seen)$('onboard').classList.add('open');
 })();
