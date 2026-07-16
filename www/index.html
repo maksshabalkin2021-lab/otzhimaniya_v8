@@ -298,9 +298,6 @@
     z-index:4;background:#000;border:2px solid var(--line);transition:border-color .2s}
   #camPip.hidden{display:none}
   #camPip.ok{border-color:var(--work)} #camPip.lost{border-color:var(--gold)} #camPip.error{border-color:var(--rest)}
-  #camPip.face-light{width:76px;height:102px;background:#fff;border-color:#fff;box-shadow:0 0 0 9999px rgba(255,255,255,.92),0 0 28px rgba(255,255,255,.95)}
-  #camPip.face-light #camStatus{background:rgba(0,0,0,.68)}
-  #camPip.torch #camStatus{background:rgba(255,213,74,.82);color:#191400}
   #camPip video{width:100%;height:100%;object-fit:cover;display:block}
   #camPip.mirror video{transform:scaleX(-1)}
   #camStatus{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;font-family:'Oswald';font-weight:600;
@@ -311,6 +308,9 @@
     mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));
     transition:background .1s linear}
   #camCalibRing.hidden{display:none}
+  #google_translate_element{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden}
+  .goog-te-banner-frame,.goog-te-balloon-frame,.goog-logo-link,.goog-te-gadget span{display:none!important}
+  body{top:0!important}
 
   /* Ачивки тост */
   #achieveToast{position:fixed;top:max(100px,calc(env(safe-area-inset-top) + 72px));left:50%;
@@ -612,7 +612,6 @@
         <div class="seg" id="cameraFacing"><button data-cam="user" class="on">Фронт</button><button data-cam="environment">Основная</button></div>
       </div>
       <div class="row"><label>Проверка техники (ИИ, бета)<br><span style="font-size:13.5px;color:var(--muted)">модель тела: считает движение, глубину и перекос</span></label><div class="tgl" id="formCheck"></div></div>
-      <div class="row"><label>Подсветка камеры<br><span style="font-size:13.5px;color:var(--muted)">фронт — белый экран, основная — автофонарь если доступен</span></label><div class="tgl on" id="cameraLight"></div></div>
     </div>
     <div class="grp progonly" data-tab="train" id="grpProg">
       <h3>Программа · 52 недели</h3>
@@ -694,6 +693,9 @@
     </div>
     <div class="grp" data-tab="theme">
       <h3>Оформление</h3>
+      <div class="row"><label>Язык интерфейса<br><span style="font-size:13.5px;color:var(--muted)">перевод через интернет, включая узбекский и туркменский</span></label>
+        <select id="appLang" class="vsel" style="max-width:190px"></select>
+      </div>
       <div class="themegrid" id="theme">
         <button data-th="dark" class="on"><span class="sw" style="--sb:#0a0b0d;--sw:#c8ff00"></span>Тёмная</button>
         <button data-th="light"><span class="sw" style="--sb:#ecefe8;--sw:#5f7d00"></span>Светлая</button>
@@ -818,6 +820,7 @@
     <div class="orline" id="pwaHint">Совет: добавь на экран «Домой» — откроется как приложение</div>
   </div>
 </div>
+<div id="google_translate_element"></div>
 
 <script>
 (function(){
@@ -889,13 +892,55 @@
   let gripVoiceOn=false;
   let inputMode='tap'; // 'tap' | 'camera' | 'both'
   let cameraFacing='user'; // 'user' | 'environment'
-  let cameraLightOn=true; // фронтальная: белая подсветка экраном; основная: torch, если поддерживается
   let formCheckOn=false; // бета: разбор техники по камере (PoseLandmarker вместо FaceLandmarker)
   let musicApp='yandex', musicCustomUrl='';
   const MUSIC_PRESETS={spotify:'spotify:',yandex:'yandexmusic://',vk:'vkmusic://',ytmusic:'youtubemusic://'};
   function musicUrl(){return musicApp==='custom'?musicCustomUrl:(MUSIC_PRESETS[musicApp]||'');}
   let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
   let theme='dark';
+  let appLang='ru';
+  const APP_LANGS=[
+    ['ru','Русский'],['af','Afrikaans'],['sq','Shqip / Albanian'],['am','አማርኛ / Amharic'],['ar','العربية / Arabic'],['hy','Հայերեն / Armenian'],['az','Azərbaycanca'],['eu','Euskara / Basque'],['be','Беларуская'],['bn','বাংলা / Bengali'],['bs','Bosanski'],['bg','Български'],['ca','Català'],['ceb','Cebuano'],['ny','Chichewa'],['zh-CN','中文简体'],['zh-TW','中文繁體'],['co','Corsu'],['hr','Hrvatski'],['cs','Čeština'],['da','Dansk'],['nl','Nederlands'],['en','English'],['eo','Esperanto'],['et','Eesti'],['tl','Filipino'],['fi','Suomi'],['fr','Français'],['fy','Frysk'],['gl','Galego'],['ka','ქართული'],['de','Deutsch'],['el','Ελληνικά'],['gu','ગુજરાતી'],['ht','Kreyòl ayisyen'],['ha','Hausa'],['haw','ʻŌlelo Hawaiʻi'],['iw','עברית / Hebrew'],['hi','हिन्दी'],['hmn','Hmong'],['hu','Magyar'],['is','Íslenska'],['ig','Igbo'],['id','Indonesia'],['ga','Gaeilge'],['it','Italiano'],['ja','日本語'],['jw','Jawa'],['kn','ಕನ್ನಡ'],['kk','Қазақша'],['km','ខ្មែរ'],['ko','한국어'],['ku','Kurdî'],['ky','Кыргызча'],['lo','ລາວ'],['la','Latina'],['lv','Latviešu'],['lt','Lietuvių'],['lb','Lëtzebuergesch'],['mk','Македонски'],['mg','Malagasy'],['ms','Melayu'],['ml','മലയാളം'],['mt','Malti'],['mi','Māori'],['mr','मराठी'],['mn','Монгол'],['my','မြန်မာ'],['ne','नेपाली'],['no','Norsk'],['or','ଓଡ଼ିଆ'],['ps','پښتو'],['fa','فارسی'],['pl','Polski'],['pt','Português'],['pa','ਪੰਜਾਬੀ'],['ro','Română'],['sm','Samoan'],['gd','Gàidhlig'],['sr','Српски'],['st','Sesotho'],['sn','Shona'],['sd','سنڌي'],['si','සිංහල'],['sk','Slovenčina'],['sl','Slovenščina'],['so','Soomaali'],['es','Español'],['su','Sunda'],['sw','Kiswahili'],['sv','Svenska'],['tg','Тоҷикӣ'],['ta','தமிழ்'],['tt','Татарча'],['te','తెలుగు'],['th','ไทย'],['tr','Türkçe'],['tk','Türkmençe'],['uk','Українська'],['ur','اردو'],['ug','ئۇيغۇرچە'],['uz','O‘zbekcha'],['vi','Tiếng Việt'],['cy','Cymraeg'],['xh','isiXhosa'],['yi','יידיש'],['yo','Yorùbá'],['zu','isiZulu']
+  ];
+  const TRANSLATE_CODES=APP_LANGS.filter(([c])=>c!=='ru').map(([c])=>c).join(',');
+  let translateScriptLoading=false;
+  function initLangSelect(){
+    const sel=$('appLang');if(!sel||sel.children.length)return;
+    sel.innerHTML=APP_LANGS.map(([code,name])=>'<option value="'+code+'">'+name+'</option>').join('');
+  }
+  function setTranslateCookie(lang){
+    const val=lang&&lang!=='ru'?'/ru/'+lang:'';
+    const max=val?'; max-age=31536000':'; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie='googtrans='+val+'; path=/'+max;
+    try{document.cookie='googtrans='+val+'; path=/; domain='+location.hostname+max;}catch(e){}
+  }
+  function triggerTranslate(lang){
+    const combo=document.querySelector('.goog-te-combo');
+    if(!combo||lang==='ru')return false;
+    combo.value=lang;
+    combo.dispatchEvent(new Event('change'));
+    return true;
+  }
+  function loadGoogleTranslate(){
+    if(window.google&&window.google.translate){triggerTranslate(appLang);return;}
+    if(translateScriptLoading)return;
+    translateScriptLoading=true;
+    window.googleTranslateElementInit=()=>{
+      new google.translate.TranslateElement({pageLanguage:'ru',includedLanguages:TRANSLATE_CODES,autoDisplay:false},'google_translate_element');
+      let tries=0;
+      const timer=setInterval(()=>{tries++;if(triggerTranslate(appLang)||tries>30)clearInterval(timer);},250);
+    };
+    const s=document.createElement('script');
+    s.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    s.async=true;
+    document.head.appendChild(s);
+  }
+  function applyAppLanguage(){
+    initLangSelect();
+    const sel=$('appLang');if(sel&&sel.value!==appLang)sel.value=appLang;
+    setTranslateCookie(appLang);
+    if(appLang!=='ru')loadGoogleTranslate();
+  }
   let amrapMin=10; // AMRAP длительность в минутах
   let amrapEndTime=0; // когда закончится AMRAP
   // пауза
@@ -992,7 +1037,6 @@
   let faceLandmarker=null, faceInitPromise=null;
   let poseLandmarker=null, poseInitPromise=null, poseModeActive=false;
   let camStream=null, camRaf=0, camActive=false, camReady=false, camError='';
-  let camTorchSupported=false, camTorchOn=false, camLostSince=0, camTorchBusy=false;
   let lastInference=0, camState='up', smoothedDist=0, upBaseline=0, calibUntil=0, camLastFaceT=0;
   let repMinElbow=999, formTipUntil=0, formTipCount=0;
   const CAM_INFER_MS=80, CAM_DOWN=1.18, CAM_UP=1.06, CAM_EMA=0.35, CAM_BASE_EMA=0.06, CAM_CALIB_MS=1500, CAM_LOST_MS=1500;
@@ -1004,39 +1048,6 @@
     camPip.classList.remove('ok','lost','error');
     if(cls)camPip.classList.add(cls);
     if(camStatusEl)camStatusEl.textContent=text;
-  }
-  function syncCameraLightClass(){
-    if(!camPip)return;
-    const screenLight=camActive&&cameraLightOn&&cameraFacing==='user';
-    camPip.classList.toggle('face-light',screenLight);
-    camPip.classList.toggle('torch',camTorchOn);
-  }
-  async function setTorch(on){
-    if(!cameraLightOn||cameraFacing!=='environment'||!camStream)return false;
-    if(camTorchBusy||camTorchOn===on)return camTorchOn;
-    const track=camStream.getVideoTracks&&camStream.getVideoTracks()[0];
-    if(!track||!track.applyConstraints)return false;
-    const caps=track.getCapabilities?track.getCapabilities():{};
-    if(!caps||!('torch' in caps)){camTorchSupported=false;return false;}
-    camTorchBusy=true;
-    try{
-      await track.applyConstraints({advanced:[{torch:on}]});
-      camTorchSupported=true;camTorchOn=on;syncCameraLightClass();
-      return true;
-    }catch(e){
-      camTorchSupported=false;camTorchOn=false;syncCameraLightClass();
-      return false;
-    }finally{camTorchBusy=false;}
-  }
-  function autoLightOnLost(lost){
-    if(cameraFacing!=='environment'||!cameraLightOn||!camTorchSupported)return;
-    if(lost){
-      camLostSince=camLostSince||now();
-      if(now()-camLostSince>1200&&!camTorchOn)setTorch(true);
-    }else{
-      camLostSince=0;
-      if(camTorchOn)setTorch(false);
-    }
   }
   function formTip(text){
     say(text);
@@ -1082,19 +1093,15 @@
     }
     poseModeActive=formCheckOn||cameraFacing==='environment';
     camActive=true;camReady=false;camError='';camState='up';smoothedDist=0;upBaseline=0;
-    repMinElbow=999;formTipUntil=0;formTipCount=0;camLostSince=0;camTorchSupported=false;camTorchOn=false;
+    repMinElbow=999;formTipUntil=0;formTipCount=0;
     if(camPip){
       camPip.classList.remove('hidden');
       camPip.classList.toggle('mirror',cameraFacing==='user');
-      syncCameraLightClass();
     }
     setCamStatus('lost','⏳ включаю камеру…');
     try{
       camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing},width:{ideal:320},height:{ideal:240}},audio:false});
       if(!camActive){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;return;} // режим сменили, пока ждали разрешение
-      const track=camStream.getVideoTracks&&camStream.getVideoTracks()[0];
-      const caps=track&&track.getCapabilities?track.getCapabilities():{};
-      camTorchSupported=!!(caps&&('torch' in caps));
       camVideo.srcObject=camStream;
       await camVideo.play().catch(()=>{});
       await (poseModeActive?ensurePoseLandmarker():ensureFaceLandmarker());
@@ -1112,11 +1119,9 @@
   function stopCamera(){
     camActive=false;camReady=false;
     if(camRaf)cancelAnimationFrame(camRaf);camRaf=0;
-    setTorch(false);
     if(camStream){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;}
     if(camVideo)camVideo.srcObject=null;
-    camTorchOn=false;camLostSince=0;
-    if(camPip){camPip.classList.add('hidden');camPip.classList.remove('mirror','face-light','torch');}
+    if(camPip){camPip.classList.add('hidden');camPip.classList.remove('mirror');}
     if(camCalibRing)camCalibRing.classList.add('hidden');
   }
 
@@ -1156,12 +1161,10 @@
     if(dist==null){
       const lost=now()-camLastFaceT>CAM_LOST_MS;
       if(lost){
-        autoLightOnLost(true);
-        setCamStatus('lost',poseModeActive?(camTorchOn?'🔦 ищу тело':'🔴 не вижу тело'):(camTorchOn?'🔦 ищу лицо':'🔴 не вижу лицо'));
+        setCamStatus('lost',poseModeActive?'🔴 не вижу тело':'🔴 не вижу лицо');
       }
       return;
     }
-    autoLightOnLost(false);
     camLastFaceT=now();
     smoothedDist=smoothedDist?smoothedDist+(dist-smoothedDist)*CAM_EMA:dist;
     if(now()<calibUntil||!upBaseline){
@@ -1202,7 +1205,7 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,cameraLightOn,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
     if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;programSets=clampProgramSets(c.programSets||5);goal=c.goal||0;
@@ -1213,11 +1216,11 @@
       startMax=c.startMax||7;autoProg=c.autoProg!==false;autoAdjust=!!c.autoAdjust;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
-      reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
-      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';cameraFacing=c.cameraFacing==='environment'?'environment':'user';cameraLightOn=c.cameraLightOn!==false;formCheckOn=!!c.formCheckOn;
+      reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';appLang=APP_LANGS.some(([code])=>code===c.appLang)?c.appLang:'ru';
+      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';cameraFacing=c.cameraFacing==='environment'?'environment':'user';formCheckOn=!!c.formCheckOn;
       if(Array.isArray(c.setGrips)&&c.setGrips.length===SET_COUNT)setGrips=c.setGrips.map(v=>{v=+v;return(Number.isInteger(v)&&v>=0&&v<GRIPS.length)?v:0;});
       musicApp=c.musicApp||'yandex';musicCustomUrl=c.musicCustomUrl||'';}
-    applyTheme();
+    applyTheme();applyAppLanguage();
     PLAN=buildPlan(startMax);if(week>51)week=51;programSets=clampProgramSets(programSets);
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
   }catch(e){storageOk=false;history={};}}
@@ -2010,9 +2013,8 @@
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
     [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
     [...$('cameraFacing').children].forEach(b=>b.classList.toggle('on',b.dataset.cam===cameraFacing));
+    initLangSelect();if($('appLang').value!==appLang)$('appLang').value=appLang;
     $('mediaCamera').textContent='📷 Сделать фото ('+(cameraFacing==='user'?'фронт':'основная')+')';
-    $('cameraLight').classList.toggle('on',cameraLightOn);
-    syncCameraLightClass();
     $('formCheck').classList.toggle('on',formCheckOn||cameraFacing==='environment');
     if($('musicApp').value!==musicApp)$('musicApp').value=musicApp;
     $('musicCustomRow').classList.toggle('hidden',musicApp!=='custom');
@@ -2115,14 +2117,15 @@
     formCheckOn=!formCheckOn;syncControls();persist();
     if(started&&!paused&&inputMode!=='tap'){stopCamera();startCamera();}
   });
-  $('cameraLight').addEventListener('click',()=>{
-    cameraLightOn=!cameraLightOn;
-    if(!cameraLightOn)setTorch(false);
-    syncControls();persist();
-  });
   $('musicApp').addEventListener('change',e=>{musicApp=e.target.value;syncControls();persist();});
   $('musicCustomUrl').addEventListener('change',e=>{musicCustomUrl=e.target.value.trim();syncControls();persist();});
   $('musicBtn').addEventListener('click',()=>{const u=musicUrl();if(!u)return;try{window.location.href=u;}catch(e){}});
+  $('appLang').addEventListener('change',e=>{
+    const next=e.target.value;
+    if(next===appLang)return;
+    appLang=next;persist();applyAppLanguage();
+    if(appLang==='ru')location.reload();
+  });
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
@@ -2279,7 +2282,7 @@
   // ---- Бэкап ----
   $('exportBtn').addEventListener('click',()=>{
     const data={v:2,history,pr,
-      cfg:{mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,cameraLightOn,formCheckOn,musicApp,musicCustomUrl},
+      cfg:{mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl},
       ach:[...earnedAchieve]};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
