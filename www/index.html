@@ -233,9 +233,14 @@
   #bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     min-height:45px;border:1px solid transparent;border-radius:14px;background:transparent;color:var(--muted);cursor:pointer;padding:6px 1px;
     font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:0;white-space:nowrap;transition:background .18s,border-color .18s,color .18s,transform .12s}
-  #bottomnav button .bi{font-size:20px;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .15s,transform .12s}
+  #bottomnav button[data-view="train"]{--nav-accent:#c8ff00}
+  #bottomnav button[data-view="grips"]{--nav-accent:#ffb15c}
+  #bottomnav button[data-view="progress"]{--nav-accent:#5cc8ff}
+  #bottomnav button[data-view="media"]{--nav-accent:#ff6fb1}
+  #bottomnav button[data-view="more"]{--nav-accent:#9fb7ff}
+  #bottomnav button .bi{font-size:20px;line-height:1;color:var(--nav-accent);filter:saturate(.8) opacity(.66);transition:filter .15s,transform .12s}
   #bottomnav button.on{color:var(--work);background:color-mix(in srgb,var(--work) 10%,transparent);border-color:color-mix(in srgb,var(--work) 28%,var(--line))}
-  #bottomnav button.on .bi{filter:none;transform:translateY(-1px)}
+  #bottomnav button.on .bi{filter:saturate(1.25) opacity(1);transform:translateY(-1px)}
   #bottomnav button:active{transform:translateY(1px)}
   #bottomnav button:active .bi{transform:scale(.88)}
   #bottomnav button .bl{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -300,6 +305,7 @@
   #camPip.ok{border-color:var(--work)} #camPip.lost{border-color:var(--gold)} #camPip.error{border-color:var(--rest)}
   #camPip video{width:100%;height:100%;object-fit:cover;display:block}
   #camPip.mirror video{transform:scaleX(-1)}
+  #poseGuide{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   #camStatus{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;font-family:'Oswald';font-weight:600;
     font-size:13px;letter-spacing:.3px;color:#fff;background:rgba(0,0,0,.55);text-align:center;line-height:1.3}
   #camCalibRing{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;--pct:0;
@@ -398,6 +404,16 @@
   /* ---- галерея прогресса (фото/видео) ---- */
   .mediatools{display:flex;gap:10px;align-items:stretch;margin-bottom:16px;flex-wrap:wrap}
   .mediatools .cdbtn{margin-top:0;flex:1 1 180px}
+  .statcards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 14px}
+  .statcard{border:1px solid var(--line);background:var(--surface1);border-radius:12px;padding:12px}
+  .statcard .k{font-family:'Oswald';font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .statcard .v{font-family:'Bebas Neue';font-size:34px;color:var(--ink);line-height:1;margin-top:4px}
+  .coachbox{border:1px solid color-mix(in srgb,var(--work) 35%,var(--line));background:color-mix(in srgb,var(--work) 8%,var(--surface1));border-radius:12px;padding:12px;font-family:'Oswald';font-size:15px;color:var(--ink);line-height:1.45}
+  .quickgrid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .quickgrid button{border:1px solid var(--line);background:var(--surface1);color:var(--ink);border-radius:10px;padding:9px 10px;font-family:'Oswald';font-weight:600}
+  .rpegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+  .rpegrid button{border:1px solid var(--line);background:var(--surface1);color:var(--ink);border-radius:10px;padding:10px;font-family:'Oswald';font-weight:700}
+  .rpegrid button.on{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
   .mediaempty{text-align:center;color:var(--muted);font-family:'Oswald';font-size:14.5px;padding:40px 12px;line-height:1.6}
   .mediagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
   .mediacell{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface1);border:1px solid var(--line);cursor:pointer}
@@ -554,7 +570,7 @@
     <div id="pauseOverlay"></div>
     <div id="pauseIcon"><div class="pp">II</div><div class="pl">Нажми для продолжения</div></div>
     <div id="amrapTimer"><div class="at" id="amrapCountdown">10:00</div><div class="al">ОСТАЛОСЬ ВРЕМЕНИ</div></div>
-    <div id="camPip" class="hidden"><video id="camVideo" muted playsinline autoplay></video><div id="camCalibRing" class="hidden"></div><div id="camStatus"></div></div>
+    <div id="camPip" class="hidden"><video id="camVideo" muted playsinline autoplay></video><canvas id="poseGuide"></canvas><div id="camCalibRing" class="hidden"></div><div id="camStatus"></div></div>
 
     <div id="hello"></div>
 
@@ -613,12 +629,26 @@
       </div>
       <div class="row"><label>Проверка техники (ИИ, бета)<br><span style="font-size:13.5px;color:var(--muted)">модель тела: считает движение, глубину и перекос</span></label><div class="tgl" id="formCheck"></div></div>
     </div>
+    <div class="grp" data-tab="train">
+      <h3>Профиль спортсмена</h3>
+      <div class="row"><label>Вес, кг</label><input type="number" id="profileWeight" class="vsel" min="25" max="250" step="1" style="max-width:120px"></div>
+      <div class="row"><label>Рост, см</label><input type="number" id="profileHeight" class="vsel" min="100" max="230" step="1" style="max-width:120px"></div>
+      <div class="row"><label>Возраст</label><input type="number" id="profileAge" class="vsel" min="10" max="100" step="1" style="max-width:120px"></div>
+      <div class="row"><label>Пол</label><select id="profileSex" class="vsel" style="max-width:150px"><option value="male">Мужчина</option><option value="female">Женщина</option></select></div>
+      <div class="row"><label>Образ жизни<br><span style="font-size:13.5px;color:var(--muted)">для нормы калорий</span></label><select id="profileActivity" class="vsel" style="max-width:190px"><option value="sedentary">Сидячий</option><option value="light">Малоподвижный</option><option value="walking">Ходячий</option><option value="active">Активный</option><option value="very">Очень активный</option></select></div>
+      <div class="row"><label>Питательная цель</label><select id="nutritionGoal" class="vsel" style="max-width:190px"><option value="fatloss">Жиросжигание</option><option value="maintain">Поддержание</option><option value="muscle">Набор мышц</option></select></div>
+      <div class="weekprev" id="profileCalc" style="margin-top:6px"></div>
+    </div>
     <div class="grp progonly" data-tab="train" id="grpProg">
       <h3>Программа · 52 недели</h3>
+      <div class="row"><label>Цель программы<br><span style="font-size:13.5px;color:var(--muted)">меняет отдых и расклад подходов</span></label>
+        <select id="programProfile" class="vsel" style="max-width:190px"></select>
+      </div>
+      <div class="weekprev" id="profileInfo" style="margin-top:0"></div>
       <div class="row"><label>Неделя</label>
         <div class="stepper"><button id="wMinus">−</button><div class="val" id="wVal">1</div><button id="wPlus">+</button></div>
       </div>
-      <div class="row"><label>Подходов<br><span style="font-size:13.5px;color:var(--muted)">общая цель недели сохраняется</span></label>
+      <div class="row"><label>Подходов<br><span style="font-size:13.5px;color:var(--muted)">план пересчитывается под уровень и цель</span></label>
         <div class="stepper"><button id="psMinus">−</button><div class="val" id="psVal">5</div><button id="psPlus">+</button></div>
       </div>
       <div class="weekprev" id="wPrev"></div>
@@ -627,7 +657,7 @@
       </div>
       <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:13.5px;color:var(--muted)">когда закрыты все цели подходов</span></label><div class="tgl on" id="auto"></div></div>
       <div class="row"><label>Авто-подбор нагрузки<br><span style="font-size:13.5px;color:var(--muted)">2 тренировки подряд ≥115% — план чуть растёт; &lt;80% — повторяем неделю</span></label><div class="tgl" id="autoAdjust"></div></div>
-      <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">🎯 День теста · пересчитать под себя</button>
+      <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">⚡ Замерить максимум</button>
       <div class="weekprev" id="maxInfo" style="margin-top:8px"></div>
     </div>
     <div class="grp freeonly" data-tab="train" id="grpFree">
@@ -686,6 +716,8 @@
       <div class="row" style="align-items:flex-start"><label>Дни тренировок</label>
         <div id="days" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end"></div>
       </div>
+      <div class="weekprev" id="daySuggest" style="margin-top:0"></div>
+      <button class="iconbtn" id="applyDays" style="width:100%;height:42px;margin-bottom:8px">Применить рекомендованные дни</button>
       <div class="row"><label>Напоминание</label><div class="tgl" id="remind"></div></div>
       <div class="row"><label>Время напоминания</label><input type="time" id="remTime" class="vsel" value="08:00" style="max-width:120px"></div>
       <div class="weekprev" id="remStatus" style="margin-top:0"></div>
@@ -696,6 +728,7 @@
       <div class="row"><label>Язык интерфейса<br><span style="font-size:13.5px;color:var(--muted)">перевод через интернет, включая узбекский и туркменский</span></label>
         <select id="appLang" class="vsel" style="max-width:190px"></select>
       </div>
+      <div class="row"><label>Офлайн-язык<br><span style="font-size:13.5px;color:var(--muted)" id="langStatus">Русский встроен</span></label><button class="iconbtn" id="langDownload">Скачать</button></div>
       <div class="themegrid" id="theme">
         <button data-th="dark" class="on"><span class="sw" style="--sb:#0a0b0d;--sw:#c8ff00"></span>Тёмная</button>
         <button data-th="light"><span class="sw" style="--sb:#ecefe8;--sw:#5f7d00"></span>Светлая</button>
@@ -720,6 +753,13 @@
       </div>
     </div>
     <div class="grp" data-tab="hist">
+      <h3>Паспорт прогресса</h3>
+      <div class="statcards" id="progressCards"></div>
+      <div class="coachbox" id="progressCoach"></div>
+      <div class="quickgrid">
+        <button id="progressMaxTest">⚡ Замерить максимум</button>
+        <button id="coachOpen">AI-тренер</button>
+      </div>
       <h3>Ачивки</h3>
       <div id="achList" style="display:flex;flex-wrap:wrap;gap:10px;padding:4px 0"></div>
       <div id="graph"></div>
@@ -746,11 +786,13 @@
       <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:14px">Добавляй фото и видео своих результатов и следи, как меняешься. Всё хранится только на твоём телефоне — ничего не загружается в сеть.</div>
       <div class="mediatools">
         <button class="cdbtn" id="mediaCamera">📷 Сделать фото</button>
+        <button class="cdbtn" id="techRecord">🎥 Записать технику</button>
         <button class="cdbtn" id="mediaAdd">＋ Добавить фото / видео</button>
         <div class="seg" id="mediaMode"><button data-mm="grid" class="on">Лента</button><button data-mm="compare">До / После</button></div>
       </div>
       <input type="file" id="mediaFile" accept="image/*,video/*" style="display:none">
       <input type="file" id="mediaCameraFile" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="techVideoFile" accept="video/*" capture="environment" style="display:none">
       <div id="mediaEmpty" class="mediaempty">Пока пусто. Добавь первое фото прогресса 📸</div>
       <div id="mediaGrid" class="mediagrid"></div>
       <div id="mediaCompare" class="mediacompare hidden">
@@ -775,6 +817,25 @@
   </div>
 </div>
 
+<!-- AI-тренер -->
+<div id="coachView" class="overlay">
+  <div class="phead"><h2>AI-ТРЕНЕР</h2><button class="iconbtn" id="coachClose">ЗАКРЫТЬ</button></div>
+  <div class="pbody">
+    <div class="row"><label>Характер</label><select id="coachTone" class="vsel" style="max-width:190px"><option value="calm">Спокойный</option><option value="care">Заботливый</option><option value="strict">Жёсткий</option><option value="angry">Разгневанный</option></select></div>
+    <div class="coachbox" id="coachAnswer"></div>
+    <div class="quickgrid" id="coachQuick">
+      <button data-q="why_easy">Почему программа легче?</button>
+      <button data-q="why_rest">Почему такой отдых?</button>
+      <button data-q="progress">Какой прогресс?</button>
+      <button data-q="calories">Сколько калорий?</button>
+      <button data-q="missed">Я пропустил</button>
+      <button data-q="technique">Как улучшить технику?</button>
+    </div>
+    <div class="row" style="align-items:flex-start"><label>Спросить</label><input id="coachInput" class="vsel" placeholder="например: почему тяжело?" style="max-width:220px"></div>
+    <button class="cdbtn" id="coachAsk" style="width:100%">Спросить тренера</button>
+  </div>
+</div>
+
 <!-- Итоги -->
 <div id="summary" class="overlay">
   <div class="phead"><h2>ТРЕНИРОВКА</h2></div>
@@ -783,12 +844,12 @@
 
 <!-- День теста -->
 <div id="test" class="overlay">
-  <div class="phead"><h2>ДЕНЬ ТЕСТА</h2><button class="iconbtn" id="testClose">ЗАКРЫТЬ</button></div>
+  <div class="phead"><h2>ЗАМЕР МАКСИМУМА</h2><button class="iconbtn" id="testClose">ЗАКРЫТЬ</button></div>
   <div id="testTap">
     <div class="state" style="margin-bottom:6px">МАКСИМУМ ЗА ПОДХОД</div>
     <div class="count" id="testCount" style="color:var(--gold)">0</div>
     <div class="caption">КАСАЙСЯ НОСОМ ДО ОТКАЗА</div>
-    <p style="font-family:'Oswald';font-weight:400;font-size:15px;color:var(--muted);max-width:300px;margin:14px auto 0;line-height:1.5">Отожмись максимум раз за один подход. Нажми «Готово», когда больше не можешь — программа пересчитается под твой уровень.</p>
+    <p style="font-family:'Oswald';font-weight:400;font-size:15px;color:var(--muted);max-width:300px;margin:14px auto 0;line-height:1.5">Отожмись максимум раз за один подход. Рекорд сохранится отдельно, а программу можно будет пересчитать с запасом.</p>
   </div>
   <div id="testAction"><button id="testUndo">−1</button><button id="testDone">ГОТОВО ▸</button></div>
 </div>
@@ -828,7 +889,7 @@
   const $=id=>document.getElementById(id), now=()=>performance.now();
 
   // масштабированная программа (старт с 7), 52 недели × 5 базовых подходов.
-  // Пользовательское число подходов пересчитывается из базовой строки с сохранением общей цели недели.
+  // Пользовательское число подходов пересчитывается под рабочий максимум и цель, без прыжков выше уровня.
   // программа строится под твой максимум: старт = твой максимум, финиш = цифры схемы
   function buildPlan(sm){
     sm=Math.max(1,Math.min(60,Math.round(sm)));
@@ -852,12 +913,37 @@
   let PLAN=buildPlan(7);
   const PROGRAM_SET_MIN=1, PROGRAM_SET_MAX=12;
   let programSets=5;
+  let programProfile='balanced';
+  const PROGRAM_PROFILES={
+    endurance:{name:'Выносливость',rest:45000,sets:6,intensity:.72,desc:'30-60 сек отдыха · много повторов, плотная работа'},
+    burn:{name:'Жиросжигание',rest:30000,sets:7,intensity:.66,desc:'30 сек отдыха · высокий пульс, короткие паузы'},
+    balanced:{name:'Универсальная',rest:75000,sets:5,intensity:.86,desc:'60-90 сек отдыха · хороший вариант по умолчанию'},
+    muscle:{name:'Сила и мышцы',rest:150000,sets:4,intensity:.92,desc:'2-3 мин отдыха · тяжёлые подходы почти до отказа'},
+    heavy:{name:'Тяжёлая силовая',rest:240000,sets:3,intensity:1,desc:'3-5 мин отдыха · редкий режим для максимальных сетов'},
+    custom:{name:'Своя настройка',rest:null,sets:null,intensity:.9,desc:'ручной отдых и количество подходов'}
+  };
+  function applyProgramProfile(id){
+    const p=PROGRAM_PROFILES[id]||PROGRAM_PROFILES.balanced;
+    programProfile=id in PROGRAM_PROFILES?id:'balanced';
+    if(p.rest!=null)programRest=p.rest;
+    if(p.sets!=null)programSets=clampProgramSets(p.sets);
+    programRest=Math.max(programRest,minRestForSets(programSets));
+  }
   const basePlanSum=w=>PLAN[w].reduce((a,b)=>a+b,0);
   const clampProgramSets=(n,w=week)=>Math.max(PROGRAM_SET_MIN,Math.min(PROGRAM_SET_MAX,basePlanSum(w),Math.round(+n||5)));
-  function rebalancePlanRow(row,setCount){
+  const maxSetForWeek=w=>Math.max(1,PLAN[w][0]||startMax||1);
+  const minRestForSets=n=>n<=3?180000:n===4?120000:n===5?60000:30000;
+  function planVolumeTarget(baseRow,setCount,maxSet,profile){
+    const baseTotal=baseRow.reduce((a,b)=>a+b,0);
+    const p=PROGRAM_PROFILES[profile]||PROGRAM_PROFILES.custom;
+    const ratio=setCount/baseRow.length;
+    const density=profile==='endurance'||profile==='burn'?Math.min(1.08,0.9+ratio*0.12):profile==='balanced'?Math.min(1,0.78+ratio*0.22):profile==='muscle'?Math.min(.88,0.62+ratio*0.18):profile==='heavy'?Math.min(.72,0.5+ratio*0.14):Math.min(1,ratio);
+    return Math.max(setCount,Math.min(baseTotal,Math.round(baseTotal*density),maxSet*setCount));
+  }
+  function rebalancePlanRow(row,setCount,w=week){
     setCount=Math.max(1,Math.round(setCount));
-    if(setCount===row.length)return row.slice();
-    const total=row.reduce((a,b)=>a+b,0);
+    const maxSet=maxSetForWeek(w);
+    const total=planVolumeTarget(row,setCount,maxSet,programProfile);
     if(total<=0)return Array(setCount).fill(0);
     if(setCount>=total)return Array.from({length:setCount},(_,i)=>i<total?1:0);
     const weights=[];
@@ -868,20 +954,20 @@
     }
     const ws=weights.reduce((a,b)=>a+b,0);
     const raw=weights.map(w=>w/ws*total);
-    const out=raw.map(v=>Math.max(1,Math.floor(v)));
+    const out=raw.map(v=>Math.min(maxSet,Math.max(1,Math.floor(v))));
     let diff=total-out.reduce((a,b)=>a+b,0);
-    raw.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>b.f-a.f).forEach(x=>{if(diff>0){out[x.i]++;diff--;}});
+    raw.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>b.f-a.f).forEach(x=>{if(diff>0&&out[x.i]<maxSet){out[x.i]++;diff--;}});
     for(let i=out.length-1;diff<0&&i>=0;i--)if(out[i]>1){out[i]--;diff++;}
     return out;
   }
-  const planForWeek=w=>rebalancePlanRow(PLAN[w],clampProgramSets(programSets,w));
-  const planSum=w=>basePlanSum(w);
+  const planForWeek=w=>rebalancePlanRow(PLAN[w],clampProgramSets(programSets,w),w);
+  const planSum=w=>planForWeek(w).reduce((a,b)=>a+b,0);
   const currentPlan=()=>planForWeek(week);
   const currentTarget=()=>currentPlan()[setIndex]||0;
   const currentSetCount=()=>currentPlan().length;
 
   // настройки
-  let mode='program', week=0, programRest=60000;
+  let mode='program', week=0, programRest=75000;
   let goal=0, restThreshold=4000, targetRest=0;
   let soundOn=true, vibeOn=true, voiceOn=true;
   let voiceName='svetlana', voiceEnergy='hype';
@@ -896,6 +982,25 @@
   let musicApp='yandex', musicCustomUrl='';
   const MUSIC_PRESETS={spotify:'spotify:',yandex:'yandexmusic://',vk:'vkmusic://',ytmusic:'youtubemusic://'};
   function musicUrl(){return musicApp==='custom'?musicCustomUrl:(MUSIC_PRESETS[musicApp]||'');}
+  let profileWeight=80, profileHeight=175, profileAge=30, profileSex='male', profileActivity='light', nutritionGoal='maintain', coachTone='care';
+  let lastRpe='', lastRpeDate='', sessionRpe='';
+  const ACTIVITY_FACTORS={sedentary:1.2,light:1.35,walking:1.5,active:1.7,very:1.9};
+  const ACTIVITY_NAMES={sedentary:'сидячий',light:'малоподвижный',walking:'ходячий',active:'активный',very:'очень активный'};
+  function bmi(){const h=profileHeight/100;return h?profileWeight/(h*h):0;}
+  function bmr(){return Math.round(10*profileWeight+6.25*profileHeight-5*profileAge+(profileSex==='male'?5:-161));}
+  function tdee(){return Math.round(bmr()*(ACTIVITY_FACTORS[profileActivity]||1.35));}
+  function bodyFatPct(){const sex=profileSex==='male'?1:0;return Math.max(5,Math.min(60,1.2*bmi()+0.23*profileAge-10.8*sex-5.4));}
+  function nutritionRange(){const t=tdee();if(nutritionGoal==='fatloss')return [Math.round(t*.8),Math.round(t*.9)];if(nutritionGoal==='muscle')return [Math.round(t*1.05),Math.round(t*1.15)];return [t,t];}
+  function profileSummary(){
+    const range=nutritionRange(), fat=bodyFatPct(), fatKg=Math.round(profileWeight*fat)/100;
+    return 'ИМТ '+bmi().toFixed(1)+' · жир ~'+fat.toFixed(0)+'% ('+fatKg.toFixed(1)+' кг) · BMR '+bmr()+' · норма '+tdee()+' ккал/день · цель '+range[0]+(range[1]!==range[0]?'–'+range[1]:'')+' ккал.';
+  }
+  function workoutKcal(total,mins){
+    const p=PROGRAM_PROFILES[programProfile]||PROGRAM_PROFILES.balanced;
+    const met=programProfile==='burn'?7:programProfile==='endurance'?6:programProfile==='balanced'?5.2:programProfile==='muscle'?5:4.2;
+    const timeH=Math.max(mins||0,total?total/35:0)/60;
+    return Math.round(met*profileWeight*timeH);
+  }
   let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
   let theme='dark';
   let appLang='ru';
@@ -904,6 +1009,17 @@
   ];
   const TRANSLATE_CODES=APP_LANGS.filter(([c])=>c!=='ru').map(([c])=>c).join(',');
   let translateScriptLoading=false;
+  let offlineLangs=[];
+  const OFFLINE_LANG_CODES=['ru','en','uz','tk'];
+  function loadOfflineLangs(){try{offlineLangs=JSON.parse(localStorage.getItem('pushup_offline_langs'))||['ru'];}catch(e){offlineLangs=['ru'];}}
+  function saveOfflineLangs(){try{localStorage.setItem('pushup_offline_langs',JSON.stringify([...new Set(offlineLangs.concat('ru'))]));}catch(e){}}
+  function syncLangStatus(){
+    const st=$('langStatus'), btn=$('langDownload');if(!st||!btn)return;
+    if(appLang==='ru'){st.textContent='Русский встроен';btn.disabled=true;btn.textContent='Встроен';return;}
+    if(offlineLangs.includes(appLang)){st.textContent='Язык доступен офлайн как локальный пакет интерфейса';btn.disabled=true;btn.textContent='Офлайн';return;}
+    if(OFFLINE_LANG_CODES.includes(appLang)){st.textContent='Можно скачать локальный пакет интерфейса';btn.disabled=false;btn.textContent='Скачать';return;}
+    st.textContent='Этот язык пока работает через онлайн-перевод';btn.disabled=true;btn.textContent='Онлайн';
+  }
   function initLangSelect(){
     const sel=$('appLang');if(!sel||sel.children.length)return;
     sel.innerHTML=APP_LANGS.map(([code,name])=>'<option value="'+code+'">'+name+'</option>').join('');
@@ -939,6 +1055,7 @@
     initLangSelect();
     const sel=$('appLang');if(sel&&sel.value!==appLang)sel.value=appLang;
     setTranslateCookie(appLang);
+    syncLangStatus();
     if(appLang!=='ru')loadGoogleTranslate();
   }
   let amrapMin=10; // AMRAP длительность в минутах
@@ -1033,7 +1150,7 @@
     g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.start(t);o.stop(t+.06);}catch(e){}}
 
   // ---- КАМЕРА (счёт по носу через FaceLandmarker, либо разбор техники через PoseLandmarker) ----
-  const camVideo=$('camVideo'), camPip=$('camPip'), camStatusEl=$('camStatus'), camCalibRing=$('camCalibRing');
+  const camVideo=$('camVideo'), camPip=$('camPip'), camStatusEl=$('camStatus'), camCalibRing=$('camCalibRing'), poseGuide=$('poseGuide');
   let faceLandmarker=null, faceInitPromise=null;
   let poseLandmarker=null, poseInitPromise=null, poseModeActive=false;
   let camStream=null, camRaf=0, camActive=false, camReady=false, camError='';
@@ -1054,6 +1171,28 @@
     if(camPip){camPip.classList.remove('ok','lost','error');camPip.classList.add('ok');}
     if(camStatusEl)camStatusEl.textContent='💡 '+text;
     formTipUntil=now()+2500;
+  }
+
+  function clearPoseGuide(){
+    if(!poseGuide)return;
+    const ctx=poseGuide.getContext('2d');
+    if(ctx)ctx.clearRect(0,0,poseGuide.width||poseGuide.clientWidth,poseGuide.height||poseGuide.clientHeight);
+  }
+  function drawPoseGuide(lm){
+    if(!poseGuide||!lm)return;
+    const dpr=window.devicePixelRatio||1, w=poseGuide.clientWidth||92, h=poseGuide.clientHeight||122;
+    if(poseGuide.width!==Math.round(w*dpr)||poseGuide.height!==Math.round(h*dpr)){
+      poseGuide.width=Math.round(w*dpr);poseGuide.height=Math.round(h*dpr);
+    }
+    const ctx=poseGuide.getContext('2d');if(!ctx)return;
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+    const p=i=>{const v=lm[i];return v?{x:(cameraFacing==='user'?1-v.x:v.x)*w,y:v.y*h,ok:(v.visibility==null||v.visibility>.35)}:null;};
+    const line=(a,b,color='#c8ff00',lw=2)=>{if(!a||!b||!a.ok||!b.ok)return;ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();};
+    const dot=a=>{if(!a||!a.ok)return;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(a.x,a.y,2.6,0,Math.PI*2);ctx.fill();};
+    const ls=p(11),rs=p(12),le=p(13),re=p(14),lw=p(15),rw=p(16),lh=p(23),rh=p(24);
+    line(ls,rs,'#ffffff',1.5);line(lh,rh,'#ffffff',1.5);
+    line(ls,le);line(le,lw);line(rs,re);line(re,rw);line(ls,lh,'#7dd3fc',1.8);line(rs,rh,'#7dd3fc',1.8);
+    [ls,rs,le,re,lw,rw,lh,rh].forEach(dot);
   }
 
   async function ensureFaceLandmarker(){
@@ -1123,6 +1262,7 @@
     if(camVideo)camVideo.srcObject=null;
     if(camPip){camPip.classList.add('hidden');camPip.classList.remove('mirror');}
     if(camCalibRing)camCalibRing.classList.add('hidden');
+    clearPoseGuide();
   }
 
   // угол в локте (плечо-локоть-запястье), градусы
@@ -1149,6 +1289,7 @@
     if(poseModeActive){
       const lm=res&&res.landmarks&&res.landmarks[0];
       if(lm){
+        drawPoseGuide(lm);
         const ls=lm[11],rs=lm[12],le=lm[13],re=lm[14],lw=lm[15],rw=lm[16];
         dist=Math.hypot(ls.x-rs.x,ls.y-rs.y);
         elbow=Math.min(elbowAngleDeg(ls,le,lw),elbowAngleDeg(rs,re,rw));
@@ -1159,6 +1300,7 @@
       if(lm){const a=lm[33],b=lm[263];dist=Math.hypot(a.x-b.x,a.y-b.y);} // внешние уголки глаз
     }
     if(dist==null){
+      clearPoseGuide();
       const lost=now()-camLastFaceT>CAM_LOST_MS;
       if(lost){
         setCamStatus('lost',poseModeActive?'🔴 не вижу тело':'🔴 не вижу лицо');
@@ -1205,10 +1347,10 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programProfile,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl,profileWeight,profileHeight,profileAge,profileSex,profileActivity,nutritionGoal,coachTone,lastRpe,lastRpeDate}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
-    if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;programSets=clampProgramSets(c.programSets||5);goal=c.goal||0;
+    if(c){mode=c.mode||'program';week=c.week||0;programProfile=PROGRAM_PROFILES[c.programProfile]?c.programProfile:'balanced';programRest=c.programRest||PROGRAM_PROFILES[programProfile].rest||60000;programSets=clampProgramSets(c.programSets||PROGRAM_PROFILES[programProfile].sets||5);goal=c.goal||0;
       restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
       voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'svetlana';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
@@ -1219,9 +1361,12 @@
       reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';appLang=APP_LANGS.some(([code])=>code===c.appLang)?c.appLang:'ru';
       amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';cameraFacing=c.cameraFacing==='environment'?'environment':'user';formCheckOn=!!c.formCheckOn;
       if(Array.isArray(c.setGrips)&&c.setGrips.length===SET_COUNT)setGrips=c.setGrips.map(v=>{v=+v;return(Number.isInteger(v)&&v>=0&&v<GRIPS.length)?v:0;});
-      musicApp=c.musicApp||'yandex';musicCustomUrl=c.musicCustomUrl||'';}
-    applyTheme();applyAppLanguage();
-    PLAN=buildPlan(startMax);if(week>51)week=51;programSets=clampProgramSets(programSets);
+      musicApp=c.musicApp||'yandex';musicCustomUrl=c.musicCustomUrl||'';
+      profileWeight=Math.max(25,Math.min(250,+c.profileWeight||80));profileHeight=Math.max(100,Math.min(230,+c.profileHeight||175));profileAge=Math.max(10,Math.min(100,+c.profileAge||30));
+      profileSex=c.profileSex==='female'?'female':'male';profileActivity=ACTIVITY_FACTORS[c.profileActivity]?c.profileActivity:'light';nutritionGoal=['fatloss','maintain','muscle'].includes(c.nutritionGoal)?c.nutritionGoal:'maintain';
+      coachTone=['calm','care','strict','angry'].includes(c.coachTone)?c.coachTone:'care';lastRpe=c.lastRpe||'';lastRpeDate=c.lastRpeDate||'';}
+    loadOfflineLangs();applyTheme();applyAppLanguage();
+    PLAN=buildPlan(startMax);if(week>51)week=51;programSets=clampProgramSets(programSets);programRest=Math.max(programRest,minRestForSets(programSets));
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
   }catch(e){storageOk=false;history={};}}
   const sessMax=()=>Math.max(0,repsThisSet,...sets.map(s=>s.reps));
@@ -1240,6 +1385,9 @@
   }
   const DOW=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const DOW_ORDER=[1,2,3,4,5,6,0]; // Пн..Вс
+  const PROFILE_DAYS={endurance:[1,2,4,6],burn:[1,2,4,5,6],balanced:[1,3,5],muscle:[1,3,5],heavy:[1,4],custom:[1,3,5]};
+  const recommendedDays=()=>PROFILE_DAYS[programProfile]||PROFILE_DAYS.custom;
+  const daysLabel=a=>a.map(d=>DOW[d]).join(' · ');
   const isTrain=dow=>trainingDays.includes(dow);
   function nextTrain(){for(let i=1;i<=7;i++){const d=new Date();d.setDate(d.getDate()+i);if(isTrain(d.getDay()))return DOW[d.getDay()];}return '';}
   function weekCells(){ // понедельник..воскресенье текущей недели
@@ -1740,7 +1888,8 @@
     let heroTag,heroMeta,heroTitle,heroNums,heroSub;
     if(mode==='program'){
       const row=currentPlan();
-      heroTag='Сегодня';heroMeta='неделя '+(week+1)+' из 52';heroTitle='Тренировка · '+row.length+' '+pluralSets(row.length);
+      const p=PROGRAM_PROFILES[programProfile]||PROGRAM_PROFILES.custom;
+      heroTag=p.name;heroMeta='неделя '+(week+1)+' из 52';heroTitle='Тренировка · '+row.length+' '+pluralSets(row.length);
       heroNums=row.map((n,i)=>'<span class="hn'+(i===0?' first':'')+'">'+n+'</span>').join('');
       heroSub='всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+' · '+modeLabel;
     }else if(mode==='amrap'){
@@ -1774,6 +1923,7 @@
   // ---- завершение тренировки + итоги ----
   function finishWorkout(){
     if(!started){return;}
+    sessionRpe='';
     finished=true;
     stopCamera();
     const all=sets.slice();if(repsThisSet>0)all.push({reps:repsThisSet,target:mode==='program'?currentTarget():(goal||null)});
@@ -1804,6 +1954,8 @@
       '<div><div class="k">Темп /мин</div><div class="v">'+tempo+'</div></div></div>';
     html+='<div class="chips" style="justify-content:center;margin-bottom:14px">'+chips+'</div>';
     html+='<div class="sumnote">'+note+'<br>Сегодня всего будет: <b>'+(committed.reps+total)+'</b> · рекорд подхода: <b>'+Math.max(pr,best)+'</b></div>';
+    html+='<div class="coachbox" style="margin:0 0 12px">Как ощущалась нагрузка?<div class="rpegrid" id="rpeGrid">'+
+      '<button data-rpe="easy">Легко</button><button data-rpe="ok">Нормально</button><button data-rpe="hard">Тяжело</button><button data-rpe="very">Очень тяжело</button><button data-rpe="bad">Плохо себя чувствую</button></div></div>';
     html+='<div class="sumbtns">';
     if(mode==='program'){
       const canAdvance=week<51;
@@ -1885,6 +2037,7 @@
         },'image/png');
       }catch(err){try{if(navigator.share)await navigator.share({text:sumText});else{await navigator.clipboard.writeText(sumText);alert('Скопировано!');}}catch(e){}}
     };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true,pct);
+    $('rpeGrid').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sessionRpe=b.dataset.rpe;lastRpe=sessionRpe;lastRpeDate=tkey();[...$('rpeGrid').children].forEach(x=>x.classList.toggle('on',x===b));persist();});
   }
 
   function commitSession(best,advance,pct){
@@ -1893,7 +2046,13 @@
     if(best>pr)pr=best;
     saveToday();
     if(mode==='program'&&pct!=null&&history[tkey()])history[tkey()].perf=pct;
+    if(history[tkey()])history[tkey()].rpe=sessionRpe||'';
     persist();
+    if(mode==='program'&&sessionRpe){
+      if(sessionRpe==='easy'&&pct!=null&&pct>=100&&programRest>minRestForSets(programSets))programRest=Math.max(minRestForSets(programSets),programRest-15000);
+      if(sessionRpe==='hard')programRest=Math.min(300000,programRest+15000);
+      if(sessionRpe==='very'||sessionRpe==='bad'){advance=false;programRest=Math.min(300000,programRest+30000);}
+    }
     if(advance&&week<51){
       week++;
       if(mode==='program'&&autoAdjust){
@@ -1922,7 +2081,7 @@
     $('summary').classList.remove('open');
     started=false;finished=false;reps=0;repsThisSet=0;sets=[];exerciseMs=0;restMs=0;lastTap=0;wasResting=false;
     setIndex=0;phase='work';goalHit=false;restAlert=false;lastCountSec=99;counting=false;warmupDone=false;
-    paused=false;pauseMs=0;amrapEndTime=0;
+    paused=false;pauseMs=0;amrapEndTime=0;sessionRpe='';
     tap.classList.remove('work','rest','paused');
     core.classList.add('leave');
     setTimeout(()=>{
@@ -1971,7 +2130,7 @@
     [...$('bottomnav').children].forEach(b=>b.classList.toggle('on',b.dataset.view===view));
     if(view==='train'){ $('panel').classList.remove('open'); if(!started)renderHello(); return; }
     // остальные три — как «страницы» в оверлее #panel
-    syncControls();renderGraph();renderHist();
+    syncControls();renderGraph();renderHist();renderProgressPanel();
     const tb=$('tabbar'), title=$('panelTitle');
     if(view==='grips'){ tb.style.display='none'; title.textContent='Хваты'; showTab('grips'); }
     else if(view==='progress'){ tb.style.display='none'; title.textContent='Прогресс'; showTab('hist'); }
@@ -2013,6 +2172,10 @@
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
     [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
     [...$('cameraFacing').children].forEach(b=>b.classList.toggle('on',b.dataset.cam===cameraFacing));
+    const profSel=$('programProfile');
+    if(profSel&&!profSel.children.length)profSel.innerHTML=Object.entries(PROGRAM_PROFILES).map(([id,p])=>'<option value="'+id+'">'+p.name+'</option>').join('');
+    if(profSel&&profSel.value!==programProfile)profSel.value=programProfile;
+    $('profileInfo').innerHTML=(PROGRAM_PROFILES[programProfile]||PROGRAM_PROFILES.custom).desc;
     initLangSelect();if($('appLang').value!==appLang)$('appLang').value=appLang;
     $('mediaCamera').textContent='📷 Сделать фото ('+(cameraFacing==='user'?'фронт':'основная')+')';
     $('formCheck').classList.toggle('on',formCheckOn||cameraFacing==='environment');
@@ -2020,6 +2183,12 @@
     $('musicCustomRow').classList.toggle('hidden',musicApp!=='custom');
     $('musicCustomUrl').value=musicCustomUrl;
     $('musicBtn').classList.toggle('hidden',musicApp==='off'||!musicUrl());
+    $('profileWeight').value=profileWeight;$('profileHeight').value=profileHeight;$('profileAge').value=profileAge;
+    if($('profileSex').value!==profileSex)$('profileSex').value=profileSex;
+    if($('profileActivity').value!==profileActivity)$('profileActivity').value=profileActivity;
+    if($('nutritionGoal').value!==nutritionGoal)$('nutritionGoal').value=nutritionGoal;
+    if($('coachTone')&&$('coachTone').value!==coachTone)$('coachTone').value=coachTone;
+    $('profileCalc').innerHTML=profileSummary();
     $('wVal').textContent=week+1;
     programSets=clampProgramSets(programSets);
     $('psVal').textContent=programSets;
@@ -2040,6 +2209,7 @@
     renderGrips();renderSetGrips();syncGripAssignUI();
     $('remind').classList.toggle('on',remindOn);
     $('remTime').value=reminderTime;
+    $('daySuggest').innerHTML='Рекомендация для цели: <b>'+daysLabel(recommendedDays())+'</b>. Сейчас: '+daysLabel(trainingDays);
     if(!$('days').children.length){
       $('days').innerHTML=DOW_ORDER.map(d=>'<button class="daychip" data-d="'+d+'">'+DOW[d]+'</button>').join('');
       [...$('days').children].forEach(b=>b.addEventListener('click',()=>{const d=+b.dataset.d;
@@ -2058,7 +2228,7 @@
     [...$('theme').children].forEach(b=>b.classList.toggle('on',b.dataset.th===theme));
     $('auto').classList.toggle('on',autoProg);
     $('autoAdjust').classList.toggle('on',autoAdjust);
-    $('maxInfo').innerHTML='Текущий уровень: максимум <b>'+startMax+'</b> · неделя 1 = '+planForWeek(0).join('·');
+    $('maxInfo').innerHTML='Рекорд <b>'+pr+'</b> · рабочий уровень <b>'+startMax+'</b> · неделя 1 = '+planForWeek(0).join('·');
     [...$('vibe2').children].forEach(b=>b.classList.toggle('on',b.dataset.e===voiceEnergy));
     if($('voiceSel').value!==voiceName)$('voiceSel').value=voiceName;
     applyModeUI();
@@ -2073,6 +2243,35 @@
     keys.forEach(k=>{const r=history[k];html+='<div class="hrow'+(k===tk?' today':'')+'"><div class="d">'+(k===tk?'Сегодня':dshort(k))+
       '</div><div class="n">'+r.reps+'</div><div class="s">'+r.sets+'</div><div class="t">'+fmt(r.workMs)+'</div></div>';});
     h.innerHTML=html;
+  }
+  function progressStats(){
+    const vals=Object.entries(history).filter(([,v])=>v&&v.reps>0).sort();
+    const total=vals.reduce((a,[,v])=>a+(v.reps||0),0);
+    const days=vals.length, best=Math.max(pr,0,...vals.map(([,v])=>v.best||0));
+    const work=vals.reduce((a,[,v])=>a+(v.workMs||0),0), rest=vals.reduce((a,[,v])=>a+(v.restMs||0),0);
+    const first=vals[0]?new Date(vals[0][0]):null;
+    const since=first?Math.max(1,Math.floor((new Date()-first)/86400000)+1):0;
+    const kcal=vals.reduce((a,[,v])=>a+workoutKcal(v.reps||0,(v.workMs||0)/60000),0);
+    return {total,days,best,work,rest,since,kcal,avg:days?Math.round(total/days):0};
+  }
+  function coachText(topic){
+    const s=progressStats(), p=PROGRAM_PROFILES[programProfile]||PROGRAM_PROFILES.balanced;
+    const tone={calm:'Спокойно. ',care:'Я на твоей стороне. ',strict:'Дисциплина решает. ',angry:'Так, без фокусов. '}[coachTone]||'';
+    if(topic==='why_rest')return tone+'Отдых сейчас '+ms2(programRest/1000)+'. При '+programSets+' подходах минимум '+ms2(minRestForSets(programSets)/1000)+', чтобы не делать максимум без восстановления.';
+    if(topic==='why_easy')return tone+'Рекорд '+pr+', рабочий уровень '+startMax+'. Максимум остаётся рекордом, а программа держит запас, чтобы ты рос стабильно.';
+    if(topic==='progress')return tone+'Всего '+s.total+' повторов за '+s.days+' тренировок. Лучший подход '+s.best+', средняя тренировка '+s.avg+' повторов.';
+    if(topic==='calories')return tone+'Норма примерно '+tdee()+' ккал/день. Целевой коридор: '+nutritionRange().join('–')+' ккал. Тренировка сейчас даст около '+workoutKcal(planSum(week),20)+' ккал.';
+    if(topic==='missed')return tone+'Пропуск не катастрофа. Если пропусков много, оставим неделю и вернём стабильность без рывков.';
+    if(topic==='technique')return tone+'Техника важнее рекорда: корпус ровный, глубина стабильная, боль — стоп. Включи проверку техники или основную камеру — поверх видео появятся линии плеч, рук и корпуса.';
+    return tone+'Сейчас цель: '+p.name+', '+programSets+' подходов, отдых '+ms2(programRest/1000)+'. Я смотрю на уровень, историю, дни и ощущения.';
+  }
+  function renderProgressPanel(){
+    const box=$('progressCards');if(!box)return;
+    const s=progressStats();
+    box.innerHTML=[
+      ['Всего',s.total],['Дней',s.days],['Рекорд',s.best],['Средняя',s.avg],['Ккал',s.kcal],['Стаж',s.since+' дн.']
+    ].map(([k,v])=>'<div class="statcard"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join('');
+    $('progressCoach').textContent=coachText('progress');
   }
   function renderGraph(){
     const g=$('graph');if(!g)return;
@@ -2120,23 +2319,50 @@
   $('musicApp').addEventListener('change',e=>{musicApp=e.target.value;syncControls();persist();});
   $('musicCustomUrl').addEventListener('change',e=>{musicCustomUrl=e.target.value.trim();syncControls();persist();});
   $('musicBtn').addEventListener('click',()=>{const u=musicUrl();if(!u)return;try{window.location.href=u;}catch(e){}});
+  ['profileWeight','profileHeight','profileAge'].forEach(id=>$(id).addEventListener('change',()=>{
+    profileWeight=Math.max(25,Math.min(250,+$('profileWeight').value||80));
+    profileHeight=Math.max(100,Math.min(230,+$('profileHeight').value||175));
+    profileAge=Math.max(10,Math.min(100,+$('profileAge').value||30));
+    syncControls();persist();renderProgressPanel();
+  }));
+  $('profileSex').addEventListener('change',e=>{profileSex=e.target.value==='female'?'female':'male';syncControls();persist();renderProgressPanel();});
+  $('profileActivity').addEventListener('change',e=>{profileActivity=ACTIVITY_FACTORS[e.target.value]?e.target.value:'light';syncControls();persist();renderProgressPanel();});
+  $('nutritionGoal').addEventListener('change',e=>{nutritionGoal=['fatloss','maintain','muscle'].includes(e.target.value)?e.target.value:'maintain';syncControls();persist();renderProgressPanel();});
+  $('coachTone').addEventListener('change',e=>{coachTone=e.target.value;persist();$('coachAnswer').textContent=coachText('default');renderProgressPanel();});
+  $('progressMaxTest').addEventListener('click',openTest);
+  $('coachOpen').addEventListener('click',()=>{$('coachView').classList.add('open');$('coachAnswer').textContent=coachText('default');});
+  $('coachClose').addEventListener('click',()=>$('coachView').classList.remove('open'));
+  $('coachQuick').addEventListener('click',e=>{const b=e.target.closest('button');if(b)$('coachAnswer').textContent=coachText(b.dataset.q);});
+  $('coachAsk').addEventListener('click',()=>{const q=($('coachInput').value||'').toLowerCase();
+    const topic=q.includes('калор')?'calories':q.includes('отдых')?'why_rest':q.includes('проп')?'missed':q.includes('техник')?'technique':q.includes('прогресс')?'progress':'default';
+    $('coachAnswer').textContent=coachText(topic);
+  });
+  $('programProfile').addEventListener('change',e=>{
+    if(started){alert('Цель программы можно менять до начала тренировки.');syncControls();return;}
+    applyProgramProfile(e.target.value);syncControls();persist();renderHello();
+  });
   $('appLang').addEventListener('change',e=>{
     const next=e.target.value;
     if(next===appLang)return;
     appLang=next;persist();applyAppLanguage();
     if(appLang==='ru')location.reload();
   });
+  $('langDownload').addEventListener('click',()=>{
+    if(!OFFLINE_LANG_CODES.includes(appLang)||offlineLangs.includes(appLang))return;
+    offlineLangs.push(appLang);saveOfflineLangs();syncLangStatus();
+    alert('Язык добавлен в офлайн-пакеты интерфейса. Полный перевод всех фраз будет расширяться словарями.');
+  });
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
   function changeProgramSets(delta){
     if(started){alert('Количество подходов можно менять до начала тренировки.');return;}
-    programSets=clampProgramSets(programSets+delta);syncControls();persist();renderHello();
+    programProfile='custom';programSets=clampProgramSets(programSets+delta);programRest=Math.max(programRest,minRestForSets(programSets));syncControls();persist();renderHello();
   }
   $('psPlus').addEventListener('click',()=>changeProgramSets(1));
   $('psMinus').addEventListener('click',()=>changeProgramSets(-1));
-  $('prPlus').addEventListener('click',()=>{programRest=Math.min(PR_MAX,programRest+PR_STEP);syncControls();persist();if(!started)renderHello();});
-  $('prMinus').addEventListener('click',()=>{programRest=Math.max(PR_MIN,programRest-PR_STEP);syncControls();persist();if(!started)renderHello();});
+  $('prPlus').addEventListener('click',()=>{programProfile='custom';programRest=Math.min(PR_MAX,programRest+PR_STEP);syncControls();persist();if(!started)renderHello();});
+  $('prMinus').addEventListener('click',()=>{programProfile='custom';programRest=Math.max(PR_MIN,minRestForSets(programSets),programRest-PR_STEP);syncControls();persist();if(!started)renderHello();});
   const goalStep=g=>g>=100?10:g>=20?5:1;
   $('gPlus').addEventListener('click',()=>{goal=Math.min(1000,goal+goalStep(goal));syncControls();persist();});
   $('gMinus').addEventListener('click',()=>{goal=Math.max(0,goal-goalStep(goal-1));syncControls();persist();});
@@ -2155,6 +2381,7 @@
   $('tempoV').addEventListener('click',()=>{tempoVoiceOn=!tempoVoiceOn;syncControls();persist();if(tempoVoiceOn){say('Вниз');setTimeout(()=>say('Вверх'),metroSec*1000);}});
   $('warm').addEventListener('click',()=>{warmupOn=!warmupOn;syncControls();persist();});
   $('gripVoice').addEventListener('click',()=>{gripVoiceOn=!gripVoiceOn;syncControls();persist();if(gripVoiceOn)say('Буду подсказывать хват на каждый подход.',true);});
+  $('applyDays').addEventListener('click',()=>{trainingDays=recommendedDays().slice();syncControls();persist();refreshReminders();if(!started)renderHello();});
   $('warmGo').addEventListener('click',finishWarmup);
   $('warmSkip').addEventListener('click',finishWarmup);
   // ===== УВЕДОМЛЕНИЯ (APK / PWA / браузер) =====
@@ -2270,19 +2497,29 @@
   $('testUndo').addEventListener('click',()=>{if(testReps>0){testReps--;$('testCount').textContent=testReps;buzz(20);}});
   $('testDone').addEventListener('click',()=>{
     if(testReps<1){$('test').classList.remove('open');showView('train');return;}
-    const m=Math.max(1,Math.min(60,testReps));
-    const np=buildPlan(m);
-    if(confirm('Твой максимум: '+testReps+'.\nПересчитать программу под этот уровень?\nНеделя 1 станет: '+np[0].join('·')+' (до '+np[51].join('·')+' к 52-й неделе), и ты начнёшь с недели 1.')){
-      startMax=m;PLAN=np;week=0;mode='program';if(testReps>pr)pr=testReps;persist();
+    const maxRep=Math.max(1,Math.min(120,testReps));
+    const reserve=maxRep<=1?0:Math.max(1,Math.min(10,Math.round(maxRep*.15)));
+    const workMax=Math.max(1,Math.min(60,maxRep-reserve));
+    const oldPlan=PLAN, oldStart=startMax;
+    PLAN=buildPlan(workMax);
+    const nextRow=planForWeek(0);
+    PLAN=oldPlan;startMax=oldStart;
+    if(maxRep>pr)pr=maxRep;
+    const msg='Твой максимум: '+maxRep+'.\nРабочий уровень для программы: '+workMax+' (запас '+reserve+').\n\nМаксимум сохраняем как рекорд. Пересчитать программу с запасом?\nНеделя 1 станет: '+nextRow.join('·')+'.';
+    if(confirm(msg)){
+      startMax=workMax;PLAN=buildPlan(workMax);week=0;mode='program';persist();
       $('test').classList.remove('open');showView('train');
-      alert('Готово! Программа пересчитана под максимум '+testReps+'. Удачи! 💪');
+      alert('Готово. Рекорд: '+maxRep+'. Программа построена от рабочего уровня '+workMax+'.');
+    }else{
+      persist();$('test').classList.remove('open');showView('train');
+      alert('Рекорд сохранён: '+maxRep+'. Программу не менял.');
     }
   });
 
   // ---- Бэкап ----
   $('exportBtn').addEventListener('click',()=>{
     const data={v:2,history,pr,
-      cfg:{mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl},
+      cfg:{mode,week,programProfile,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl,profileWeight,profileHeight,profileAge,profileSex,profileActivity,nutritionGoal,coachTone,lastRpe,lastRpeDate},
       ach:[...earnedAchieve]};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -2301,7 +2538,7 @@
         if(Array.isArray(d.ach))localStorage.setItem('pushup_achieve',JSON.stringify(d.ach));
         loadAll();loadAchievements();
         if(!history[tkey()])committed={reps:0,sets:0,workMs:0,restMs:0,best:0};
-        syncControls();renderGraph();renderHist();renderHello();renderAchievements();
+        syncControls();renderGraph();renderHist();renderProgressPanel();renderHello();renderAchievements();
         alert('Импорт выполнен.');
       }
     }catch(err){alert('Не удалось прочитать файл.');}e.target.value='';};
@@ -2366,7 +2603,7 @@
     const isVid = /^video\//.test(f.type);
     let ext = (f.name.split('.').pop()||'').toLowerCase(); if(!ext||ext.length>4) ext = isVid?'mp4':'jpg';
     const id = 'm'+Date.now().toString(36)+(mediaSeq++).toString(36);
-    const entry = { id, type:isVid?'video':'image', ext, date:new Date().toISOString() };
+    const entry = { id, type:isVid?'video':'image', ext, date:new Date().toISOString(), tech:ev.target&&ev.target.id==='techVideoFile' };
     try{ await mediaSaveBlob(id, ext, f); media.unshift(entry); saveMedia(); renderMedia(); }
     catch(err){ alert('Не удалось сохранить файл. Возможно, он слишком большой.'); }
   }
@@ -2377,7 +2614,7 @@
     if(!has){ grid.innerHTML=''; grid.style.display='none'; cmp.classList.add('hidden'); return; }
     if(mediaMode==='grid'){
       cmp.classList.add('hidden'); grid.style.display='';
-      grid.innerHTML = media.map(e=>'<div class="mediacell" data-id="'+e.id+'">'+(e.type==='video'?'<span class="mvid">▶</span>':'')+'<div class="mdate">'+fmtMediaDate(e.date)+'</div></div>').join('');
+      grid.innerHTML = media.map(e=>'<div class="mediacell" data-id="'+e.id+'">'+(e.type==='video'?'<span class="mvid">'+(e.tech?'ТЕХ':'▶')+'</span>':'')+'<div class="mdate">'+fmtMediaDate(e.date)+'</div></div>').join('');
       for(const e of media){ const cell=grid.querySelector('.mediacell[data-id="'+e.id+'"]'); if(!cell)continue;
         const src=await mediaSrc(e); const el = e.type==='video'?document.createElement('video'):document.createElement('img');
         el.src=src; if(e.type==='video'){ el.muted=true; el.setAttribute('playsinline',''); } cell.insertBefore(el, cell.firstChild); }
@@ -2398,7 +2635,7 @@
       else if(pick){ pick.style.display=''; } }
   }
   async function openMediaView(id){ const e=media.find(m=>m.id===id); if(!e)return; mediaViewId=id;
-    $('mediaViewTitle').textContent = e.type==='video'?'ВИДЕО':'ФОТО';
+    $('mediaViewTitle').textContent = e.tech?'ТЕХНИКА':(e.type==='video'?'ВИДЕО':'ФОТО');
     const body=$('mvBody'); body.innerHTML='';
     const src=await mediaSrc(e); const el=e.type==='video'?document.createElement('video'):document.createElement('img');
     el.src=src; if(e.type==='video'){ el.controls=true; el.setAttribute('playsinline',''); }
@@ -2408,6 +2645,11 @@
   }
   $('mediaAdd').addEventListener('click',()=>$('mediaFile').click());
   $('mediaFile').addEventListener('change',onMediaFile);
+  $('techRecord').addEventListener('click',()=>{
+    alert('Запиши 10-20 секунд отжиманий. Видео сохранится в галерею как запись техники. Линии тела и оценку добавим поверх этой базы.');
+    $('techVideoFile').click();
+  });
+  $('techVideoFile').addEventListener('change',onMediaFile);
   $('mediaCamera').addEventListener('click',()=>{
     const inp=$('mediaCameraFile');
     inp.setAttribute('capture',cameraFacing);
