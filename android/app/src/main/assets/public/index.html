@@ -219,22 +219,30 @@
   #discard{background:transparent;color:#ff5a5a;border-color:#3a1d1d}
   .hidden{display:none!important}
   /* вкладки настроек */
-  .tabbar{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--bg2)}
+  .tabbar{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--bg2)}
   .tabbar button{flex:1;padding:12px 2px;border:none;background:transparent;color:var(--muted);
-    font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:0;cursor:pointer;border-bottom:2px solid transparent;line-height:1.2}
-  .tabbar button.on{color:var(--ink);border-bottom-color:var(--work)}
+    font-family:'Oswald';font-weight:600;font-size:13px;letter-spacing:0;cursor:pointer;line-height:1.2;
+    border-radius:10px;border:1px solid transparent}
+  .tabbar button.on{color:var(--work);background:color-mix(in srgb,var(--work) 12%,transparent);border-color:color-mix(in srgb,var(--work) 35%,var(--line))}
   /* ---- нижний таб-бар (редизайн этап 2) ---- */
   #bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--navh);
-    display:flex;background:var(--bg2);border-top:1px solid var(--line);
-    padding-bottom:env(safe-area-inset-bottom);
-    padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+    display:flex;gap:6px;background:linear-gradient(180deg,color-mix(in srgb,var(--bg2) 84%,transparent),color-mix(in srgb,var(--bg) 96%,transparent));
+    border-top:1px solid var(--glass-brd,var(--line));box-shadow:0 -16px 34px -28px rgba(0,0,0,.75);
+    -webkit-backdrop-filter:saturate(1.2) blur(14px);backdrop-filter:saturate(1.2) blur(14px);
+    padding:7px max(8px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px,env(safe-area-inset-left))}
   #bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    min-height:44px;border:none;background:transparent;color:var(--muted);cursor:pointer;padding:6px 1px;
-    font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:0;white-space:nowrap;transition:color .15s}
+    min-height:45px;border:1px solid transparent;border-radius:14px;background:transparent;color:var(--muted);cursor:pointer;padding:6px 1px;
+    font-family:'Oswald';font-weight:600;font-size:10px;letter-spacing:0;white-space:nowrap;transition:background .18s,border-color .18s,color .18s,transform .12s}
   #bottomnav button .bi{font-size:20px;line-height:1;filter:grayscale(1) opacity(.7);transition:filter .15s,transform .12s}
-  #bottomnav button.on{color:var(--work)}
+  #bottomnav button.on{color:var(--work);background:color-mix(in srgb,var(--work) 10%,transparent);border-color:color-mix(in srgb,var(--work) 28%,var(--line))}
   #bottomnav button.on .bi{filter:none;transform:translateY(-1px)}
+  #bottomnav button:active{transform:translateY(1px)}
   #bottomnav button:active .bi{transform:scale(.88)}
+  #bottomnav button .bl{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #panel.swipe-left .pbody{animation:swipeLeft .18s ease-out}
+  #panel.swipe-right .pbody{animation:swipeRight .18s ease-out}
+  @keyframes swipeLeft{0%{opacity:.72;transform:translateX(16px)}100%{opacity:1;transform:none}}
+  @keyframes swipeRight{0%{opacity:.72;transform:translateX(-16px)}100%{opacity:1;transform:none}}
   /* модальные оверлеи (итоги/тест/разминка/онбординг) — поверх таб-бара; страницы (#panel) — под ним */
   #summary,#test,#warmup,#onboard,#mediaView{z-index:45}
   /* темы — каждая это один блок из 12 переменных, всё остальное в приложении уже завязано на них */
@@ -290,7 +298,11 @@
     z-index:4;background:#000;border:2px solid var(--line);transition:border-color .2s}
   #camPip.hidden{display:none}
   #camPip.ok{border-color:var(--work)} #camPip.lost{border-color:var(--gold)} #camPip.error{border-color:var(--rest)}
-  #camPip video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+  #camPip.face-light{width:76px;height:102px;background:#fff;border-color:#fff;box-shadow:0 0 0 9999px rgba(255,255,255,.92),0 0 28px rgba(255,255,255,.95)}
+  #camPip.face-light #camStatus{background:rgba(0,0,0,.68)}
+  #camPip.torch #camStatus{background:rgba(255,213,74,.82);color:#191400}
+  #camPip video{width:100%;height:100%;object-fit:cover;display:block}
+  #camPip.mirror video{transform:scaleX(-1)}
   #camStatus{position:absolute;left:0;right:0;bottom:0;padding:3px 5px;font-family:'Oswald';font-weight:600;
     font-size:13px;letter-spacing:.3px;color:#fff;background:rgba(0,0,0,.55);text-align:center;line-height:1.3}
   #camCalibRing{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;--pct:0;
@@ -596,18 +608,25 @@
       <div class="row"><label>Способ счёта<br><span style="font-size:13.5px;color:var(--muted)">тап носом · камера · оба вместе</span></label>
         <div class="seg" id="inputMode"><button data-im="tap" class="on">Тап</button><button data-im="camera">Камера</button><button data-im="both">Оба</button></div>
       </div>
-      <div class="row"><label>Проверка техники (бета)<br><span style="font-size:13.5px;color:var(--muted)">только фронтальная камера — оценивает глубину и симметрию приблизительно</span></label><div class="tgl" id="formCheck"></div></div>
+      <div class="row"><label>Камера<br><span style="font-size:13.5px;color:var(--muted)">для счёта и фото в галерее</span></label>
+        <div class="seg" id="cameraFacing"><button data-cam="user" class="on">Фронт</button><button data-cam="environment">Основная</button></div>
+      </div>
+      <div class="row"><label>Проверка техники (ИИ, бета)<br><span style="font-size:13.5px;color:var(--muted)">модель тела: считает движение, глубину и перекос</span></label><div class="tgl" id="formCheck"></div></div>
+      <div class="row"><label>Подсветка камеры<br><span style="font-size:13.5px;color:var(--muted)">фронт — белый экран, основная — автофонарь если доступен</span></label><div class="tgl on" id="cameraLight"></div></div>
     </div>
     <div class="grp progonly" data-tab="train" id="grpProg">
       <h3>Программа · 52 недели</h3>
       <div class="row"><label>Неделя</label>
         <div class="stepper"><button id="wMinus">−</button><div class="val" id="wVal">1</div><button id="wPlus">+</button></div>
       </div>
+      <div class="row"><label>Подходов<br><span style="font-size:13.5px;color:var(--muted)">общая цель недели сохраняется</span></label>
+        <div class="stepper"><button id="psMinus">−</button><div class="val" id="psVal">5</div><button id="psPlus">+</button></div>
+      </div>
       <div class="weekprev" id="wPrev"></div>
       <div class="row" style="margin-top:14px"><label>Отдых между подходами<br><span style="font-size:13.5px;color:var(--muted)">15 сек – 5 мин</span></label>
         <div class="stepper"><button id="prMinus">−</button><div class="val" id="prVal">1:00</div><button id="prPlus">+</button></div>
       </div>
-      <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:13.5px;color:var(--muted)">когда закрыты все 5 целей</span></label><div class="tgl on" id="auto"></div></div>
+      <div class="row"><label>Автопереход на след. неделю<br><span style="font-size:13.5px;color:var(--muted)">когда закрыты все цели подходов</span></label><div class="tgl on" id="auto"></div></div>
       <div class="row"><label>Авто-подбор нагрузки<br><span style="font-size:13.5px;color:var(--muted)">2 тренировки подряд ≥115% — план чуть растёт; &lt;80% — повторяем неделю</span></label><div class="tgl" id="autoAdjust"></div></div>
       <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">🎯 День теста · пересчитать под себя</button>
       <div class="weekprev" id="maxInfo" style="margin-top:8px"></div>
@@ -724,10 +743,12 @@
     <div class="grp" data-tab="media">
       <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:14px">Добавляй фото и видео своих результатов и следи, как меняешься. Всё хранится только на твоём телефоне — ничего не загружается в сеть.</div>
       <div class="mediatools">
+        <button class="cdbtn" id="mediaCamera">📷 Сделать фото</button>
         <button class="cdbtn" id="mediaAdd">＋ Добавить фото / видео</button>
         <div class="seg" id="mediaMode"><button data-mm="grid" class="on">Лента</button><button data-mm="compare">До / После</button></div>
       </div>
       <input type="file" id="mediaFile" accept="image/*,video/*" style="display:none">
+      <input type="file" id="mediaCameraFile" accept="image/*" capture="environment" style="display:none">
       <div id="mediaEmpty" class="mediaempty">Пока пусто. Добавь первое фото прогресса 📸</div>
       <div id="mediaGrid" class="mediagrid"></div>
       <div id="mediaCompare" class="mediacompare hidden">
@@ -803,7 +824,8 @@
   "use strict";
   const $=id=>document.getElementById(id), now=()=>performance.now();
 
-  // масштабированная программа (старт с 7), 15 недель × 5 подходов
+  // масштабированная программа (старт с 7), 52 недели × 5 базовых подходов.
+  // Пользовательское число подходов пересчитывается из базовой строки с сохранением общей цели недели.
   // программа строится под твой максимум: старт = твой максимум, финиш = цифры схемы
   function buildPlan(sm){
     sm=Math.max(1,Math.min(60,Math.round(sm)));
@@ -825,7 +847,35 @@
     return plan;
   }
   let PLAN=buildPlan(7);
-  const planSum=w=>PLAN[w].reduce((a,b)=>a+b,0);
+  const PROGRAM_SET_MIN=1, PROGRAM_SET_MAX=12;
+  let programSets=5;
+  const basePlanSum=w=>PLAN[w].reduce((a,b)=>a+b,0);
+  const clampProgramSets=(n,w=week)=>Math.max(PROGRAM_SET_MIN,Math.min(PROGRAM_SET_MAX,basePlanSum(w),Math.round(+n||5)));
+  function rebalancePlanRow(row,setCount){
+    setCount=Math.max(1,Math.round(setCount));
+    if(setCount===row.length)return row.slice();
+    const total=row.reduce((a,b)=>a+b,0);
+    if(total<=0)return Array(setCount).fill(0);
+    if(setCount>=total)return Array.from({length:setCount},(_,i)=>i<total?1:0);
+    const weights=[];
+    for(let i=0;i<setCount;i++){
+      const pos=setCount===1?0:(i/(setCount-1))*(row.length-1);
+      const lo=Math.floor(pos), hi=Math.min(row.length-1,Math.ceil(pos)), t=pos-lo;
+      weights.push(Math.max(0.01,row[lo]*(1-t)+row[hi]*t));
+    }
+    const ws=weights.reduce((a,b)=>a+b,0);
+    const raw=weights.map(w=>w/ws*total);
+    const out=raw.map(v=>Math.max(1,Math.floor(v)));
+    let diff=total-out.reduce((a,b)=>a+b,0);
+    raw.map((v,i)=>({i,f:v-Math.floor(v)})).sort((a,b)=>b.f-a.f).forEach(x=>{if(diff>0){out[x.i]++;diff--;}});
+    for(let i=out.length-1;diff<0&&i>=0;i--)if(out[i]>1){out[i]--;diff++;}
+    return out;
+  }
+  const planForWeek=w=>rebalancePlanRow(PLAN[w],clampProgramSets(programSets,w));
+  const planSum=w=>basePlanSum(w);
+  const currentPlan=()=>planForWeek(week);
+  const currentTarget=()=>currentPlan()[setIndex]||0;
+  const currentSetCount=()=>currentPlan().length;
 
   // настройки
   let mode='program', week=0, programRest=60000;
@@ -838,8 +888,10 @@
   let tempoVoiceOn=false, warmupOn=true, warmupDone=false;
   let gripVoiceOn=false;
   let inputMode='tap'; // 'tap' | 'camera' | 'both'
+  let cameraFacing='user'; // 'user' | 'environment'
+  let cameraLightOn=true; // фронтальная: белая подсветка экраном; основная: torch, если поддерживается
   let formCheckOn=false; // бета: разбор техники по камере (PoseLandmarker вместо FaceLandmarker)
-  let musicApp='off', musicCustomUrl='';
+  let musicApp='yandex', musicCustomUrl='';
   const MUSIC_PRESETS={spotify:'spotify:',yandex:'yandexmusic://',vk:'vkmusic://',ytmusic:'youtubemusic://'};
   function musicUrl(){return musicApp==='custom'?musicCustomUrl:(MUSIC_PRESETS[musicApp]||'');}
   let trainingDays=[1,3,5], reminderTime='08:00', remindOn=false, lastNotifyDay='', pendingStart=null;
@@ -869,6 +921,7 @@
   const ms2=s=>{s=Math.max(0,Math.round(s));const m=Math.floor(s/60),r=s%60;return m>0?(m+':'+String(r).padStart(2,'0')):(''+r);};
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const pluralDays=n=>{const m=n%100,l=n%10;if(m>=11&&m<=14)return'дней';if(l===1)return'день';if(l>=2&&l<=4)return'дня';return'дней';};
+  const pluralSets=n=>{const m=n%100,l=n%10;if(m>=11&&m<=14)return'подходов';if(l===1)return'подход';if(l>=2&&l<=4)return'подхода';return'подходов';};
 
   // голос / звук / вибро — предзаписанные клипы (edge-tts), т.к. speechSynthesis не звучит в Android WebView
   const ENERGY={calm:{rate:1.0},hype:{rate:1.22},beast:{rate:1.35}};
@@ -939,6 +992,7 @@
   let faceLandmarker=null, faceInitPromise=null;
   let poseLandmarker=null, poseInitPromise=null, poseModeActive=false;
   let camStream=null, camRaf=0, camActive=false, camReady=false, camError='';
+  let camTorchSupported=false, camTorchOn=false, camLostSince=0, camTorchBusy=false;
   let lastInference=0, camState='up', smoothedDist=0, upBaseline=0, calibUntil=0, camLastFaceT=0;
   let repMinElbow=999, formTipUntil=0, formTipCount=0;
   const CAM_INFER_MS=80, CAM_DOWN=1.18, CAM_UP=1.06, CAM_EMA=0.35, CAM_BASE_EMA=0.06, CAM_CALIB_MS=1500, CAM_LOST_MS=1500;
@@ -950,6 +1004,39 @@
     camPip.classList.remove('ok','lost','error');
     if(cls)camPip.classList.add(cls);
     if(camStatusEl)camStatusEl.textContent=text;
+  }
+  function syncCameraLightClass(){
+    if(!camPip)return;
+    const screenLight=camActive&&cameraLightOn&&cameraFacing==='user';
+    camPip.classList.toggle('face-light',screenLight);
+    camPip.classList.toggle('torch',camTorchOn);
+  }
+  async function setTorch(on){
+    if(!cameraLightOn||cameraFacing!=='environment'||!camStream)return false;
+    if(camTorchBusy||camTorchOn===on)return camTorchOn;
+    const track=camStream.getVideoTracks&&camStream.getVideoTracks()[0];
+    if(!track||!track.applyConstraints)return false;
+    const caps=track.getCapabilities?track.getCapabilities():{};
+    if(!caps||!('torch' in caps)){camTorchSupported=false;return false;}
+    camTorchBusy=true;
+    try{
+      await track.applyConstraints({advanced:[{torch:on}]});
+      camTorchSupported=true;camTorchOn=on;syncCameraLightClass();
+      return true;
+    }catch(e){
+      camTorchSupported=false;camTorchOn=false;syncCameraLightClass();
+      return false;
+    }finally{camTorchBusy=false;}
+  }
+  function autoLightOnLost(lost){
+    if(cameraFacing!=='environment'||!cameraLightOn||!camTorchSupported)return;
+    if(lost){
+      camLostSince=camLostSince||now();
+      if(now()-camLostSince>1200&&!camTorchOn)setTorch(true);
+    }else{
+      camLostSince=0;
+      if(camTorchOn)setTorch(false);
+    }
   }
   function formTip(text){
     say(text);
@@ -993,14 +1080,21 @@
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
       camError='unsupported';setCamStatus('error','⚠️ камера не поддерживается');return;
     }
-    poseModeActive=formCheckOn;
+    poseModeActive=formCheckOn||cameraFacing==='environment';
     camActive=true;camReady=false;camError='';camState='up';smoothedDist=0;upBaseline=0;
-    repMinElbow=999;formTipUntil=0;formTipCount=0;
-    if(camPip)camPip.classList.remove('hidden');
+    repMinElbow=999;formTipUntil=0;formTipCount=0;camLostSince=0;camTorchSupported=false;camTorchOn=false;
+    if(camPip){
+      camPip.classList.remove('hidden');
+      camPip.classList.toggle('mirror',cameraFacing==='user');
+      syncCameraLightClass();
+    }
     setCamStatus('lost','⏳ включаю камеру…');
     try{
-      camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:240}},audio:false});
+      camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:cameraFacing},width:{ideal:320},height:{ideal:240}},audio:false});
       if(!camActive){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;return;} // режим сменили, пока ждали разрешение
+      const track=camStream.getVideoTracks&&camStream.getVideoTracks()[0];
+      const caps=track&&track.getCapabilities?track.getCapabilities():{};
+      camTorchSupported=!!(caps&&('torch' in caps));
       camVideo.srcObject=camStream;
       await camVideo.play().catch(()=>{});
       await (poseModeActive?ensurePoseLandmarker():ensureFaceLandmarker());
@@ -1018,9 +1112,11 @@
   function stopCamera(){
     camActive=false;camReady=false;
     if(camRaf)cancelAnimationFrame(camRaf);camRaf=0;
+    setTorch(false);
     if(camStream){camStream.getTracks().forEach(tr=>tr.stop());camStream=null;}
     if(camVideo)camVideo.srcObject=null;
-    if(camPip)camPip.classList.add('hidden');
+    camTorchOn=false;camLostSince=0;
+    if(camPip){camPip.classList.add('hidden');camPip.classList.remove('mirror','face-light','torch');}
     if(camCalibRing)camCalibRing.classList.add('hidden');
   }
 
@@ -1058,9 +1154,14 @@
       if(lm){const a=lm[33],b=lm[263];dist=Math.hypot(a.x-b.x,a.y-b.y);} // внешние уголки глаз
     }
     if(dist==null){
-      if(now()-camLastFaceT>CAM_LOST_MS)setCamStatus('lost',poseModeActive?'🔴 не вижу тело':'🔴 не вижу лицо');
+      const lost=now()-camLastFaceT>CAM_LOST_MS;
+      if(lost){
+        autoLightOnLost(true);
+        setCamStatus('lost',poseModeActive?(camTorchOn?'🔦 ищу тело':'🔴 не вижу тело'):(camTorchOn?'🔦 ищу лицо':'🔴 не вижу лицо'));
+      }
       return;
     }
+    autoLightOnLost(false);
     camLastFaceT=now();
     smoothedDist=smoothedDist?smoothedDist+(dist-smoothedDist)*CAM_EMA:dist;
     if(now()<calibUntil||!upBaseline){
@@ -1101,10 +1202,10 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,cameraLightOn,formCheckOn,musicApp,musicCustomUrl}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
-    if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;goal=c.goal||0;
+    if(c){mode=c.mode||'program';week=c.week||0;programRest=c.programRest||60000;programSets=clampProgramSets(c.programSets||5);goal=c.goal||0;
       restThreshold=c.restThreshold||4000;targetRest=c.targetRest||0;
       soundOn=c.soundOn!==false;vibeOn=c.vibeOn!==false;voiceOn=c.voiceOn!==false;
       voiceName=(c.voiceName==='svetlana'||c.voiceName==='dmitry')?c.voiceName:'svetlana';voiceEnergy=c.voiceEnergy||'hype';countOn=c.countOn!==false;
@@ -1113,11 +1214,11 @@
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
       reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';
-      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';formCheckOn=!!c.formCheckOn;
+      amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';cameraFacing=c.cameraFacing==='environment'?'environment':'user';cameraLightOn=c.cameraLightOn!==false;formCheckOn=!!c.formCheckOn;
       if(Array.isArray(c.setGrips)&&c.setGrips.length===SET_COUNT)setGrips=c.setGrips.map(v=>{v=+v;return(Number.isInteger(v)&&v>=0&&v<GRIPS.length)?v:0;});
-      musicApp=c.musicApp||'off';musicCustomUrl=c.musicCustomUrl||'';}
+      musicApp=c.musicApp||'yandex';musicCustomUrl=c.musicCustomUrl||'';}
     applyTheme();
-    PLAN=buildPlan(startMax);if(week>51)week=51;
+    PLAN=buildPlan(startMax);if(week>51)week=51;programSets=clampProgramSets(programSets);
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
   }catch(e){storageOk=false;history={};}}
   const sessMax=()=>Math.max(0,repsThisSet,...sets.map(s=>s.reps));
@@ -1402,7 +1503,7 @@
       '<optgroup label="'+lv+'">'+GRIPS.map((g,i)=>g.lvl===lv?'<option value="'+i+'">'+g.name+'</option>':'').join('')+'</optgroup>'
     ).join('');
     let h='<div class="sgttl">Хват на каждый подход</div>'+
-      '<div class="sgsub">Назначь своё положение рук каждому из 5 подходов программы — или жми цифры прямо на карточках ниже. Действует, когда включён тумблер под каталогом.</div>';
+      '<div class="sgsub">Назначь шаблон хвата для подходов программы — если подходов больше пяти, шаблон повторяется по кругу. Действует, когда включён тумблер под каталогом.</div>';
     for(let s=0;s<SET_COUNT;s++){
       h+='<div class="sgrow"><div class="sgnum">Подход <b>'+(s+1)+'</b></div>'+
          '<select class="sgsel" data-set="'+s+'">'+groups+'</select></div>'+
@@ -1498,7 +1599,7 @@
     if(mode==='amrap'&&phase==='rest'){phase='work';repsThisSet=0;goalHit=false;}
     if(repsThisSet===0)goalHit=false;
     reps++;repsThisSet++;lastTap=t;
-    const target=mode==='program'?PLAN[week][setIndex]:goal;
+    const target=mode==='program'?currentTarget():goal;
     const hitNow=target>0&&repsThisSet>=target&&!goalHit;
     elCount.classList.remove('bump','bump-goal');void elCount.offsetWidth;elCount.classList.add(hitNow?'bump-goal':'bump');
     flash.classList.remove('go','goal');void flash.offsetWidth;
@@ -1509,15 +1610,15 @@
     if(target>0&&rem>0&&rem<=cheerLead)say(rem===1?'Последний!':rem===2?'Ещё два!':'Ещё '+rem+'!',true);
     else if(!tempoVoiceOn)say(String(repsThisSet));
     if(hitNow&&(mode==='free'||mode==='amrap'))sayGoal();
-    if(mode==='program'&&repsThisSet>=PLAN[week][setIndex])completeSet(t);
+    if(mode==='program'&&repsThisSet>=currentTarget())completeSet(t);
     saveToday();checkAchievements();render();
   }
 
   function completeSet(t){
-    const target=mode==='program'?PLAN[week][setIndex]:goal;
+    const target=mode==='program'?currentTarget():goal;
     sets.push({reps:repsThisSet,target:target||null});
     if(mode==='program'){
-      if(setIndex>=PLAN[week].length-1){phase='done';repsThisSet=0;finishWorkout();return;}
+      if(setIndex>=currentSetCount()-1){phase='done';repsThisSet=0;finishWorkout();return;}
       setIndex++;phase='rest';restStart=t;restAlert=false;repsThisSet=0;lastCountSec=99;
       if(gripVoiceOn){const sp=gripSay(gripForSet(setIndex));if(sp)say('Отдых. Следующий подход — '+sp+'.');else sayRest();}else sayRest();
       beep(420);buzz([0,60,40,60]);
@@ -1588,7 +1689,7 @@
           elCount.classList.remove('alert');topcount.textContent=ms2(left);elCap.textContent=left>=60?'ДО ПОДХОДА':'СЕКУНД ДО ПОДХОДА';}
         else{elState.textContent='ПОРА!';elState.className='state rest';elCount.textContent='ПОРА';
           elCount.classList.add('alert');topcount.textContent='!';elCap.textContent='КОСНИСЬ — НОВЫЙ ПОДХОД';}
-        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · цель <b>'+PLAN[week][setIndex]+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
+        elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из '+currentSetCount()+' · цель <b>'+currentTarget()+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
       }else{
         const sec=Math.floor(gap/1000);
         if(targetRest>0){const left=Math.ceil((targetRest-gap)/1000);
@@ -1600,7 +1701,7 @@
     }else{
       tap.classList.remove('rest');elCount.classList.remove('alert');
       elCount.textContent=repsThisSet;topcount.textContent=repsThisSet;elCap.textContent='В ПОДХОДЕ';
-      const target=mode==='program'?PLAN[week][setIndex]:goal;
+      const target=mode==='program'?currentTarget():goal;
       if(started&&target>0){
         goalwrap.classList.add('show');
         const pct=Math.min(100,repsThisSet/target*100);goalfill.style.width=pct+'%';
@@ -1610,7 +1711,7 @@
       }else{goalwrap.classList.remove('show');
         elState.textContent=started?'РАБОТА':'ГОТОВ';elState.className=started?'state work':'state';}
       if(started){
-        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из 5 · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
+        if(mode==='program')elSet.innerHTML='Подход <b>'+(setIndex+1)+'</b> из '+currentSetCount()+' · всего <b>'+reps+'</b>'+(gripVoiceOn?' · хват: <b>'+gripForSet(setIndex).name+'</b>':'');
         else if(mode==='amrap')elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b> за время';
         else elSet.innerHTML='Подход <b>'+(sets.length+1)+'</b> · всего <b>'+reps+'</b>';
       }
@@ -1635,8 +1736,9 @@
     // содержимое героя зависит от режима
     let heroTag,heroMeta,heroTitle,heroNums,heroSub;
     if(mode==='program'){
-      heroTag='Сегодня';heroMeta='неделя '+(week+1)+' из 52';heroTitle='Тренировка · 5 подходов';
-      heroNums=PLAN[week].map((n,i)=>'<span class="hn'+(i===0?' first':'')+'">'+n+'</span>').join('');
+      const row=currentPlan();
+      heroTag='Сегодня';heroMeta='неделя '+(week+1)+' из 52';heroTitle='Тренировка · '+row.length+' '+pluralSets(row.length);
+      heroNums=row.map((n,i)=>'<span class="hn'+(i===0?' first':'')+'">'+n+'</span>').join('');
       heroSub='всего '+planSum(week)+' · отдых '+ms2(programRest/1000)+' · '+modeLabel;
     }else if(mode==='amrap'){
       heroTag='На время';heroMeta=amrapMin+' мин';heroTitle='Максимум повторов';
@@ -1671,7 +1773,7 @@
     if(!started){return;}
     finished=true;
     stopCamera();
-    const all=sets.slice();if(repsThisSet>0)all.push({reps:repsThisSet,target:mode==='program'?PLAN[week][setIndex]:(goal||null)});
+    const all=sets.slice();if(repsThisSet>0)all.push({reps:repsThisSet,target:mode==='program'?currentTarget():(goal||null)});
     const total=reps, nSets=all.length;
     const best=Math.max(0,...all.map(s=>s.reps));
     const avg=nSets?Math.round(total/nSets):0;
@@ -1679,10 +1781,10 @@
     const newPR=best>pr;
     let note='', fullDone=false, pct=null;
     if(mode==='program'){
-      const planned=planSum(week); pct=Math.round(total/planned*100);
-      fullDone=phase==='done'||(nSets>=5&&all.every((s,i)=>s.reps>=PLAN[week][i]));
+      const planned=planSum(week), row=currentPlan(); pct=Math.round(total/planned*100);
+      fullDone=phase==='done'||(nSets>=row.length&&all.every((s,i)=>s.reps>=row[i]));
       note='Неделя <b>'+(week+1)+'</b> · план '+planned+' повт. · выполнено <b>'+pct+'%</b>'+
-        (fullDone?' — неделя пройдена! 💪':' — добей все 5 целей, чтобы открыть следующую.');
+        (fullDone?' — неделя пройдена! 💪':' — добей все цели подходов, чтобы открыть следующую.');
     }else if(mode==='amrap'){
       note='Режим «На время» · <b>'+amrapMin+'</b> мин · <b>'+total+'</b> повторов за отведённое время. '+(newPR?'Новый рекорд!':'Так держать!');
     }else note='Свободная тренировка.';
@@ -1858,9 +1960,10 @@
   try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);}catch(e){}
   function showTab(name){[...document.querySelectorAll('.grp[data-tab]')].forEach(g=>g.style.display=g.dataset.tab===name?'':'none');
     [...$('tabbar').children].forEach(b=>b.classList.toggle('on',b.dataset.tab===name));}
-  // ---- нижняя навигация (редизайн этап 2): 4 вкладки, страницы переиспользуют группы оверлея ----
+  // ---- нижняя навигация (редизайн этап 2): 5 разделов, страницы переиспользуют группы оверлея ----
+  const VIEW_ORDER=['train','grips','progress','media','more'];
   let currentView='train', moreSub='train';
-  function showView(view){
+  function showView(view,swipeDir){
     currentView=view;
     [...$('bottomnav').children].forEach(b=>b.classList.toggle('on',b.dataset.view===view));
     if(view==='train'){ $('panel').classList.remove('open'); if(!started)renderHello(); return; }
@@ -1873,17 +1976,52 @@
     else { tb.style.display=''; title.textContent='Настройки'; showTab(moreSub); }
     $('panel').classList.add('open');
     const pb=document.querySelector('#panel .pbody');if(pb)pb.scrollTop=0;
+    if(swipeDir){
+      $('panel').classList.remove('swipe-left','swipe-right');void $('panel').offsetWidth;
+      $('panel').classList.add(swipeDir);
+      setTimeout(()=>$('panel').classList.remove('swipe-left','swipe-right'),220);
+    }
   }
+  function shiftView(delta){
+    if(started&&currentView==='train')return;
+    const i=VIEW_ORDER.indexOf(currentView);
+    if(i<0)return;
+    const next=VIEW_ORDER[Math.max(0,Math.min(VIEW_ORDER.length-1,i+delta))];
+    if(next!==currentView)showView(next,delta>0?'swipe-left':'swipe-right');
+  }
+  let swipeStart=null;
+  function modalOpen(){return ['summary','test','warmup','onboard','mediaView'].some(id=>$(id)&&$(id).classList.contains('open'));}
+  function canSwipeFrom(target){
+    return !target.closest('button,input,select,textarea,.seg,.stepper,.tabbar,.cmpstrip,.mediagrid,.mvbody,#tap.paused');
+  }
+  document.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1||modalOpen()||!canSwipeFrom(e.target))return;
+    const t=e.touches[0];swipeStart={x:t.clientX,y:t.clientY,t:now()};
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!swipeStart||modalOpen()){swipeStart=null;return;}
+    const t=e.changedTouches&&e.changedTouches[0];if(!t){swipeStart=null;return;}
+    const dx=t.clientX-swipeStart.x, dy=t.clientY-swipeStart.y, dt=now()-swipeStart.t;
+    swipeStart=null;
+    if(dt>700||Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.35)return;
+    shiftView(dx<0?1:-1);
+  },{passive:true});
   function syncControls(){
     [...$('mode').children].forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
     [...$('inputMode').children].forEach(b=>b.classList.toggle('on',b.dataset.im===inputMode));
-    $('formCheck').classList.toggle('on',formCheckOn);
+    [...$('cameraFacing').children].forEach(b=>b.classList.toggle('on',b.dataset.cam===cameraFacing));
+    $('mediaCamera').textContent='📷 Сделать фото ('+(cameraFacing==='user'?'фронт':'основная')+')';
+    $('cameraLight').classList.toggle('on',cameraLightOn);
+    syncCameraLightClass();
+    $('formCheck').classList.toggle('on',formCheckOn||cameraFacing==='environment');
     if($('musicApp').value!==musicApp)$('musicApp').value=musicApp;
     $('musicCustomRow').classList.toggle('hidden',musicApp!=='custom');
     $('musicCustomUrl').value=musicCustomUrl;
     $('musicBtn').classList.toggle('hidden',musicApp==='off'||!musicUrl());
     $('wVal').textContent=week+1;
-    $('wPrev').innerHTML='Подходы: '+PLAN[week].map(n=>'<b>'+n+'</b>').join(' · ')+' = '+planSum(week);
+    programSets=clampProgramSets(programSets);
+    $('psVal').textContent=programSets;
+    $('wPrev').innerHTML='Подходы: '+currentPlan().map(n=>'<b>'+n+'</b>').join(' · ')+' = '+planSum(week);
     $('prVal').textContent=ms2(programRest/1000);
     $('gVal').textContent=goal>0?goal:'выкл';
     [...$('thr').children].forEach(b=>b.classList.toggle('on',+b.dataset.t*1000===restThreshold));
@@ -1918,7 +2056,7 @@
     [...$('theme').children].forEach(b=>b.classList.toggle('on',b.dataset.th===theme));
     $('auto').classList.toggle('on',autoProg);
     $('autoAdjust').classList.toggle('on',autoAdjust);
-    $('maxInfo').innerHTML='Текущий уровень: максимум <b>'+startMax+'</b> · неделя 1 = '+PLAN[0].join('·');
+    $('maxInfo').innerHTML='Текущий уровень: максимум <b>'+startMax+'</b> · неделя 1 = '+planForWeek(0).join('·');
     [...$('vibe2').children].forEach(b=>b.classList.toggle('on',b.dataset.e===voiceEnergy));
     if($('voiceSel').value!==voiceName)$('voiceSel').value=voiceName;
     applyModeUI();
@@ -1966,13 +2104,34 @@
     if(started&&!paused){if(inputMode==='tap')stopCamera();else if(!camActive)startCamera();}
     if(!started)renderHello();
   });
-  $('formCheck').addEventListener('click',()=>{formCheckOn=!formCheckOn;syncControls();persist();});
+  $('cameraFacing').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b||b.dataset.cam===cameraFacing)return;
+    cameraFacing=b.dataset.cam==='environment'?'environment':'user';
+    syncControls();persist();
+    if(started&&!paused&&inputMode!=='tap'){stopCamera();startCamera();}
+  });
+  $('formCheck').addEventListener('click',()=>{
+    if(cameraFacing==='environment'){alert('На основной камере ИИ-проверка техники включена постоянно. Поставь телефон так, чтобы камера видела тело целиком сбоку или спереди.');return;}
+    formCheckOn=!formCheckOn;syncControls();persist();
+    if(started&&!paused&&inputMode!=='tap'){stopCamera();startCamera();}
+  });
+  $('cameraLight').addEventListener('click',()=>{
+    cameraLightOn=!cameraLightOn;
+    if(!cameraLightOn)setTorch(false);
+    syncControls();persist();
+  });
   $('musicApp').addEventListener('change',e=>{musicApp=e.target.value;syncControls();persist();});
   $('musicCustomUrl').addEventListener('change',e=>{musicCustomUrl=e.target.value.trim();syncControls();persist();});
   $('musicBtn').addEventListener('click',()=>{const u=musicUrl();if(!u)return;try{window.location.href=u;}catch(e){}});
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
+  function changeProgramSets(delta){
+    if(started){alert('Количество подходов можно менять до начала тренировки.');return;}
+    programSets=clampProgramSets(programSets+delta);syncControls();persist();renderHello();
+  }
+  $('psPlus').addEventListener('click',()=>changeProgramSets(1));
+  $('psMinus').addEventListener('click',()=>changeProgramSets(-1));
   $('prPlus').addEventListener('click',()=>{programRest=Math.min(PR_MAX,programRest+PR_STEP);syncControls();persist();if(!started)renderHello();});
   $('prMinus').addEventListener('click',()=>{programRest=Math.max(PR_MIN,programRest-PR_STEP);syncControls();persist();if(!started)renderHello();});
   const goalStep=g=>g>=100?10:g>=20?5:1;
@@ -2120,7 +2279,7 @@
   // ---- Бэкап ----
   $('exportBtn').addEventListener('click',()=>{
     const data={v:2,history,pr,
-      cfg:{mode,week,programRest,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,formCheckOn,musicApp,musicCustomUrl},
+      cfg:{mode,week,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,cameraLightOn,formCheckOn,musicApp,musicCustomUrl},
       ach:[...earnedAchieve]};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -2246,6 +2405,12 @@
   }
   $('mediaAdd').addEventListener('click',()=>$('mediaFile').click());
   $('mediaFile').addEventListener('change',onMediaFile);
+  $('mediaCamera').addEventListener('click',()=>{
+    const inp=$('mediaCameraFile');
+    inp.setAttribute('capture',cameraFacing);
+    inp.click();
+  });
+  $('mediaCameraFile').addEventListener('change',onMediaFile);
   $('mediaMode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; mediaMode=b.dataset.mm;
     [...$('mediaMode').children].forEach(x=>x.classList.toggle('on',x.dataset.mm===mediaMode)); renderMedia(); });
   $('mediaGrid').addEventListener('click',e=>{ const c=e.target.closest('.mediacell'); if(c)openMediaView(c.dataset.id); });
