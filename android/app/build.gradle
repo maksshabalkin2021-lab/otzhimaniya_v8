@@ -30,6 +30,12 @@ android {
         }
     }
     buildTypes {
+        debug {
+            // Отдельное приложение для безопасной проверки на телефоне рядом с release.
+            // Прогресс и настройки установленной версии com.otzhimaniya.app не затрагиваются.
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

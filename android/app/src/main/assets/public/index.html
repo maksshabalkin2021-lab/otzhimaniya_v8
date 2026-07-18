@@ -249,33 +249,7 @@
   @keyframes swipeLeft{0%{opacity:.72;transform:translateX(16px)}100%{opacity:1;transform:none}}
   @keyframes swipeRight{0%{opacity:.72;transform:translateX(-16px)}100%{opacity:1;transform:none}}
   /* модальные оверлеи (итоги/тест/разминка/онбординг) — поверх таб-бара; страницы (#panel) — под ним */
-  #summary,#test,#warmup,#onboard,#mediaView{z-index:45}
-  /* темы — каждая это один блок из 12 переменных, всё остальное в приложении уже завязано на них */
-  body.light{--bg:#ecefe8;--bg2:#ffffff;--ink:#15181b;--muted:#626a74;--line:#e0e4da;--work:#5f7d00;--rest:#d2660f;--gold:#a9790a;
-    --surface1:#eef1ea;--surface2:#e2e6db;--surface3:#c5cbbb;--accent-ink:#fff}
-  body.theme-sunset{--bg:#150e0a;--bg2:#1d1410;--ink:#f7ede6;--muted:#a08874;--line:#2c2019;--work:#ff6b4a;--rest:#ffb238;--gold:#ffd23f;
-    --surface1:#241a14;--surface2:#2f221a;--surface3:#453224;--accent-ink:#000}
-  body.theme-ocean{--bg:#061418;--bg2:#0c1f26;--ink:#e6f6f8;--muted:#6f97a0;--line:#152c33;--work:#2fe0d0;--rest:#ff8a5c;--gold:#ffd23f;
-    --surface1:#0f262e;--surface2:#173540;--surface3:#25505c;--accent-ink:#000}
-  body.theme-violet{--bg:#120c1a;--bg2:#1b1327;--ink:#f1ecf9;--muted:#9587ad;--line:#291d3a;--work:#b478ff;--rest:#ff7ab8;--gold:#ffd23f;
-    --surface1:#221934;--surface2:#2d2244;--surface3:#453362;--accent-ink:#000}
-  body.theme-crimson{--bg:#0c0505;--bg2:#170909;--ink:#f7ecec;--muted:#a17f7f;--line:#2c1414;--work:#ff3b3b;--rest:#ff9142;--gold:#ffd23f;
-    --surface1:#1e0d0d;--surface2:#2a1313;--surface3:#452020;--accent-ink:#000}
-  body.theme-mint{--bg:#eafaf3;--bg2:#ffffff;--ink:#123328;--muted:#567d6d;--line:#d3ece2;--work:#00a884;--rest:#e08a2a;--gold:#c99a1b;
-    --surface1:#e3f5ee;--surface2:#d3ece2;--surface3:#aed7c7;--accent-ink:#fff}
-  body.theme-graphite{--bg:#0e0e0f;--bg2:#17171a;--ink:#f2f2f2;--muted:#888a8f;--line:#2a2a2e;--work:#e8e8ea;--rest:#9a9ca1;--gold:#c8c9cd;
-    --surface1:#1e1e21;--surface2:#28282c;--surface3:#3e3e43;--accent-ink:#000}
-  body.theme-rose{--bg:#160c11;--bg2:#20131a;--ink:#f9ecf2;--muted:#a884a4;--line:#301b28;--work:#ff5fa8;--rest:#ff9142;--gold:#ffd23f;
-    --surface1:#26161f;--surface2:#33202b;--surface3:#4d2f3f;--accent-ink:#000}
-  body.theme-midnight{--bg:#070b18;--bg2:#0e1526;--ink:#e8edf9;--muted:#7c88ab;--line:#182036;--work:#4d8dff;--rest:#ff8a5c;--gold:#ffd23f;
-    --surface1:#101a30;--surface2:#182640;--surface3:#28395c;--accent-ink:#000}
-  /* сетка сэмплов тем в настройках */
-  .themegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
-  .themegrid button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border:1px solid var(--line);
-    border-radius:10px;background:var(--bg2);cursor:pointer;font-family:'Oswald';font-weight:500;font-size:13px;color:var(--muted)}
-  .themegrid button.on{border-color:var(--work);color:var(--ink)}
-  .themegrid .sw{width:26px;height:26px;border-radius:50%;border:1px solid rgba(128,128,128,.35);
-    background:linear-gradient(135deg,var(--sb) 50%,var(--sw) 50%)}
+  #summary,#test,#warmup,#onboard,#mediaView,#coachView{z-index:45}
 
   /* Пауза */
   #pauseBar{display:none;align-items:center;gap:6px;padding:5px 10px;background:color-mix(in srgb,var(--work) 8%,transparent);
@@ -338,6 +312,9 @@
   #achieveToast .ae{font-size:26px;line-height:1;flex:0 0 auto}
   #achieveToast .at2{font-family:'Oswald';font-weight:600;font-size:14px;color:var(--ink);line-height:1.3}
   #achieveToast .as2{font-family:'Oswald';font-weight:400;font-size:13.5px;color:var(--muted);margin-top:2px}
+  #appDialog{position:fixed;z-index:120;inset:0;display:none;align-items:flex-end;justify-content:center;padding:18px;background:rgba(0,0,0,.68);backdrop-filter:blur(10px)}#appDialog.open{display:flex}.dialog-card{width:min(100%,430px);padding:20px;border:1px solid var(--glass-brd);border-radius:24px;background:linear-gradient(155deg,#171a1e,#090b0d);box-shadow:0 24px 70px rgba(0,0,0,.65)}
+  .dialog-head{display:flex;align-items:center;gap:12px}.dialog-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;background:color-mix(in srgb,var(--work) 12%,var(--surface1));color:var(--work);font-size:24px}.dialog-card[data-type="error"] .dialog-icon{color:#ff6868;background:rgba(255,80,80,.12)}.dialog-card[data-type="warning"] .dialog-icon{color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--surface1))}
+  .dialog-title{font-family:'Oswald';font-weight:700;font-size:22px}.dialog-message{margin-top:14px;color:var(--muted);font-family:'Oswald';font-size:15px;line-height:1.5;white-space:pre-line}.dialog-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}.dialog-actions button{min-height:50px;border-radius:15px}.dialog-actions .single{grid-column:1/-1}.dialog-confirm{background:var(--work);color:var(--accent-ink);border-color:var(--work)}
   .achbadge{font-size:20px;cursor:default;line-height:1;display:inline-block;transition:transform .15s}
   .achbadge:hover{transform:scale(1.3)}
   #testTap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer;padding:0 16px;
@@ -368,8 +345,10 @@
   .wkstrip .wd.today{color:var(--ink)}
 
   /* Хваты */
-  .gripcard{display:flex;gap:13px;align-items:flex-start;padding:13px;border:1px solid var(--line);
+  .gripcard{position:relative;isolation:isolate;overflow:hidden;display:flex;gap:13px;align-items:flex-start;padding:13px;border:1px solid var(--line);
     border-radius:14px;background:var(--bg2);margin-bottom:11px}
+  .gripcard::before{content:"";position:absolute;z-index:-2;inset:0;background:url('assets/technique-gym-bg-v1.png') center/cover no-repeat;opacity:.23}
+  .gripcard::after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(7,9,10,.76),rgba(7,9,10,.92) 46%,rgba(7,9,10,.82))}
   .gripcard .dia{flex:0 0 92px;width:92px;height:72px;border-radius:10px;background:var(--surface1);border:1px solid var(--line);overflow:hidden}
   .gripcard .dia svg{display:block;width:100%;height:100%}
   .gripcard .gc{flex:1;min-width:0}
@@ -489,7 +468,7 @@
   .hrow{background:var(--glass)}
   .hrow.head{background:var(--glass-2)}
   /* Мелкие чипы — лёгкое стекло без тени */
-  .chip,.daychip,.themegrid button{
+  .chip,.daychip{
     background:var(--glass);
     -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
     border-color:var(--glass-brd)}
@@ -519,7 +498,7 @@
   /* стартовая карточка программы мягко всплывает */
   #hello .planbox{animation:glassIn .5s cubic-bezier(.22,1,.36,1) both}
   /* тактильный отклик стеклянных элементов на нажатие */
-  .wuitem:active,.daychip:active,.themegrid button:active,.chip:active,
+  .wuitem:active,.daychip:active,.chip:active,
   .seg button:active,.stepper button:active,.gripcard:active{transform:scale(.96)}
   /* глянцевый блик пробегает по акцентной кнопке при нажатии */
   #action #primary,#save,#nextweek,#testDone,.cdbtn{position:relative;overflow:hidden}
@@ -535,6 +514,199 @@
     #action #primary:active::after,#save:active::after,#nextweek:active::after,
     #testDone:active::after,.cdbtn:active::after{animation:none}
   }
+
+  /* ===== Athletic home v1 — premium graphite/lime dashboard ===== */
+  #hello.athletic-home{justify-content:flex-start;align-items:stretch;text-align:left;gap:12px;padding:18px 16px 22px;overflow-x:hidden;
+    background:radial-gradient(90% 48% at 50% 0%,color-mix(in srgb,var(--work) 8%,transparent),transparent 72%)}
+  .home-top{display:flex;align-items:center;justify-content:space-between;min-height:42px;position:relative;z-index:2}
+  .home-greeting small{display:block;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase}
+  .home-greeting strong{display:block;font-family:'Bebas Neue';font-size:25px;line-height:1.05;letter-spacing:1.2px}
+  .streak-pill{height:38px;min-width:58px;padding:0 12px;border:1px solid var(--glass-brd);border-radius:13px;
+    display:flex;align-items:center;justify-content:center;gap:7px;background:var(--glass-2);box-shadow:var(--glass-sh-sm)}
+  .streak-pill svg{width:18px;height:18px;fill:var(--work)}
+  .streak-pill b{font-family:'Bebas Neue';font-size:22px}
+  .coach-stage{position:relative;min-height:210px;margin:0 -16px -16px;overflow:hidden;display:flex;justify-content:center}
+  .coach-stage::after{content:"";position:absolute;inset:auto 0 0;height:58%;background:linear-gradient(transparent,var(--bg));pointer-events:none}
+  .coach-stage::before{content:"";position:absolute;width:240px;height:240px;top:2px;border-radius:50%;
+    background:color-mix(in srgb,var(--work) 13%,transparent);filter:blur(34px);opacity:.75}
+  .coach-stage img{height:268px;width:auto;transform:translateY(2px);filter:saturate(.78) contrast(1.08);animation:coachFloat 5s ease-in-out infinite;
+    -webkit-mask-image:radial-gradient(ellipse 55% 53% at 50% 43%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 55% 53% at 50% 43%,#000 58%,transparent 100%)}
+  @keyframes coachFloat{0%,100%{transform:translateY(2px)}50%{transform:translateY(-5px)}}
+  .daily-ring{--p:0;position:absolute;z-index:2;left:50%;bottom:0;transform:translateX(-50%);width:144px;height:144px;border-radius:50%;
+    display:grid;place-items:center;background:conic-gradient(var(--work) calc(var(--p)*1%),var(--surface2) 0);
+    box-shadow:0 0 36px color-mix(in srgb,var(--work) 16%,transparent),0 18px 36px rgba(0,0,0,.55)}
+  .daily-ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:linear-gradient(145deg,#11151a,#07090b);border:1px solid var(--line)}
+  .ring-copy{position:relative;text-align:center;z-index:1}
+  .ring-copy b{display:block;font-family:'Bebas Neue';font-size:58px;line-height:.82;letter-spacing:-1px}
+  .ring-copy span{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;margin-top:8px}
+  .workout-card{position:relative;z-index:3;border:1px solid var(--glass-brd);border-radius:20px;padding:15px;background:var(--glass);
+    background-image:var(--glass-hi);box-shadow:var(--glass-sh);backdrop-filter:var(--glass-blur)}
+  .workout-card-head{display:flex;align-items:flex-start;gap:11px}
+  .workout-icon{width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--work) 13%,transparent);color:var(--work);
+    display:grid;place-items:center;flex:0 0 auto}
+  .workout-icon svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .workout-title{flex:1}.workout-title b{display:block;font-size:16px;letter-spacing:.5px}.workout-title span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+  .mode-badge{color:var(--work);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:4px 8px;border-radius:20px;
+    border:1px solid color-mix(in srgb,var(--work) 28%,transparent);background:color-mix(in srgb,var(--work) 8%,transparent)}
+  .set-track{display:flex;align-items:center;margin:14px 2px 2px}.set-node{display:flex;align-items:center;flex:1}.set-node:last-child{flex:0 0 auto}
+  .set-node i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:'Bebas Neue';font-style:normal;font-size:18px;
+    border:1px solid color-mix(in srgb,var(--work) 55%,var(--line));color:var(--ink);background:#0d1013}
+  .set-node:first-child i{background:var(--work);color:var(--accent-ink);box-shadow:0 0 16px color-mix(in srgb,var(--work) 30%,transparent)}
+  .set-node em{height:1px;flex:1;background:color-mix(in srgb,var(--work) 38%,var(--line));font-style:normal}
+  .athletic-cta{height:58px;width:100%;border:0;border-radius:17px;background:var(--work);color:var(--accent-ink);margin-top:2px;
+    display:flex;align-items:center;justify-content:center;gap:12px;font-family:'Oswald';font-size:17px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;
+    box-shadow:0 12px 28px -12px color-mix(in srgb,var(--work) 75%,transparent),inset 0 1px rgba(255,255,255,.55);position:relative;overflow:hidden}
+  .athletic-cta svg{width:22px;height:22px;fill:currentColor}.athletic-cta:active{transform:scale(.975)}
+  .home-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.home-stat{min-width:0;border:1px solid var(--glass-brd);border-radius:16px;
+    padding:11px 6px;text-align:center;background:var(--glass);box-shadow:var(--glass-sh-sm)}
+  .home-stat svg{width:18px;height:18px;stroke:var(--work);fill:none;stroke-width:1.8}.home-stat span{display:block;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;margin-top:3px}
+  .home-stat b{display:block;font-family:'Bebas Neue';font-size:25px;line-height:1.05;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .home-week{display:flex;align-items:center;justify-content:space-between;padding:0 2px}.home-week .wkstrip{margin:0}.home-week .orline{font-size:11px}
+  .home-top,.coach-stage,.workout-card,.athletic-cta,.home-stats,.home-week{flex-shrink:0}
+  .athletic-cta{flex-basis:58px}
+  #bottomnav .bi svg{width:22px;height:22px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  #bottomnav button:not(.on){--nav-accent:var(--muted);color:var(--muted)}
+  #bottomnav button:not(.on) .bi{filter:none;opacity:.68}
+  #app:has(#hello.athletic-home:not(.hidden)) #bar{display:none}
+  #app:has(#hello.athletic-home:not(.hidden)) #stats{display:none}
+  @media(max-height:760px){.coach-stage{min-height:168px}.coach-stage img{height:218px}.daily-ring{width:118px;height:118px}.ring-copy b{font-size:48px}
+    .workout-card{padding:12px}.athletic-cta{height:50px;flex-basis:50px}.home-stat{padding:7px 5px}.home-stat b{font-size:21px}}
+  @media(max-height:620px){#hello.athletic-home{padding:9px 14px 16px;gap:7px}.home-top{min-height:34px}.home-greeting small{font-size:9px}.home-greeting strong{font-size:19px}
+    .streak-pill{height:32px}.coach-stage{min-height:125px;margin-bottom:-12px}.coach-stage img{height:172px}.daily-ring{width:98px;height:98px}.daily-ring::before{inset:7px}
+    .ring-copy b{font-size:40px}.ring-copy span{font-size:8px;margin-top:5px}.workout-card{padding:9px 10px;border-radius:16px}.workout-icon{width:32px;height:32px}.workout-icon svg{width:20px;height:20px}
+    .workout-title b{font-size:14px}.workout-title span{font-size:10.5px}.mode-badge{font-size:8px;padding:3px 6px}.set-track{margin-top:9px}.set-node i{width:26px;height:26px;font-size:16px}
+    .athletic-cta{height:46px;flex-basis:46px;border-radius:14px;font-size:15px}.home-stats{gap:6px}.home-stat{padding:6px 4px}.home-week{padding-bottom:3px}}
+  @media(orientation:landscape) and (max-height:500px){
+    #hello.athletic-home{display:grid;grid-template-columns:minmax(128px,.72fr) minmax(250px,1.28fr);grid-template-rows:34px minmax(0,1fr) 44px;
+      gap:7px 10px;padding:7px 12px 8px;overflow-y:hidden;align-items:stretch}
+    .home-top{grid-column:1/-1;grid-row:1}.coach-stage{grid-column:1;grid-row:2/4;min-height:0;height:auto;margin:0;align-self:stretch}
+    .coach-stage img{height:158px;align-self:start}.daily-ring{width:88px;height:88px;bottom:2px}.daily-ring::before{inset:6px}.ring-copy b{font-size:34px}.ring-copy span{font-size:7px;margin-top:4px}
+    .workout-card{grid-column:2;grid-row:2;min-height:0;padding:8px 10px;align-self:stretch}.workout-card-head{gap:8px}.workout-title span{font-size:10px}.set-track{margin-top:7px}
+    .athletic-cta{grid-column:2;grid-row:3;height:44px;min-height:44px;flex-basis:auto;margin:0;font-size:14px;border-radius:13px}.home-stats,.home-week{display:none}
+    #onboard .pbody{justify-content:flex-start!important;overflow-y:auto;padding-top:12px!important;padding-bottom:18px!important}
+  }
+  @media(prefers-reduced-motion:reduce){.coach-stage img{animation:none}}
+
+  /* ===== Athletic system v2 — shared screens, controls and workout states ===== */
+  .overlay{background:
+    radial-gradient(90% 42% at 50% -8%,color-mix(in srgb,var(--work) 10%,transparent),transparent 72%),
+    color-mix(in srgb,var(--bg) 94%,transparent)}
+  #panel{padding-bottom:var(--navh);transform:translateY(24px);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .22s}
+  #panel.open{transform:none;opacity:1;pointer-events:auto}
+  .phead{position:relative;z-index:3;min-height:62px;padding:max(15px,env(safe-area-inset-top)) 16px 12px;
+    background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 96%,transparent),color-mix(in srgb,var(--bg2) 75%,transparent));
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-color:var(--glass-brd)}
+  .phead h2{font-size:29px;letter-spacing:1.5px}.phead .iconbtn{height:38px;color:var(--muted);font-size:11px;letter-spacing:1px}
+  .pbody{width:100%;max-width:520px;margin:0 auto;padding:18px 14px calc(28px + var(--navh));scrollbar-width:none}
+  .pbody::-webkit-scrollbar{display:none}
+  .tabbar{position:relative;z-index:3;gap:5px;padding:8px 12px;background:color-mix(in srgb,var(--bg2) 72%,transparent);border-color:var(--glass-brd);
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+  .tabbar button{min-height:43px;border-radius:13px;font-size:12px;transition:color .18s,background .18s,transform .12s}
+  .tabbar button.on{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--work) 24%,transparent)}
+  .grp[data-tab]{padding:15px;border:1px solid var(--glass-brd);border-radius:19px;
+    background:var(--glass);background-image:var(--glass-hi);box-shadow:var(--glass-sh);margin-bottom:12px}
+  .grp h3{display:flex;align-items:center;gap:8px;margin-bottom:14px;color:var(--ink);font-family:'Bebas Neue';font-size:20px;letter-spacing:1.2px}
+  .grp h3::before{content:"";width:4px;height:18px;border-radius:3px;background:var(--work);box-shadow:0 0 12px color-mix(in srgb,var(--work) 45%,transparent)}
+  .row{min-height:46px;margin:0;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--ink) 7%,transparent)}
+  .row:last-child{border-bottom:0}.row label{font-size:14px;line-height:1.35}.sub{color:var(--muted);font-size:12.5px;line-height:1.4}
+  .seg,.stepper,.vsel{min-height:40px}.seg button{min-height:40px}.stepper button{height:40px}.vsel{padding:9px 11px}
+  .tgl{width:52px;height:31px;box-shadow:inset 0 1px 6px rgba(0,0,0,.28)}
+  .days-label{margin:4px 0 9px;color:var(--ink);font-family:'Oswald';font-weight:600;font-size:15px}.days-line{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;width:100%;margin-bottom:10px}.days-line .daychip{min-width:0;width:100%;height:42px;padding:0;font-size:12px}
+  .section-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.section-shortcuts button{min-height:50px;border-radius:14px;white-space:normal;line-height:1.2}
+  .home-week{gap:10px}.home-week .wkstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;flex:1}.home-week .wd{min-width:0;min-height:38px;padding:7px 2px;border-radius:10px;font-size:12px}
+
+  /* Active workout: bold counter, clear state, subtle coach presence */
+  #tap.work,#tap.rest{background:
+    radial-gradient(ellipse 80% 55% at 50% 44%,color-mix(in srgb,var(--work) 8%,transparent),transparent 67%),
+    linear-gradient(180deg,var(--bg2),var(--bg))}
+  #tap.rest{background:radial-gradient(ellipse 80% 55% at 50% 44%,color-mix(in srgb,var(--rest) 11%,transparent),transparent 67%),linear-gradient(180deg,var(--bg2),var(--bg))}
+  #tap.work::after,#tap.rest::after{content:"";position:absolute;left:-24px;bottom:12px;width:150px;height:205px;pointer-events:none;opacity:.16;
+    background:var(--coach-image,url('assets/coach-layma-fox-v1.png')) center/contain no-repeat;filter:grayscale(.18) contrast(1.08);
+    -webkit-mask-image:linear-gradient(90deg,#000 65%,transparent),linear-gradient(0deg,#000 72%,transparent);mask-image:linear-gradient(90deg,#000 65%,transparent)}
+  .core{z-index:2}.state{font-size:clamp(19px,5vw,27px);letter-spacing:4px}.count{font-size:clamp(150px,46vmin,330px);filter:drop-shadow(0 14px 26px rgba(0,0,0,.45))}
+  .goalbar{height:10px;border-radius:8px;box-shadow:inset 0 2px 5px rgba(0,0,0,.35)}.goalfill{border-radius:8px;box-shadow:0 0 16px color-mix(in srgb,var(--work) 42%,transparent)}
+  #action{gap:10px;padding:10px max(12px,env(safe-area-inset-right));background:color-mix(in srgb,var(--bg2) 88%,transparent);border-color:var(--glass-brd)}
+  #action button{height:55px;border-radius:16px}#action #primary{box-shadow:0 10px 24px -12px color-mix(in srgb,var(--work) 75%,transparent)}
+  #stats{border-color:var(--glass-brd);background:color-mix(in srgb,var(--bg2) 88%,transparent)}.cell{padding:10px 4px;border-color:var(--glass-brd)}
+
+  /* Progress dashboard */
+  .statcards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:3px 0 14px}
+  .statcard{position:relative;overflow:hidden;min-height:92px;padding:14px;border-radius:18px;border-color:var(--glass-brd);background:var(--glass);background-image:var(--glass-hi);box-shadow:var(--glass-sh-sm)}
+  .statcard::after{content:"";position:absolute;width:70px;height:70px;right:-30px;bottom:-38px;border-radius:50%;background:color-mix(in srgb,var(--work) 10%,transparent)}
+  .statcard .k{font-size:11px;letter-spacing:1.2px}.statcard .v{font-size:39px;color:var(--work);margin-top:9px}
+  .progress-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 18px}.progress-actions button{min-width:0;min-height:50px;padding:9px 10px;border:1px solid var(--glass-brd);border-radius:15px;background:var(--glass);color:var(--ink);font-family:'Oswald';font-weight:600;font-size:13px;white-space:normal;line-height:1.2}.progress-actions button:first-child{border-color:color-mix(in srgb,var(--gold) 40%,var(--glass-brd));color:var(--gold)}
+  .achgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:8px 0 18px}.achcard{min-width:0;padding:12px;border:1px solid var(--glass-brd);border-radius:17px;background:var(--glass);text-align:left;box-shadow:var(--glass-sh-sm)}
+  .achcard.earned{border-color:color-mix(in srgb,var(--work) 42%,var(--glass-brd));background:linear-gradient(145deg,color-mix(in srgb,var(--work) 9%,var(--glass)),var(--glass))}.ach-top{display:flex;align-items:center;gap:9px}.ach-emoji{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--work) 10%,var(--surface1));font-size:21px;flex:0 0 auto}.achcard:not(.earned) .ach-emoji{filter:grayscale(1);opacity:.55}
+  .ach-copy{min-width:0}.ach-copy b{display:block;color:var(--ink);font-family:'Oswald';font-size:15px;line-height:1.15}.ach-copy small{display:block;margin-top:3px;color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ach-progress{height:5px;margin-top:10px;border-radius:5px;background:var(--surface2);overflow:hidden}.ach-progress i{display:block;height:100%;border-radius:inherit;background:var(--work)}
+  .ach-meta{display:flex;justify-content:space-between;gap:6px;margin-top:7px;color:var(--muted);font-size:10px}.detail-card{margin-top:20px;padding:20px;border:1px solid var(--glass-brd);border-radius:22px;background:var(--glass);box-shadow:var(--glass-sh)}.detail-icon{font-size:48px}.detail-card h3{margin:10px 0 6px;font-family:'Oswald';font-size:27px}.detail-progress{height:9px;margin:18px 0 8px;border-radius:9px;background:var(--surface2);overflow:hidden}.detail-progress i{display:block;height:100%;background:var(--work)}
+  #graph{padding:14px;border:1px solid var(--glass-brd);border-radius:18px;background:var(--glass);box-shadow:var(--glass-sh-sm)}
+  .bars{height:112px;gap:5px}.bars .b{border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--work),color-mix(in srgb,var(--work) 38%,transparent));box-shadow:0 0 10px color-mix(in srgb,var(--work) 18%,transparent)}
+  .coachbox{position:relative;min-height:78px;padding:14px 14px 14px 76px;border-radius:18px;border-color:color-mix(in srgb,var(--work) 26%,var(--line));
+    background:linear-gradient(135deg,color-mix(in srgb,var(--work) 10%,var(--glass)),var(--glass));box-shadow:var(--glass-sh-sm)}
+  .coachbox::before{content:"";position:absolute;left:8px;bottom:0;width:62px;height:76px;background:var(--coach-image,url('assets/coach-layma-fox-v1.png')) center 22%/86px auto no-repeat;
+    -webkit-mask-image:linear-gradient(#000 72%,transparent);mask-image:linear-gradient(#000 72%,transparent)}
+
+  /* Grips catalogue */
+  .setgrips{padding:14px;border:1px solid var(--glass-brd);border-radius:19px;background:var(--glass);box-shadow:var(--glass-sh);margin-bottom:16px}
+  .griplvl{position:sticky;top:0;z-index:2;margin:20px -2px 10px;padding:9px 4px 8px;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);color:var(--work)}
+  .gripcard{gap:12px;padding:12px;border-radius:18px;margin-bottom:9px;transition:transform .16s,border-color .18s,box-shadow .18s}
+  .gripcard:active{border-color:color-mix(in srgb,var(--work) 45%,var(--line));box-shadow:0 8px 26px -14px color-mix(in srgb,var(--work) 34%,transparent)}
+  .gripcard .dia{flex-basis:98px;width:98px;height:78px;border-radius:14px;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--work) 7%,var(--surface1)),var(--surface1))}
+  .gripcard .gn{font-size:22px}.gripcard .gt{border-radius:20px;padding:3px 8px}.gasg button{border-radius:10px}
+
+  /* Gallery */
+  .mediatools{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mediatools .cdbtn{min-width:0;height:48px;border-radius:15px;font-size:13px;margin:0}
+  .mediatools #mediaAdd,.mediatools .seg{grid-column:1/-1}.mediaempty{padding:56px 18px;border:1px dashed var(--glass-brd);border-radius:20px;background:var(--glass)}
+  .mediatools .cdbtn svg{width:18px;height:18px;vertical-align:-4px;margin-right:7px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .mediagrid{gap:8px}.mediacell{border-radius:16px;border-color:var(--glass-brd);box-shadow:var(--glass-sh-sm);transition:transform .15s}.mediacell:active{transform:scale(.96)}
+  .cmpslot{border-radius:18px;background:var(--glass);box-shadow:var(--glass-sh-sm)}.cmpstrip .cs{border-radius:12px}
+
+  /* Personal coach chat */
+  .coachhero{display:flex;align-items:center;gap:14px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--glass-brd);border-radius:20px;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--work) 12%,var(--glass)),var(--glass));box-shadow:var(--glass-sh)}
+  .coachhero-img{width:76px;height:76px;border-radius:18px;object-fit:cover;object-position:center 16%;background:var(--surface1);border:1px solid color-mix(in srgb,var(--work) 30%,transparent)}
+  .coachhero span{display:block;color:var(--work);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}.coachhero b{display:block;font-family:'Oswald',sans-serif;font-weight:700;font-size:24px;letter-spacing:.5px;margin-top:2px}
+  .coachpick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}.coachpick button{position:relative;overflow:hidden;min-height:176px;padding:0;border:1px solid var(--glass-brd);border-radius:18px;background:var(--glass);text-align:left;transition:transform .14s,border-color .18s,box-shadow .18s}
+  .coachpick button:active{transform:scale(.98)}.coachpick button.on{border-color:var(--work);box-shadow:0 0 0 1px color-mix(in srgb,var(--work) 35%,transparent),0 12px 30px -18px color-mix(in srgb,var(--work) 72%,transparent)}
+  .coachpick img{display:block;width:100%;height:128px;object-fit:cover;object-position:center 25%}.coachpick button[data-coach="lime"] img{object-position:center 20%}
+  .coachpick-copy{display:block;padding:10px 11px}.coachpick-copy b{display:block;color:var(--ink);font-family:'Oswald';font-size:17px}.coachpick-copy small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+  .obstep.hidden{display:none}.obform{display:grid;gap:10px;text-align:left}.obform .row{padding:7px 0}.obform .vsel{width:155px;max-width:48vw}.obactions{display:grid;grid-template-columns:1fr 1.35fr;gap:8px}.obactions .cdbtn{margin:0;min-width:0}
+  #coachView .coachbox{min-height:100px;margin:12px 0;padding-left:82px}#coachView .quickgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .quickgrid button{min-height:46px;border-radius:14px;background:var(--glass);border-color:var(--glass-brd);font-size:12.5px;transition:transform .12s,border-color .18s}
+  .quickgrid button:active{transform:scale(.96);border-color:var(--work)}#coachInput{max-width:none!important;flex:1}#coachAsk{height:54px;border-radius:17px}
+
+  /* Summary and modal polish */
+  #sumbody{max-width:520px;margin:0 auto}.sumbig{filter:drop-shadow(0 0 22px color-mix(in srgb,var(--work) 22%,transparent))}.summet{gap:9px}.summet div{border-radius:17px}
+  .record{box-shadow:0 0 22px color-mix(in srgb,var(--gold) 22%,transparent)}.mvbody img,.mvbody video{border-radius:20px;box-shadow:var(--glass-sh)}
+  @media(max-width:360px){.pbody{padding-left:10px;padding-right:10px}.gripcard .dia{flex-basis:82px;width:82px;height:68px}.coachhero-img{width:64px;height:64px}.quickgrid button{font-size:11.5px}}
+  @media(prefers-reduced-motion:reduce){#panel,.gripcard,.mediacell,.quickgrid button{transition:none}#tap.work::after,#tap.rest::after{display:none}}
+
+  /* Bebas Neue в проекте латинский: кириллические заголовки явно ведём через Oswald */
+  .brand,.home-greeting strong,.workout-title b,.phead h2,.grp h3,.griplvl,.gripcard .gn,.sgttl,
+  .state,.caption,.sumcap,.record,.cmplabel,.pauseIcon .pl{
+    font-family:'Oswald',sans-serif;font-weight:700;font-stretch:condensed}
+  .home-greeting strong{font-size:23px}.phead h2{font-size:26px}.grp h3{font-size:18px}.griplvl{font-size:18px}
+
+  /* Android 15+ рисует WebView под системными панелями; env(safe-area) в WebView Xiaomi может быть 0. */
+  body.native-app #hello.athletic-home{padding-top:max(38px,calc(env(safe-area-inset-top) + 14px))}
+  body.native-app #bar{padding-top:max(36px,calc(env(safe-area-inset-top) + 12px))}
+  body.native-app .phead{padding-top:max(36px,calc(env(safe-area-inset-top) + 12px));min-height:82px}
+  @media(orientation:landscape) and (max-height:500px){body.native-app #hello.athletic-home{padding-top:max(20px,calc(env(safe-area-inset-top) + 6px))}}
+
+  /* Главный герой: мужчина в отжимании с сохранением исходных пропорций. */
+  .coach-stage{height:326px;min-height:326px;margin-bottom:0;background:linear-gradient(180deg,transparent 76%,var(--bg) 100%)}
+  .coach-stage img.home-athlete{display:block;width:100%;height:auto;max-width:520px;aspect-ratio:2/3;object-fit:contain;object-position:center top;transform:translateY(-20px);filter:contrast(1.04) brightness(1.18) saturate(0);
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8%,#000 72%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 8%,#000 72%,transparent 100%);
+    animation:athleteBreath 5.5s ease-in-out infinite;transform-origin:50% 42%}
+  .coach-stage::before{width:320px;height:210px;top:42px;background:color-mix(in srgb,var(--ink) 5%,transparent);filter:blur(40px)}
+  .daily-ring{width:168px;height:168px;bottom:22px}
+  @keyframes athleteBreath{0%,100%{transform:translateY(-20px) scale(1)}50%{transform:translateY(-20px) scale(1.012)}}
+  @media(max-height:760px){.coach-stage{height:250px;min-height:250px}.coach-stage img.home-athlete{height:auto;width:100%;transform:translateY(-22px)}
+    .daily-ring{width:140px;height:140px;bottom:16px}@keyframes athleteBreath{0%,100%{transform:translateY(-22px) scale(1)}50%{transform:translateY(-22px) scale(1.01)}}}
+  @media(max-height:620px){.coach-stage{height:170px;min-height:170px}.coach-stage img.home-athlete{height:auto;width:100%;transform:translateY(-20px)}
+    .daily-ring{width:104px;height:104px;bottom:10px}@keyframes athleteBreath{0%,100%{transform:translateY(-20px) scale(1)}50%{transform:translateY(-20px) scale(1.008)}}}
+  @media(orientation:landscape) and (max-height:500px){.coach-stage{height:auto;min-height:0}.coach-stage img.home-athlete{height:175px;width:auto;max-width:none;transform:translateY(-16px)}
+    @keyframes athleteBreath{0%,100%{transform:translateY(-16px) scale(1)}50%{transform:translateY(-16px) scale(1.008)}}}
 </style>
 </head>
 <body>
@@ -560,6 +732,9 @@
 
   <!-- Ачивки тост -->
   <div id="achieveToast"><span class="ae" id="aToastEmoji">🏅</span><div><div class="at2" id="aToastTitle"></div><div class="as2" id="aToastSub"></div></div></div>
+  <div id="appDialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <div class="dialog-card" id="dialogCard" data-type="info"><div class="dialog-head"><div class="dialog-icon" id="dialogIcon">i</div><div class="dialog-title" id="dialogTitle">Сообщение</div></div><div class="dialog-message" id="dialogMessage"></div><div class="dialog-actions"><button class="iconbtn" id="dialogCancel">Отмена</button><button class="dialog-confirm" id="dialogConfirm">Понятно</button></div></div>
+  </div>
   <canvas id="confettiCanvas"></canvas>
   <div id="graphTip"></div>
 
@@ -598,11 +773,11 @@
 
   <!-- Нижняя навигация -->
   <nav id="bottomnav">
-    <button data-view="train" class="on"><span class="bi">🏋️</span><span class="bl">Тренировка</span></button>
-    <button data-view="grips"><span class="bi">🤚</span><span class="bl">Хваты</span></button>
-    <button data-view="progress"><span class="bi">📊</span><span class="bl">Прогресс</span></button>
-    <button data-view="media"><span class="bi">📸</span><span class="bl">Галерея</span></button>
-    <button data-view="more"><span class="bi">⚙️</span><span class="bl">Ещё</span></button>
+    <button data-view="train" class="on"><span class="bi"><svg viewBox="0 0 24 24"><path d="M3 12h3m12 0h3M6 9v6m12-6v6M9 8v8m6-8v8M9 12h6"/></svg></span><span class="bl">Тренировка</span></button>
+    <button data-view="program"><span class="bi"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg></span><span class="bl">Программа</span></button>
+    <button data-view="progress"><span class="bi"><svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg></span><span class="bl">Прогресс</span></button>
+    <button data-view="profile"><span class="bi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.6 3.5-7 8-7s7.2 2.4 8 7"/></svg></span><span class="bl">Профиль</span></button>
+    <button data-view="more"><span class="bi"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg></span><span class="bl">Ещё</span></button>
   </nav>
 
 </div>
@@ -611,12 +786,12 @@
 <div id="panel" class="overlay">
   <div class="phead"><h2 id="panelTitle">НАСТРОЙКИ</h2><button class="iconbtn" id="close">ЗАКРЫТЬ</button></div>
   <div class="tabbar" id="tabbar">
-    <button data-tab="train" class="on">⚙ Основное</button>
+    <button data-tab="technical" class="on">⚙ Техника</button>
     <button data-tab="sound">🔊 Звук</button>
-    <button data-tab="theme">🎨 Тема</button>
+    <button data-tab="language">🌐 Язык</button>
   </div>
   <div class="pbody">
-    <div class="grp" data-tab="train">
+    <div class="grp" data-tab="technical">
       <h3>Режим</h3>
       <div class="row"><label>Тип тренировки</label>
         <div class="seg" id="mode"><button data-m="program" class="on">Программа</button><button data-m="free">Свободно</button><button data-m="amrap">На время</button></div>
@@ -625,11 +800,12 @@
         <div class="seg" id="inputMode"><button data-im="tap" class="on">Тап</button><button data-im="camera">Камера</button><button data-im="both">Оба</button></div>
       </div>
       <div class="row"><label>Камера<br><span style="font-size:13.5px;color:var(--muted)">для счёта и фото в галерее</span></label>
-        <div class="seg" id="cameraFacing"><button data-cam="user" class="on">Фронт</button><button data-cam="environment">Основная</button></div>
+        <div class="seg" id="cameraFacing"><button data-cam="user" class="on">Передняя камера</button><button data-cam="environment">Основная камера</button></div>
       </div>
       <div class="row"><label>Проверка техники (ИИ, бета)<br><span style="font-size:13.5px;color:var(--muted)">модель тела: считает движение, глубину и перекос</span></label><div class="tgl" id="formCheck"></div></div>
+      <div class="section-shortcuts"><button class="iconbtn" id="openGrips">Варианты отжиманий</button><button class="iconbtn" id="openMedia">Фото и видео</button></div>
     </div>
-    <div class="grp" data-tab="train">
+    <div class="grp" data-tab="profile">
       <h3>Профиль спортсмена</h3>
       <div class="row"><label>Вес, кг</label><input type="number" id="profileWeight" class="vsel" min="25" max="250" step="1" style="max-width:120px"></div>
       <div class="row"><label>Рост, см</label><input type="number" id="profileHeight" class="vsel" min="100" max="230" step="1" style="max-width:120px"></div>
@@ -639,7 +815,7 @@
       <div class="row"><label>Питательная цель</label><select id="nutritionGoal" class="vsel" style="max-width:190px"><option value="fatloss">Жиросжигание</option><option value="maintain">Поддержание</option><option value="muscle">Набор мышц</option></select></div>
       <div class="weekprev" id="profileCalc" style="margin-top:6px"></div>
     </div>
-    <div class="grp progonly" data-tab="train" id="grpProg">
+    <div class="grp progonly" data-tab="program" id="grpProg">
       <h3>Программа · 52 недели</h3>
       <div class="row"><label>Цель программы<br><span style="font-size:13.5px;color:var(--muted)">меняет отдых и расклад подходов</span></label>
         <select id="programProfile" class="vsel" style="max-width:190px"></select>
@@ -660,7 +836,7 @@
       <button class="cdbtn" id="testBtn" style="width:100%;margin-top:6px">⚡ Замерить максимум</button>
       <div class="weekprev" id="maxInfo" style="margin-top:8px"></div>
     </div>
-    <div class="grp freeonly" data-tab="train" id="grpFree">
+    <div class="grp freeonly" data-tab="program" id="grpFree">
       <h3>Свободный режим</h3>
       <div class="row"><label>Цель на подход</label>
         <div class="stepper"><button id="gMinus">−</button><div class="val" id="gVal">выкл</div><button id="gPlus">+</button></div>
@@ -710,12 +886,11 @@
         <input type="text" id="musicCustomUrl" class="vsel" placeholder="myapp://" style="max-width:170px">
       </div>
     </div>
-    <div class="grp" data-tab="train">
+    <div class="grp" data-tab="program">
       <h3>Разминка и расписание</h3>
       <div class="row"><label>Разминка перед стартом</label><div class="tgl on" id="warm"></div></div>
-      <div class="row" style="align-items:flex-start"><label>Дни тренировок</label>
-        <div id="days" style="display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end"></div>
-      </div>
+      <div class="days-label">Дни тренировок</div>
+      <div id="days" class="days-line"></div>
       <div class="weekprev" id="daySuggest" style="margin-top:0"></div>
       <button class="iconbtn" id="applyDays" style="width:100%;height:42px;margin-bottom:8px">Применить рекомендованные дни</button>
       <div class="row"><label>Напоминание</label><div class="tgl" id="remind"></div></div>
@@ -723,27 +898,15 @@
       <div class="weekprev" id="remStatus" style="margin-top:0"></div>
       <div class="weekprev" id="schedInfo" style="margin-top:4px"></div>
     </div>
-    <div class="grp" data-tab="theme">
+    <div class="grp" data-tab="language">
       <h3>Оформление</h3>
       <div class="row"><label>Язык интерфейса<br><span style="font-size:13.5px;color:var(--muted)">перевод через интернет, включая узбекский и туркменский</span></label>
         <select id="appLang" class="vsel" style="max-width:190px"></select>
       </div>
       <div class="row"><label>Офлайн-язык<br><span style="font-size:13.5px;color:var(--muted)" id="langStatus">Русский встроен</span></label><button class="iconbtn" id="langDownload">Скачать</button></div>
-      <div class="themegrid" id="theme">
-        <button data-th="dark" class="on"><span class="sw" style="--sb:#0a0b0d;--sw:#c8ff00"></span>Тёмная</button>
-        <button data-th="light"><span class="sw" style="--sb:#ecefe8;--sw:#5f7d00"></span>Светлая</button>
-        <button data-th="sunset"><span class="sw" style="--sb:#150e0a;--sw:#ff6b4a"></span>Закат</button>
-        <button data-th="ocean"><span class="sw" style="--sb:#061418;--sw:#2fe0d0"></span>Океан</button>
-        <button data-th="violet"><span class="sw" style="--sb:#120c1a;--sw:#b478ff"></span>Виолет</button>
-        <button data-th="crimson"><span class="sw" style="--sb:#0c0505;--sw:#ff3b3b"></span>Багровый</button>
-        <button data-th="mint"><span class="sw" style="--sb:#eafaf3;--sw:#00a884"></span>Мята</button>
-        <button data-th="graphite"><span class="sw" style="--sb:#0e0e0f;--sw:#e8e8ea"></span>Графит</button>
-        <button data-th="rose"><span class="sw" style="--sb:#160c11;--sw:#ff5fa8"></span>Роза</button>
-        <button data-th="midnight"><span class="sw" style="--sb:#070b18;--sw:#4d8dff"></span>Полночь</button>
-        <button data-th="auto"><span class="sw" style="--sb:#0a0b0d;--sw:#ecefe8"></span>Авто</button>
-      </div>
+      <div class="weekprev">Используется единая тёмная графитово-лаймовая тема.</div>
     </div>
-    <div class="grp" data-tab="train" id="grpAmrap" style="display:none">
+    <div class="grp" data-tab="program" id="grpAmrap" style="display:none">
       <h3>На время · максимум повторов</h3>
       <div class="row"><label>Длительность<br><span style="font-size:13.5px;color:var(--muted)">1 – 60 минут</span></label>
         <div class="stepper"><button id="amMinus">−</button><div class="val" id="amVal">10 мин</div><button id="amPlus">+</button></div>
@@ -756,12 +919,12 @@
       <h3>Паспорт прогресса</h3>
       <div class="statcards" id="progressCards"></div>
       <div class="coachbox" id="progressCoach"></div>
-      <div class="quickgrid">
+      <div class="progress-actions">
         <button id="progressMaxTest">⚡ Замерить максимум</button>
-        <button id="coachOpen">AI-тренер</button>
+        <button id="coachOpen">Мой тренер</button>
       </div>
-      <h3>Ачивки</h3>
-      <div id="achList" style="display:flex;flex-wrap:wrap;gap:10px;padding:4px 0"></div>
+      <h3>Достижения</h3>
+      <div id="achList" class="achgrid"></div>
       <div id="graph"></div>
       <div class="hist" id="hist"></div>
       <div style="display:flex;gap:8px;margin-top:8px">
@@ -774,7 +937,7 @@
 
     <!-- Хваты -->
     <div class="grp" data-tab="grips">
-      <h3>Варианты отжиманий · 50</h3>
+      <h3>Базовые и сложные варианты</h3>
       <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:12px">Меняй хваты и положения, чтобы прорабатывать разные мышцы и беречь суставы. Разбито по уровням. Схема — вид сверху, ты лежишь лицом вниз.</div>
       <div class="setgrips" id="setGripPanel"></div>
       <div id="gripList"></div>
@@ -785,9 +948,9 @@
     <div class="grp" data-tab="media">
       <div class="orline" style="text-align:left;color:var(--muted);margin-bottom:14px">Добавляй фото и видео своих результатов и следи, как меняешься. Всё хранится только на твоём телефоне — ничего не загружается в сеть.</div>
       <div class="mediatools">
-        <button class="cdbtn" id="mediaCamera">📷 Сделать фото</button>
-        <button class="cdbtn" id="techRecord">🎥 Записать технику</button>
-        <button class="cdbtn" id="mediaAdd">＋ Добавить фото / видео</button>
+        <button class="cdbtn" id="mediaCamera"><svg viewBox="0 0 24 24"><path d="M4 8h4l1.5-2h5L16 8h4v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Сделать фото</button>
+        <button class="cdbtn" id="techRecord"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/></svg>Записать технику</button>
+        <button class="cdbtn" id="mediaAdd"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Добавить фото или видео</button>
         <div class="seg" id="mediaMode"><button data-mm="grid" class="on">Лента</button><button data-mm="compare">До / После</button></div>
       </div>
       <input type="file" id="mediaFile" accept="image/*,video/*" style="display:none">
@@ -817,10 +980,21 @@
   </div>
 </div>
 
-<!-- AI-тренер -->
+<!-- Подробности достижения -->
+<div id="achievementView" class="overlay">
+  <div class="phead"><h2>ДОСТИЖЕНИЕ</h2><button class="iconbtn" id="achievementClose">ЗАКРЫТЬ</button></div>
+  <div class="pbody"><div class="detail-card" id="achievementDetail"></div></div>
+</div>
+
+<!-- Персональный тренер -->
 <div id="coachView" class="overlay">
-  <div class="phead"><h2>AI-ТРЕНЕР</h2><button class="iconbtn" id="coachClose">ЗАКРЫТЬ</button></div>
+  <div class="phead"><h2>МОЙ ТРЕНЕР</h2><button class="iconbtn" id="coachClose">ЗАКРЫТЬ</button></div>
   <div class="pbody">
+    <div class="coachhero"><img class="coachhero-img" id="coachHeroImg" src="assets/coach-layma-fox-v1.png" alt="Персональный тренер"><div><span>Персональный наставник</span><b id="coachHeroName">Лайма</b></div></div>
+    <div class="coachpick" id="coachPick" aria-label="Выбор персонального тренера">
+      <button type="button" data-coach="layma" class="on"><img src="assets/coach-layma-fox-v1.png" alt="Тренер Лайма"><span class="coachpick-copy"><b>Лайма</b><small>дружелюбная и внимательная</small></span></button>
+      <button type="button" data-coach="lime"><img src="assets/coach-lime-fox-v1.png" alt="Тренер Лайм"><span class="coachpick-copy"><b>Лайм</b><small>уверенный и собранный</small></span></button>
+    </div>
     <div class="row"><label>Характер</label><select id="coachTone" class="vsel" style="max-width:190px"><option value="calm">Спокойный</option><option value="care">Заботливый</option><option value="strict">Жёсткий</option><option value="angry">Разгневанный</option></select></div>
     <div class="coachbox" id="coachAnswer"></div>
     <div class="quickgrid" id="coachQuick">
@@ -867,18 +1041,30 @@
 <!-- Онбординг -->
 <div id="onboard" class="overlay">
   <div class="pbody" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:14px;width:100%;max-width:420px;margin:0 auto;box-sizing:border-box;overflow-wrap:break-word">
-    <div style="font-family:'Bebas Neue';font-size:clamp(26px,9vw,46px);letter-spacing:1px;line-height:1">СЧЁТ<b style="color:var(--work)">•</b>ОТЖИМАНИЙ</div>
-    <div style="font-family:'Oswald';font-weight:300;font-size:15px;color:var(--muted);line-height:1.5">Счётчик-тренер по отжиманиям. Коротко, как это работает:</div>
-    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin:6px 0">
-      <div class="wuitem on"><div class="box">1</div><div class="tx">Положи телефон на пол<span>касайся носом экрана — каждое касание = повтор</span></div></div>
-      <div class="wuitem on"><div class="box">2</div><div class="tx">Программа на 52 недели<span>подстраивается под твой уровень, ведёт по подходам с отдыхом</span></div></div>
-      <div class="wuitem on"><div class="box">3</div><div class="tx">Голос и темп<span>считает, командует «вниз-вверх», подбадривает на финише</span></div></div>
-      <div class="wuitem on"><div class="box">4</div><div class="tx">Прогресс сохраняется<span>история, рекорды, серия дней и график</span></div></div>
+    <div class="obstep" id="obIntro">
+      <div style="font-family:'Bebas Neue';font-size:clamp(26px,9vw,46px);letter-spacing:1px;line-height:1">СЧЁТ<b style="color:var(--work)">•</b>ОТЖИМАНИЙ</div>
+      <div style="font-family:'Oswald';font-weight:300;font-size:15px;color:var(--muted);line-height:1.5;margin-top:12px">Счётчик и персональная программа. Коротко, как это работает:</div>
+      <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin:14px 0">
+        <div class="wuitem on"><div class="box">1</div><div class="tx">Выбери удобный счёт<span>касание экрана, камера или оба способа</span></div></div>
+        <div class="wuitem on"><div class="box">2</div><div class="tx">Тренируйся по своему уровню<span>подходы, отдых и нагрузка адаптируются</span></div></div>
+        <div class="wuitem on"><div class="box">3</div><div class="tx">Следи за прогрессом<span>история, рекорды, серия дней и график</span></div></div>
+      </div>
+      <button class="cdbtn" id="obNext" style="width:100%">Настроить профиль ▸</button>
     </div>
-    <div class="orline">Есть режим счёта по камере (без касания) — включи в Настройки → Тренировка → Способ счёта</div>
-    <button class="cdbtn" id="obTest" style="width:100%;background:var(--gold)">🎯 Замерить мой максимум</button>
-    <button class="cdbtn" id="obGo" style="width:100%">Поехали ▸</button>
-    <div class="orline" id="pwaHint">Совет: добавь на экран «Домой» — откроется как приложение</div>
+    <div class="obstep hidden" id="obProfile">
+      <div style="font-family:'Oswald';font-weight:700;font-size:28px">Твой профиль</div>
+      <div class="orline">Данные нужны для расчёта калорий и рекомендаций. Их можно изменить позже.</div>
+      <div class="obform">
+        <div class="row"><label>Вес, кг</label><input id="obWeight" type="number" class="vsel" min="25" max="250" value="80"></div>
+        <div class="row"><label>Рост, см</label><input id="obHeight" type="number" class="vsel" min="100" max="230" value="175"></div>
+        <div class="row"><label>Возраст</label><input id="obAge" type="number" class="vsel" min="10" max="100" value="30"></div>
+        <div class="row"><label>Пол</label><select id="obSex" class="vsel"><option value="male">Мужчина</option><option value="female">Женщина</option></select></div>
+        <div class="row"><label>Образ жизни</label><select id="obActivity" class="vsel"><option value="sedentary">Сидячий</option><option value="light">Малоподвижный</option><option value="walking">Ходячий</option><option value="active">Активный</option><option value="very">Очень активный</option></select></div>
+        <div class="row"><label>Цель питания</label><select id="obNutrition" class="vsel"><option value="fatloss">Похудение</option><option value="maintain" selected>Поддержание</option><option value="muscle">Набор</option></select></div>
+      </div>
+      <div class="obactions"><button class="cdbtn" id="obBack">Назад</button><button class="cdbtn" id="obGo">Сохранить ▸</button></div>
+      <button class="cdbtn" id="obTest" style="width:100%;background:var(--gold);margin-top:8px">🎯 Сохранить и замерить максимум</button>
+    </div>
   </div>
 </div>
 <div id="google_translate_element"></div>
@@ -887,6 +1073,17 @@
 (function(){
   "use strict";
   const $=id=>document.getElementById(id), now=()=>performance.now();
+  let dialogYes=null,dialogNo=null;
+  function closeAppDialog(answer){const yes=dialogYes,no=dialogNo;dialogYes=null;dialogNo=null;$('appDialog').classList.remove('open');if(answer&&yes)yes();else if(!answer&&no)no();}
+  function showAppDialog(message,{type='info',title='',confirmText='Понятно',cancelText='',onConfirm=null,onCancel=null}={}){
+    const meta={info:['i','Информация'],success:['✓','Готово'],warning:['!','Обратите внимание'],error:['×','Ошибка']}[type]||['i','Информация'];
+    $('dialogCard').dataset.type=type;$('dialogIcon').textContent=meta[0];$('dialogTitle').textContent=title||meta[1];$('dialogMessage').textContent=String(message||'');
+    $('dialogConfirm').textContent=confirmText;$('dialogCancel').textContent=cancelText||'Отмена';$('dialogCancel').style.display=cancelText?'':'none';$('dialogConfirm').classList.toggle('single',!cancelText);
+    dialogYes=onConfirm;dialogNo=onCancel;$('appDialog').classList.add('open');
+  }
+  function appAlert(message,type='info',title=''){showAppDialog(message,{type,title});}
+  function appConfirm(message,onConfirm,onCancel=null,options={}){showAppDialog(message,{type:options.type||'warning',title:options.title||'Подтверждение',confirmText:options.confirmText||'Продолжить',cancelText:options.cancelText||'Отмена',onConfirm,onCancel});}
+  $('dialogConfirm').addEventListener('click',()=>closeAppDialog(true));$('dialogCancel').addEventListener('click',()=>closeAppDialog(false));
 
   // масштабированная программа (старт с 7), 52 недели × 5 базовых подходов.
   // Пользовательское число подходов пересчитывается под рабочий максимум и цель, без прыжков выше уровня.
@@ -982,7 +1179,7 @@
   let musicApp='yandex', musicCustomUrl='';
   const MUSIC_PRESETS={spotify:'spotify:',yandex:'yandexmusic://',vk:'vkmusic://',ytmusic:'youtubemusic://'};
   function musicUrl(){return musicApp==='custom'?musicCustomUrl:(MUSIC_PRESETS[musicApp]||'');}
-  let profileWeight=80, profileHeight=175, profileAge=30, profileSex='male', profileActivity='light', nutritionGoal='maintain', coachTone='care';
+  let profileWeight=80, profileHeight=175, profileAge=30, profileSex='male', profileActivity='light', nutritionGoal='maintain', coachTone='care', coachId='layma';
   let lastRpe='', lastRpeDate='', sessionRpe='';
   const ACTIVITY_FACTORS={sedentary:1.2,light:1.35,walking:1.5,active:1.7,very:1.9};
   const ACTIVITY_NAMES={sedentary:'сидячий',light:'малоподвижный',walking:'ходячий',active:'активный',very:'очень активный'};
@@ -1347,7 +1544,7 @@
 
   // хранение
   function persist(){try{localStorage.setItem('pushup_hist',JSON.stringify(history));localStorage.setItem('pushup_pr',pr);
-    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programProfile,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl,profileWeight,profileHeight,profileAge,profileSex,profileActivity,nutritionGoal,coachTone,lastRpe,lastRpeDate}));}catch(e){storageOk=false;}}
+    localStorage.setItem('pushup_cfg',JSON.stringify({mode,week,programProfile,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl,profileWeight,profileHeight,profileAge,profileSex,profileActivity,nutritionGoal,coachTone,coachId,lastRpe,lastRpeDate}));}catch(e){storageOk=false;}}
   function loadAll(){try{history=JSON.parse(localStorage.getItem('pushup_hist'))||{};pr=+localStorage.getItem('pushup_pr')||0;
     const c=JSON.parse(localStorage.getItem('pushup_cfg'));
     if(c){mode=c.mode||'program';week=c.week||0;programProfile=PROGRAM_PROFILES[c.programProfile]?c.programProfile:'balanced';programRest=c.programRest||PROGRAM_PROFILES[programProfile].rest||60000;programSets=clampProgramSets(c.programSets||PROGRAM_PROFILES[programProfile].sets||5);goal=c.goal||0;
@@ -1358,13 +1555,13 @@
       startMax=c.startMax||7;autoProg=c.autoProg!==false;autoAdjust=!!c.autoAdjust;
       tempoVoiceOn=!!c.tempoVoiceOn;warmupOn=c.warmupOn!==false;
       if(Array.isArray(c.trainingDays))trainingDays=c.trainingDays;
-      reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme=c.theme||'auto';appLang=APP_LANGS.some(([code])=>code===c.appLang)?c.appLang:'ru';
+      reminderTime=c.reminderTime||'08:00';remindOn=!!c.remindOn;theme='dark';appLang=APP_LANGS.some(([code])=>code===c.appLang)?c.appLang:'ru';
       amrapMin=c.amrapMin||10;gripVoiceOn=!!c.gripVoiceOn;inputMode=c.inputMode||'tap';cameraFacing=c.cameraFacing==='environment'?'environment':'user';formCheckOn=!!c.formCheckOn;
       if(Array.isArray(c.setGrips)&&c.setGrips.length===SET_COUNT)setGrips=c.setGrips.map(v=>{v=+v;return(Number.isInteger(v)&&v>=0&&v<GRIPS.length)?v:0;});
       musicApp=c.musicApp||'yandex';musicCustomUrl=c.musicCustomUrl||'';
       profileWeight=Math.max(25,Math.min(250,+c.profileWeight||80));profileHeight=Math.max(100,Math.min(230,+c.profileHeight||175));profileAge=Math.max(10,Math.min(100,+c.profileAge||30));
       profileSex=c.profileSex==='female'?'female':'male';profileActivity=ACTIVITY_FACTORS[c.profileActivity]?c.profileActivity:'light';nutritionGoal=['fatloss','maintain','muscle'].includes(c.nutritionGoal)?c.nutritionGoal:'maintain';
-      coachTone=['calm','care','strict','angry'].includes(c.coachTone)?c.coachTone:'care';lastRpe=c.lastRpe||'';lastRpeDate=c.lastRpeDate||'';}
+      coachTone=['calm','care','strict','angry'].includes(c.coachTone)?c.coachTone:'care';coachId=c.coachId==='lime'?'lime':'layma';lastRpe=c.lastRpe||'';lastRpeDate=c.lastRpeDate||'';}
     loadOfflineLangs();applyTheme();applyAppLanguage();
     PLAN=buildPlan(startMax);if(week>51)week=51;programSets=clampProgramSets(programSets);programRest=Math.max(programRest,minRestForSets(programSets));
     const t=history[tkey()];if(t)committed={reps:t.reps||0,sets:t.sets||0,workMs:t.workMs||0,restMs:t.restMs||0,best:t.best||0};
@@ -1453,9 +1650,17 @@
     {id:'streak30',emoji:'💎',title:'Месяц подряд',sub:'30 дней серии — железная воля',check:()=>streak()>=30},
     {id:'streak100',emoji:'🔱',title:'100 дней подряд',sub:'Сотня дней серии — ты не человек',check:()=>streak()>=100},
   ];
-  let earnedAchieve=new Set();
-  function loadAchievements(){try{const a=JSON.parse(localStorage.getItem('pushup_achieve'));if(Array.isArray(a))earnedAchieve=new Set(a);}catch(e){}}
-  function saveAchievements(){try{localStorage.setItem('pushup_achieve',JSON.stringify([...earnedAchieve]));}catch(e){}}
+  let earnedAchieve=new Set(), achievementDates={};
+  function loadAchievements(){try{const a=JSON.parse(localStorage.getItem('pushup_achieve'));if(Array.isArray(a))earnedAchieve=new Set(a);achievementDates=JSON.parse(localStorage.getItem('pushup_achieve_dates'))||{};}catch(e){achievementDates={};}}
+  function saveAchievements(){try{localStorage.setItem('pushup_achieve',JSON.stringify([...earnedAchieve]));localStorage.setItem('pushup_achieve_dates',JSON.stringify(achievementDates));}catch(e){}}
+  function achievementValue(a){
+    if(a.id.startsWith('rep'))return reps+committed.reps;
+    if(a.id.startsWith('set'))return sets.length+committed.sets;
+    if(a.id.startsWith('streak'))return streak();
+    if(a.id==='best30')return sessMax();if(a.id==='best50')return sessMax();if(a.id==='best75')return sessMax();if(a.id==='best100')return sessMax();
+    if(a.id==='pr')return sessMax();return 0;
+  }
+  function achievementTarget(a){const m=a.id.match(/(?:rep|set|streak|best)(\d+)/);return m?+m[1]:(a.id==='pr'?Math.max(1,pr+1):1);}
   let toastTimer=null;
   function showAchieveToast(a){
     $('aToastEmoji').textContent=a.emoji;$('aToastTitle').textContent=a.title;$('aToastSub').textContent=a.sub;
@@ -1500,14 +1705,22 @@
     }catch(e){}
   }
   function checkAchievements(){
-    ACHIEVEMENTS.forEach(a=>{if(!earnedAchieve.has(a.id)&&a.check()){earnedAchieve.add(a.id);saveAchievements();showAchieveToast(a);}});
+    ACHIEVEMENTS.forEach(a=>{if(!earnedAchieve.has(a.id)&&a.check()){earnedAchieve.add(a.id);achievementDates[a.id]=new Date().toISOString();saveAchievements();showAchieveToast(a);}});
   }
   function renderAchievements(){
     const el=$('achList');if(!el)return;
     el.innerHTML=ACHIEVEMENTS.map(a=>{const earned=earnedAchieve.has(a.id);
-      return '<span class="achbadge" title="'+(earned?a.title+' — '+a.sub:'Ещё не получена')+'" style="opacity:'+(earned?'1':'.25')+'">'+(earned?a.emoji:'⬜')+'</span>';
+      const val=achievementValue(a),target=achievementTarget(a),pct=earned?100:Math.min(100,Math.round(val/target*100));
+      const date=achievementDates[a.id]?new Date(achievementDates[a.id]).toLocaleDateString('ru-RU'):(earned?'Получено':'В процессе');
+      return '<button class="achcard'+(earned?' earned':'')+'" data-ach="'+a.id+'"><span class="ach-top"><span class="ach-emoji">'+a.emoji+'</span><span class="ach-copy"><b>'+a.title+'</b><small>'+a.sub+'</small></span></span><span class="ach-progress"><i style="width:'+pct+'%"></i></span><span class="ach-meta"><span>'+Math.min(val,target)+' из '+target+'</span><span>'+date+'</span></span></button>';
     }).join('');
   }
+  function openAchievement(id){const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return;const earned=earnedAchieve.has(id),val=achievementValue(a),target=achievementTarget(a),pct=earned?100:Math.min(100,Math.round(val/target*100));const date=achievementDates[id]?new Date(achievementDates[id]).toLocaleDateString('ru-RU'):'—';
+    $('achievementDetail').innerHTML='<div class="detail-icon">'+a.emoji+'</div><h3>'+a.title+'</h3><div class="sub">'+a.sub+'</div><div class="detail-progress"><i style="width:'+pct+'%"></i></div><div class="ach-meta"><span>Прогресс: '+Math.min(val,target)+' из '+target+'</span><span>'+pct+'%</span></div><div class="weekprev" style="margin-top:16px">'+(earned?'Получено '+date:'Условие ещё не выполнено. Продолжай тренировки — результат обновляется автоматически.')+'</div>';
+    $('achievementView').classList.add('open');
+  }
+  $('achList').addEventListener('click',e=>{const b=e.target.closest('[data-ach]');if(b)openAchievement(b.dataset.ach);});
+  $('achievementClose').addEventListener('click',()=>$('achievementView').classList.remove('open'));
   loadAchievements();
 
   // ---- ХВАТЫ ----
@@ -1572,7 +1785,7 @@
     {lvl:'Новичок',name:'От стены',target:'Разминочные',hands:G_cl+wall,desc:'Стоя, руки в стену, тело прямое. Самый лёгкий старт — почувствуй движение.'},
     {lvl:'Новичок',name:'С колен',target:'Облегчённые',hands:G_cl+knees,desc:'Колени на полу, короче рычаг. Держи прямую линию от колен до головы.'},
     {lvl:'Новичок',name:'Наклонные (стол)',target:'Облегчённые',hands:G_cl+incHands,desc:'Руки на столе или подоконнике. Чем выше опора — тем легче.'},
-    {lvl:'Новичок',name:'Наклонные (скамья)',target:'Грудь',hands:G_cl+incHands,desc:'Опора ниже стола — тяжелее. Ступень к отжиманиям от пола.'},
+    {lvl:'Новичок',name:'От опоры',target:'Грудь',hands:G_cl+incHands,desc:'Руки на устойчивой скамье или тумбе, тело сохраняет прямую линию. Чем ниже опора — тем тяжелее.'},
     {lvl:'Новичок',name:'Классический',target:'Грудь + трицепс',hands:G_cl,desc:'Кисти под плечами, локти назад ~45°, тело прямое. <b>База</b> для всех.'},
     {lvl:'Новичок',name:'Широкий',target:'Акцент на грудь',hands:G_wi,desc:'Кисти шире плеч, пальцы чуть наружу. Грузит грудные. Локти не на 90°.'},
     {lvl:'Новичок',name:'Узкий',target:'Акцент на трицепс',hands:G_na,desc:'Кисти уже плеч, локти вдоль тела. Больше нагрузки на трицепс.'},
@@ -1589,9 +1802,9 @@
     // ——— СРЕДНИЙ ———
     {lvl:'Средний',name:'Алмазный',target:'Трицепс',hands:G_di,desc:'Ладони вместе под грудью, ромб из пальцев, локти прижаты. Меньше повторов.'},
     {lvl:'Средний',name:'Обратный хват',target:'Бицепс · предплечья',hands:G_re,desc:'Пальцы развёрнуты к ногам. Непривычная нагрузка — начинай с малого.'},
-    {lvl:'Средний',name:'«Домиком» (пика)',target:'Плечи · дельты',hands:G_cl+PIKE,desc:'Таз вверх, тело «Λ», опускайся макушкой между ладоней. К стойке на руках.'},
+    {lvl:'Средний',name:'Пайк',target:'Плечи · дельты',hands:G_cl+PIKE,desc:'Таз вверх, тело «Λ», опускайся макушкой между ладоней. К стойке на руках.'},
     {lvl:'Средний',name:'Пика с возвышения',target:'Плечи',hands:G_cl+PIKE+decFeet,desc:'Ноги на скамье — таз выше, плечи грузятся заметно сильнее.'},
-    {lvl:'Средний',name:'С наклоном вниз',target:'Верх груди',hands:G_cl+decFeet,desc:'Ноги на возвышении. Акцент на верх груди и передние дельты.'},
+    {lvl:'Средний',name:'Ноги на возвышении',target:'Верх груди',hands:G_cl+decFeet,desc:'Ноги на устойчивой скамье, корпус прямой. Акцент на верх груди и передние дельты.'},
     {lvl:'Средний',name:'Разновысокие руки',target:'Координация',hands:G_st,desc:'Одна кисть выше другой, потом меняешь. Готовит к асимметричной нагрузке.'},
     {lvl:'Средний',name:'Псевдо-планш',target:'Плечи · кор',hands:G_ps,desc:'Кисти у пояса, пальцы назад, корпус подан вперёд. Подводка к планшу.'},
     {lvl:'Средний',name:'Человек-паук',target:'Кор · грудь',hands:G_cl+spider,desc:'На спуске колено тянется к локтю сбоку. Подключает косые мышцы.'},
@@ -1615,6 +1828,7 @@
     {lvl:'Продвинутый',name:'С хлопком за спиной',target:'Мощность',hands:G_cl+clap,desc:'Успей хлопнуть за спиной — нужен очень мощный вылет вверх.'},
     {lvl:'Продвинутый',name:'Супермен',target:'Мощность · кор',hands:G_cl+boom+clap,desc:'В полёте вытяни руки и ноги. Только для очень сильных.'},
     {lvl:'Продвинутый',name:'«90 градусов»',target:'Экстрим',hands:G_ps+handUp,desc:'Взрывом выходишь почти в вертикаль на прямых руках. Элемент силачей.'},
+    {lvl:'Продвинутый',name:'Сфинкс',target:'Трицепс',hands:G_na+elbow,desc:'Начни на предплечьях и разогни локти, поднимаясь на ладони. Корпус держи единым блоком; прекрати при боли в локтях или запястьях.'},
     {lvl:'Продвинутый',name:'Тигровые',target:'Трицепс',hands:G_na+elbow,desc:'Со сфинкса (на локтях) выжимаешься на кисти. Жёсткая нагрузка на трицепс.'},
     {lvl:'Продвинутый',name:'Человек-паук взрывной',target:'Мощность',hands:G_cl+spider+boom,desc:'Спайдермен с отрывом от пола. Координация и мощность разом.'},
     {lvl:'Продвинутый',name:'Архер на упорах',target:'Сила · амплитуда',hands:archer+bars,desc:'Лучник на брусках — больше глубина и растяжка, заметно тяжелее.'},
@@ -1629,7 +1843,9 @@
       '<div class="gasg"><span class="gasgl">В подход:</span>'+
       [0,1,2,3,4].map(s=>'<button data-grip="'+gi+'" data-set="'+s+'">'+(s+1)+'</button>').join('')+
       '</div></div></div>';
-    el.innerHTML=['Новичок','Средний','Продвинутый'].map(lv=>{
+    const featuredNames=['Классический','С колен','От стены','От опоры','Алмазный','Широкий','«Лучник»','Ноги на возвышении','Пайк','Сфинкс'];
+    const featured=featuredNames.map(n=>GRIPS.map((g,i)=>[g,i]).find(x=>x[0].name===n)).filter(Boolean);
+    el.innerHTML='<div class="griplvl">Основные карточки техники · '+featured.length+'</div>'+featured.map(gi=>card(gi[0],gi[1])).join('')+['Новичок','Средний','Продвинутый'].map(lv=>{
       const items=GRIPS.map((g,i)=>[g,i]).filter(gi=>gi[0].lvl===lv);if(!items.length)return '';
       return '<div class="griplvl">'+lv+' · '+items.length+'</div>'+items.map(gi=>card(gi[0],gi[1])).join('');
     }).join('');
@@ -1647,6 +1863,7 @@
   // фразы для голоса — предзаписанные клипы (edge-tts) для ВСЕХ 50 хватов, оба голоса (Дмитрий/Светлана)
   const GRIP_SAY={"От стены":"от стены","С колен":"с колен","Наклонные (стол)":"наклонные от стола","Наклонные (скамья)":"наклонные от скамьи","Классический":"классический хват","Широкий":"широкий хват","Узкий":"узкий хват","На кулаках":"на кулаках","С паузой внизу":"с паузой внизу","Негативные":"негативные","Алмазный с колен":"алмазный с колен","Широкий с колен":"широкий с колен","Скапулярные":"скапулярные","«Кобра»":"кобра","Пика с колен":"пика с колен","Темп 3-1-3":"в темпе три-один-три","Планка-удержание":"планка, удержание","Алмазный":"алмазный хват","Обратный хват":"обратный хват","«Домиком» (пика)":"домиком, пика","Пика с возвышения":"пика с возвышения","С наклоном вниз":"с наклоном вниз","Разновысокие руки":"разновысокие руки","Псевдо-планш":"псевдопланш","Человек-паук":"человек-паук","На пальцах":"на пальцах","Касание плеча":"с касанием плеча","Типрайтер":"типрайтер","Т-отжимание":"тэ-отжимание","Хинду":"хинду","С хлопком":"с хлопком","С отягощением":"с отягощением","«Лучник»":"лучник","Глубокие на упорах":"глубокие на упорах","На одной руке":"на одной руке","Одной рукой (узко)":"одной рукой, узко","Стойка у стены (негатив)":"стойка у стены, негатив","В стойке на руках":"в стойке на руках","Планш-наклон":"планш с наклоном","Глубокий псевдо-планш":"глубокий псевдопланш","Взрывные с отрывом":"взрывные с отрывом","С хлопком за спиной":"с хлопком за спиной","Супермен":"супермен","«90 градусов»":"девяносто градусов","Тигровые":"тигровые","Человек-паук взрывной":"человек-паук взрывной","Архер на упорах":"лучник на упорах","Одной рукой на кулаке":"одной рукой на кулаке","На петлях (TRX)":"на петлях","На кольцах":"на кольцах"};
   const gripForSet=i=>GRIPS[setGrips[((i%SET_COUNT)+SET_COUNT)%SET_COUNT]]||GRIPS[0];
+  Object.assign(GRIP_SAY,{'От опоры':'от опоры','Пайк':'пайк','Ноги на возвышении':'ноги на возвышении','Сфинкс':'сфинкс'});
   const gripSay=g=>GRIP_SAY[g&&g.name]||null;
   function renderSetGrips(){
     const el=$('setGripPanel');if(!el||el.children.length)return;
@@ -1850,7 +2067,7 @@
         elSet.innerHTML='Следующий — подход <b>'+(sets.length+1)+'</b>';
       }
     }else{
-      tap.classList.remove('rest');elCount.classList.remove('alert');
+      tap.classList.remove('rest');tap.classList.toggle('work',started);elCount.classList.remove('alert');
       elCount.textContent=repsThisSet;topcount.textContent=repsThisSet;elCap.textContent='В ПОДХОДЕ';
       const target=mode==='program'?currentTarget():goal;
       if(started&&target>0){
@@ -1901,20 +2118,23 @@
       heroNums='<span class="hn first big1">∞</span>';
       heroSub=modeLabel;
     }
-    let h='<div class="daybanner '+(todayTrain?'train':'rest')+'">'+
-      (trainedToday()?'Тренировка выполнена 🔥':todayTrain?'Сегодня — день тренировки 💪':'День отдыха · восстанавливайся')+'</div>';
-    // ГЕРОЙ: фокус экрана + встроенная главная кнопка
-    h+='<div class="herocard"><div class="herohead"><span class="herotag">'+heroTag+'</span><span class="herometa">'+heroMeta+'</span></div>'+
-       '<div class="herotitle">'+heroTitle+'</div><div class="heronums">'+heroNums+'</div><div class="herosub">'+heroSub+'</div>';
-    if(countOn){h+='<button id="cdStart" class="herocta">▶ Поехали</button>';}
-    else{h+='<div class="pulse" style="margin-top:14px">▾ Коснись экрана, чтобы начать ▾</div>';}
-    h+='</div>';
-    if(countOn)h+='<div class="orline">или просто коснись экрана — начнётся сразу</div>';
-    // вспомогательная статистика (приглушённо: серия/сегодня — нейтрально, рекорд — золото)
-    h+='<div class="meta"><div>Серия<b>'+st+(st%10===1&&st%100!==11?' день':' дн.')+'</b></div>'+
-       '<div>Сегодня<b>'+today+'</b></div><div class="g">Рекорд<b>'+pr+'</b></div></div>';
-    h+='<div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div>';
-    h+='<div class="orline">На этой неделе: '+doneWk+' / '+trainingDays.length+(todayTrain?'':' · след.: '+nextTrain())+'</div>';
+    const hour=new Date().getHours(), greeting=hour<6?'Доброй ночи':hour<12?'Доброе утро':hour<18?'Добрый день':'Добрый вечер';
+    const target=mode==='program'?Math.max(1,planSum(week)):Math.max(30,today||30), progress=Math.min(100,Math.round(today/target*100));
+    const setValues=mode==='program'?currentPlan():(mode==='amrap'?[amrapMin]:['∞']);
+    hello.className='athletic-home';
+    let h='<div class="home-top"><div class="home-greeting"><small>Твой персональный тренер</small><strong>'+greeting+'</strong></div>'+
+      '<div class="streak-pill" title="Серия тренировок"><svg viewBox="0 0 24 24"><path d="M13.4 2.3c.5 3.8-2.7 5-2.7 7.8 0 1.1.7 2 1.7 2.5-.1-2.4 1.3-4.2 3.3-5.5 2.9 2.3 4.3 5 4.3 7.6A8 8 0 1 1 5.4 10c.2 2.4 1.3 3.8 2.5 4.4-.7-4.6 1.7-8.8 5.5-12.1z"/></svg><b>'+st+'</b></div></div>';
+    h+='<div class="coach-stage"><img class="home-athlete" src="assets/hero-man-pushup-v1.png" alt="Спортсмен выполняет отжимание"><div class="daily-ring" style="--p:'+progress+'"><div class="ring-copy"><b>'+today+'</b><span>повторов сегодня</span></div></div></div>';
+    const cardTitle=mode==='program'?'Тренировка сегодня':heroTitle;
+    const cardSub=mode==='program'?(setValues.length+' подходов · '+planSum(week)+' повторов · отдых '+ms2(programRest/1000)):heroSub;
+    h+='<div class="workout-card"><div class="workout-card-head"><div class="workout-icon"><svg viewBox="0 0 24 24"><path d="M4 14h4l2-4 3 8 2-5h5"/></svg></div><div class="workout-title"><b>'+cardTitle+'</b><span>'+cardSub+'</span></div><span class="mode-badge">'+heroTag+'</span></div>';
+    h+='<div class="set-track">'+setValues.map((n,i)=>'<span class="set-node"><i>'+n+'</i>'+(i<setValues.length-1?'<em></em>':'')+'</span>').join('')+'</div></div>';
+    if(countOn)h+='<button id="cdStart" class="athletic-cta"><svg viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z"/></svg>Начать тренировку</button>';
+    else h+='<div class="pulse" style="text-align:center">Коснись экрана, чтобы начать</div>';
+    h+='<div class="home-stats"><div class="home-stat"><svg viewBox="0 0 24 24"><path d="M12 21s7-3.8 7-10a4 4 0 0 0-7-2.8A4 4 0 0 0 5 11c0 6.2 7 10 7 10z"/></svg><span>Серия</span><b>'+st+' дн.</b></div>'+
+      '<div class="home-stat"><svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4m-4 1v5m-4 2h8"/></svg><span>Рекорд</span><b>'+pr+'</b></div>'+
+      '<div class="home-stat"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4m8-4v4M4 10h16"/></svg><span>Неделя</span><b>'+(week+1)+'/52</b></div></div>';
+    h+='<div class="home-week"><div class="wkstrip">'+cells.map(c=>'<div class="wd'+(c.train?' train':'')+(c.done?' done':'')+(c.today?' today':'')+'">'+DOW[c.dow]+'<div class="dot"></div></div>').join('')+'</div><div class="orline">'+doneWk+'/'+trainingDays.length+'</div></div>';
     hello.innerHTML=h;
     const sb=hello.querySelector('#cdStart');
     if(sb)sb.addEventListener('pointerdown',ev=>{ev.stopPropagation();ev.preventDefault();doStart(true);});
@@ -1985,7 +2205,7 @@
     const sumText='💪 Отжимания\nВсего: '+total+' повт. · '+nSets+' подходов\nЛучший подход: '+best+' · работа '+fmt(exerciseMs)+
       (mode==='program'?'\nПрограмма: неделя '+(week+1):'')+(mode==='amrap'?'\nНа время '+amrapMin+' мин':'');
     $('save').onclick=()=>commitSession(best,false,pct);
-    $('discard').onclick=()=>{if(confirm('Удалить тренировку без сохранения?'))discardSession();};
+    $('discard').onclick=()=>appConfirm('Текущая тренировка будет удалена без сохранения.',discardSession,null,{confirmText:'Удалить',title:'Удалить тренировку?'});
     $('share').onclick=async()=>{
       try{
         const W=800,H=420,pad=40;
@@ -2035,7 +2255,7 @@
             else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='otzhimaniya.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
           }catch(e){if(e.name!=='AbortError'){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='otzhimaniya.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}}
         },'image/png');
-      }catch(err){try{if(navigator.share)await navigator.share({text:sumText});else{await navigator.clipboard.writeText(sumText);alert('Скопировано!');}}catch(e){}}
+      }catch(err){try{if(navigator.share)await navigator.share({text:sumText});else{await navigator.clipboard.writeText(sumText);appAlert('Результат скопирован в буфер обмена.','success');}}catch(e){}}
     };    const nw=$('nextweek');if(nw)nw.onclick=()=>commitSession(best,true,pct);
     $('rpeGrid').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;sessionRpe=b.dataset.rpe;lastRpe=sessionRpe;lastRpeDate=tkey();[...$('rpeGrid').children].forEach(x=>x.classList.toggle('on',x===b));persist();});
   }
@@ -2111,20 +2331,15 @@
     $('grpFree').style.opacity=mode==='free'?'1':'.35';
     $('grpAmrap').style.display=mode==='amrap'?'':'none';
   }
-  // 'auto' резолвится только в dark/light — у ОС нет сигнала, какая из цветных тем нравится пользователю
-  const THEME_IDS=['light','sunset','ocean','violet','crimson','mint','graphite','rose','midnight'];
   function applyTheme(){
-    const isLight=theme==='light'||(theme==='auto'&&window.matchMedia('(prefers-color-scheme: light)').matches);
-    THEME_IDS.forEach(id=>document.body.classList.remove(id==='light'?'light':'theme-'+id));
-    if(isLight)document.body.classList.add('light');
-    else if(theme!=='dark'&&theme!=='auto')document.body.classList.add('theme-'+theme);
+    theme='dark';
+    document.body.className=document.body.className.split(/\s+/).filter(c=>c!=='light'&&!c.startsWith('theme-')).join(' ');
   }
-  try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',applyTheme);}catch(e){}
   function showTab(name){[...document.querySelectorAll('.grp[data-tab]')].forEach(g=>g.style.display=g.dataset.tab===name?'':'none');
     [...$('tabbar').children].forEach(b=>b.classList.toggle('on',b.dataset.tab===name));}
   // ---- нижняя навигация (редизайн этап 2): 5 разделов, страницы переиспользуют группы оверлея ----
-  const VIEW_ORDER=['train','grips','progress','media','more'];
-  let currentView='train', moreSub='train';
+  const VIEW_ORDER=['train','program','progress','profile','more'];
+  let currentView='train', moreSub='technical';
   function showView(view,swipeDir){
     currentView=view;
     [...$('bottomnav').children].forEach(b=>b.classList.toggle('on',b.dataset.view===view));
@@ -2132,7 +2347,9 @@
     // остальные три — как «страницы» в оверлее #panel
     syncControls();renderGraph();renderHist();renderProgressPanel();
     const tb=$('tabbar'), title=$('panelTitle');
-    if(view==='grips'){ tb.style.display='none'; title.textContent='Хваты'; showTab('grips'); }
+    if(view==='program'){ tb.style.display='none'; title.textContent='Моя программа'; showTab('program'); }
+    else if(view==='profile'){ tb.style.display='none'; title.textContent='Профиль спортсмена'; showTab('profile'); }
+    else if(view==='grips'){ tb.style.display='none'; title.textContent='Варианты отжиманий'; showTab('grips'); }
     else if(view==='progress'){ tb.style.display='none'; title.textContent='Прогресс'; showTab('hist'); }
     else if(view==='media'){ tb.style.display='none'; title.textContent='Мой прогресс'; showTab('media'); renderMedia(); }
     else { tb.style.display=''; title.textContent='Настройки'; showTab(moreSub); }
@@ -2177,7 +2394,8 @@
     if(profSel&&profSel.value!==programProfile)profSel.value=programProfile;
     $('profileInfo').innerHTML=(PROGRAM_PROFILES[programProfile]||PROGRAM_PROFILES.custom).desc;
     initLangSelect();if($('appLang').value!==appLang)$('appLang').value=appLang;
-    $('mediaCamera').textContent='📷 Сделать фото ('+(cameraFacing==='user'?'фронт':'основная')+')';
+    $('mediaCamera').textContent='📷 Сделать фото';
+    $('mediaCamera').title=cameraFacing==='user'?'Передняя камера':'Основная камера';
     $('formCheck').classList.toggle('on',formCheckOn||cameraFacing==='environment');
     if($('musicApp').value!==musicApp)$('musicApp').value=musicApp;
     $('musicCustomRow').classList.toggle('hidden',musicApp!=='custom');
@@ -2188,6 +2406,7 @@
     if($('profileActivity').value!==profileActivity)$('profileActivity').value=profileActivity;
     if($('nutritionGoal').value!==nutritionGoal)$('nutritionGoal').value=nutritionGoal;
     if($('coachTone')&&$('coachTone').value!==coachTone)$('coachTone').value=coachTone;
+    syncCoachIdentity();
     $('profileCalc').innerHTML=profileSummary();
     $('wVal').textContent=week+1;
     programSets=clampProgramSets(programSets);
@@ -2225,7 +2444,6 @@
       else if(hasN&&Notification.permission==='denied')rs='Уведомления запрещены в настройках браузера — напомним внутри приложения при открытии.';
       else rs='Напомним внутри приложения при открытии в день тренировки.';
       $('remStatus').textContent=rs;})();
-    [...$('theme').children].forEach(b=>b.classList.toggle('on',b.dataset.th===theme));
     $('auto').classList.toggle('on',autoProg);
     $('autoAdjust').classList.toggle('on',autoAdjust);
     $('maxInfo').innerHTML='Рекорд <b>'+pr+'</b> · рабочий уровень <b>'+startMax+'</b> · неделя 1 = '+planForWeek(0).join('·');
@@ -2298,6 +2516,8 @@
   $('gear').addEventListener('click',()=>showView('more'));
   $('close').addEventListener('click',()=>showView('train'));
   $('bottomnav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showView(b.dataset.view);});
+  $('openGrips').addEventListener('click',()=>showView('grips'));
+  $('openMedia').addEventListener('click',()=>showView('media'));
   $('mode').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;syncControls();persist();if(!started)renderHello();});
   $('inputMode').addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
@@ -2312,7 +2532,7 @@
     if(started&&!paused&&inputMode!=='tap'){stopCamera();startCamera();}
   });
   $('formCheck').addEventListener('click',()=>{
-    if(cameraFacing==='environment'){alert('На основной камере ИИ-проверка техники включена постоянно. Поставь телефон так, чтобы камера видела тело целиком сбоку или спереди.');return;}
+    if(cameraFacing==='environment'){appAlert('На основной камере проверка техники включена постоянно. Поставь телефон так, чтобы камера видела тело целиком сбоку или спереди.','info','Основная камера');return;}
     formCheckOn=!formCheckOn;syncControls();persist();
     if(started&&!paused&&inputMode!=='tap'){stopCamera();startCamera();}
   });
@@ -2329,6 +2549,14 @@
   $('profileActivity').addEventListener('change',e=>{profileActivity=ACTIVITY_FACTORS[e.target.value]?e.target.value:'light';syncControls();persist();renderProgressPanel();});
   $('nutritionGoal').addEventListener('change',e=>{nutritionGoal=['fatloss','maintain','muscle'].includes(e.target.value)?e.target.value:'maintain';syncControls();persist();renderProgressPanel();});
   $('coachTone').addEventListener('change',e=>{coachTone=e.target.value;persist();$('coachAnswer').textContent=coachText('default');renderProgressPanel();});
+  function syncCoachIdentity(){
+    const isLime=coachId==='lime', src=isLime?'assets/coach-lime-fox-v1.png':'assets/coach-layma-fox-v1.png', name=isLime?'Лайм':'Лайма';
+    document.documentElement.style.setProperty('--coach-image',"url('"+src+"')");
+    if($('coachHeroImg')){$('coachHeroImg').src=src;$('coachHeroImg').alt='Тренер '+name;}
+    if($('coachHeroName'))$('coachHeroName').textContent=name;
+    if($('coachPick'))[...$('coachPick').children].forEach(b=>b.classList.toggle('on',b.dataset.coach===coachId));
+  }
+  $('coachPick').addEventListener('click',e=>{const b=e.target.closest('button[data-coach]');if(!b)return;coachId=b.dataset.coach==='lime'?'lime':'layma';syncCoachIdentity();persist();$('coachAnswer').textContent=coachText('default');renderProgressPanel();});
   $('progressMaxTest').addEventListener('click',openTest);
   $('coachOpen').addEventListener('click',()=>{$('coachView').classList.add('open');$('coachAnswer').textContent=coachText('default');});
   $('coachClose').addEventListener('click',()=>$('coachView').classList.remove('open'));
@@ -2338,7 +2566,7 @@
     $('coachAnswer').textContent=coachText(topic);
   });
   $('programProfile').addEventListener('change',e=>{
-    if(started){alert('Цель программы можно менять до начала тренировки.');syncControls();return;}
+    if(started){appAlert('Цель программы можно менять до начала тренировки.','warning');syncControls();return;}
     applyProgramProfile(e.target.value);syncControls();persist();renderHello();
   });
   $('appLang').addEventListener('change',e=>{
@@ -2350,13 +2578,13 @@
   $('langDownload').addEventListener('click',()=>{
     if(!OFFLINE_LANG_CODES.includes(appLang)||offlineLangs.includes(appLang))return;
     offlineLangs.push(appLang);saveOfflineLangs();syncLangStatus();
-    alert('Язык добавлен в офлайн-пакеты интерфейса. Полный перевод всех фраз будет расширяться словарями.');
+    appAlert('Язык добавлен в офлайн-пакеты интерфейса. Полный перевод всех фраз будет расширяться словарями.','success');
   });
   $('wPlus').addEventListener('click',()=>{week=Math.min(51,week+1);syncControls();persist();if(!started)renderHello();});
   $('wMinus').addEventListener('click',()=>{week=Math.max(0,week-1);syncControls();persist();if(!started)renderHello();});
   const PR_STEP=15000, PR_MIN=15000, PR_MAX=300000, TR_STEP=15000, TR_MAX=180000;
   function changeProgramSets(delta){
-    if(started){alert('Количество подходов можно менять до начала тренировки.');return;}
+    if(started){appAlert('Количество подходов можно менять до начала тренировки.','warning');return;}
     programProfile='custom';programSets=clampProgramSets(programSets+delta);programRest=Math.max(programRest,minRestForSets(programSets));syncControls();persist();renderHello();
   }
   $('psPlus').addEventListener('click',()=>changeProgramSets(1));
@@ -2387,6 +2615,7 @@
   // ===== УВЕДОМЛЕНИЯ (APK / PWA / браузер) =====
   const Cap = window.Capacitor;
   const isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
+  if(isNative)document.body.classList.add('native-app');
   // в установленном APK подсказка «добавь на экран Домой» не нужна — прячем
   if(isNative){const _ph=$('pwaHint');if(_ph)_ph.style.display='none';}
   const LN = () => (Cap && Cap.Plugins && Cap.Plugins.LocalNotifications) || null;
@@ -2481,7 +2710,7 @@
   $('msMinus').addEventListener('click',()=>{metroSec=Math.max(0.5,Math.round((metroSec-0.25)*100)/100);syncControls();persist();if(metroOn)click(true);});
   $('sound').addEventListener('click',()=>{soundOn=!soundOn;syncControls();persist();if(soundOn)beep(880);});
   $('vibe').addEventListener('click',()=>{vibeOn=!vibeOn;syncControls();persist();if(vibeOn)buzz(40);});
-  $('clearHist').addEventListener('click',()=>{if(confirm('Удалить всю историю и рекорд?')){history={};committed={reps:0,sets:0,workMs:0,restMs:0,best:0};pr=0;persist();renderGraph();renderHist();if(!started)renderHello();}});
+  $('clearHist').addEventListener('click',()=>appConfirm('Будут удалены вся история тренировок и личный рекорд. Это действие нельзя отменить.',()=>{history={};committed={reps:0,sets:0,workMs:0,restMs:0,best:0};pr=0;persist();renderGraph();renderHist();renderProgressPanel();if(!started)renderHello();appAlert('История тренировок удалена.','success');},null,{confirmText:'Удалить всё',title:'Очистить историю?'}));
   $('auto').addEventListener('click',()=>{autoProg=!autoProg;syncControls();persist();});
   $('autoAdjust').addEventListener('click',()=>{autoAdjust=!autoAdjust;syncControls();persist();});
 
@@ -2506,21 +2735,21 @@
     PLAN=oldPlan;startMax=oldStart;
     if(maxRep>pr)pr=maxRep;
     const msg='Твой максимум: '+maxRep+'.\nРабочий уровень для программы: '+workMax+' (запас '+reserve+').\n\nМаксимум сохраняем как рекорд. Пересчитать программу с запасом?\nНеделя 1 станет: '+nextRow.join('·')+'.';
-    if(confirm(msg)){
+    appConfirm(msg,()=>{
       startMax=workMax;PLAN=buildPlan(workMax);week=0;mode='program';persist();
       $('test').classList.remove('open');showView('train');
-      alert('Готово. Рекорд: '+maxRep+'. Программа построена от рабочего уровня '+workMax+'.');
-    }else{
+      appAlert('Рекорд: '+maxRep+'. Программа построена от рабочего уровня '+workMax+'.','success','Программа обновлена');
+    },()=>{
       persist();$('test').classList.remove('open');showView('train');
-      alert('Рекорд сохранён: '+maxRep+'. Программу не менял.');
-    }
+      appAlert('Рекорд сохранён: '+maxRep+'. Программа не изменена.','success');
+    },{confirmText:'Пересчитать',cancelText:'Только рекорд',title:'Результат замера'});
   });
 
   // ---- Бэкап ----
   $('exportBtn').addEventListener('click',()=>{
     const data={v:2,history,pr,
-      cfg:{mode,week,programProfile,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl,profileWeight,profileHeight,profileAge,profileSex,profileActivity,nutritionGoal,coachTone,lastRpe,lastRpeDate},
-      ach:[...earnedAchieve]};
+      cfg:{mode,week,programProfile,programRest,programSets,goal,restThreshold,targetRest,soundOn,vibeOn,voiceOn,voiceName,voiceEnergy,countOn,cheerLead,metroOn,metroSec,startMax,autoProg,autoAdjust,tempoVoiceOn,warmupOn,trainingDays,reminderTime,remindOn,theme,appLang,amrapMin,gripVoiceOn,setGrips,inputMode,cameraFacing,formCheckOn,musicApp,musicCustomUrl,profileWeight,profileHeight,profileAge,profileSex,profileActivity,nutritionGoal,coachTone,coachId,lastRpe,lastRpeDate},
+      ach:[...earnedAchieve],achDates:achievementDates};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
     a.download='otzhimaniya-backup-'+tkey()+'.json';document.body.appendChild(a);a.click();
@@ -2529,24 +2758,30 @@
   $('importBtn').addEventListener('click',()=>$('importFile').click());
   $('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
     r.onload=()=>{try{const d=JSON.parse(r.result);
-      if(d.history&&confirm('Импортировать данные из файла? Текущая история и настройки будут заменены.')){
+      if(d.history)appConfirm('Текущая история и настройки будут заменены данными из выбранного файла.',()=>{
         // пишем бэкап в хранилище и перезагружаем тем же путём, что при старте — так восстановятся
         // ВСЕ ключи конфига (тема, дни, напоминания, музыка и т.д.), а не только часть
         localStorage.setItem('pushup_hist',JSON.stringify(d.history||{}));
         localStorage.setItem('pushup_pr',d.pr||0);
         if(d.cfg)localStorage.setItem('pushup_cfg',JSON.stringify(d.cfg));
         if(Array.isArray(d.ach))localStorage.setItem('pushup_achieve',JSON.stringify(d.ach));
+        if(d.achDates)localStorage.setItem('pushup_achieve_dates',JSON.stringify(d.achDates));
         loadAll();loadAchievements();
         if(!history[tkey()])committed={reps:0,sets:0,workMs:0,restMs:0,best:0};
         syncControls();renderGraph();renderHist();renderProgressPanel();renderHello();renderAchievements();
-        alert('Импорт выполнен.');
-      }
-    }catch(err){alert('Не удалось прочитать файл.');}e.target.value='';};
+        appAlert('Данные и настройки успешно импортированы.','success');
+      },null,{confirmText:'Импортировать',title:'Заменить данные?'});
+    }catch(err){appAlert('Не удалось прочитать файл. Проверь формат и попробуй снова.','error');}e.target.value='';};
     r.readAsText(f);});
 
   $('tabbar').addEventListener('click',e=>{const b=e.target.closest('button');if(b){moreSub=b.dataset.tab;showTab(moreSub);}});
-  $('theme').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;theme=b.dataset.th;applyTheme();syncControls();persist();});
-  function closeOnboard(){try{localStorage.setItem('pushup_onboarded','1');}catch(e){}$('onboard').classList.remove('open');}
+  function saveOnboardProfile(){
+    profileWeight=Math.max(25,Math.min(250,+$('obWeight').value||80));profileHeight=Math.max(100,Math.min(230,+$('obHeight').value||175));profileAge=Math.max(10,Math.min(100,+$('obAge').value||30));
+    profileSex=$('obSex').value==='female'?'female':'male';profileActivity=ACTIVITY_FACTORS[$('obActivity').value]?$('obActivity').value:'light';nutritionGoal=['fatloss','maintain','muscle'].includes($('obNutrition').value)?$('obNutrition').value:'maintain';persist();syncControls();renderProgressPanel();
+  }
+  function closeOnboard(){saveOnboardProfile();try{localStorage.setItem('pushup_onboarded','1');}catch(e){}$('onboard').classList.remove('open');}
+  $('obNext').addEventListener('click',()=>{$('obIntro').classList.add('hidden');$('obProfile').classList.remove('hidden');});
+  $('obBack').addEventListener('click',()=>{$('obProfile').classList.add('hidden');$('obIntro').classList.remove('hidden');});
   $('obGo').addEventListener('click',closeOnboard);
   $('obTest').addEventListener('click',()=>{closeOnboard();openTest();});
 
@@ -2595,7 +2830,7 @@
           if(navigator.canShare({files:[file]})){ await navigator.share({ files:[file], text:'Мой прогресс 💪' }); return; } }
         await navigator.share({ text:'Мой прогресс в отжиманиях 💪' }); return; }
     }catch(err){ if(err && err.name==='AbortError')return; }
-    alert('Поделиться можно из приложения на телефоне — там откроется системное окно «Поделиться».');
+    appAlert('Поделиться можно из приложения на телефоне — там откроется системное окно «Поделиться».','info');
   }
   async function onMediaFile(ev){
     const f = ev.target.files && ev.target.files[0]; ev.target.value='';
@@ -2605,7 +2840,7 @@
     const id = 'm'+Date.now().toString(36)+(mediaSeq++).toString(36);
     const entry = { id, type:isVid?'video':'image', ext, date:new Date().toISOString(), tech:ev.target&&ev.target.id==='techVideoFile' };
     try{ await mediaSaveBlob(id, ext, f); media.unshift(entry); saveMedia(); renderMedia(); }
-    catch(err){ alert('Не удалось сохранить файл. Возможно, он слишком большой.'); }
+    catch(err){ appAlert('Не удалось сохранить файл. Возможно, он слишком большой.','error'); }
   }
   async function renderMedia(){
     const grid=$('mediaGrid'), empty=$('mediaEmpty'), cmp=$('mediaCompare');
@@ -2646,7 +2881,7 @@
   $('mediaAdd').addEventListener('click',()=>$('mediaFile').click());
   $('mediaFile').addEventListener('change',onMediaFile);
   $('techRecord').addEventListener('click',()=>{
-    alert('Запиши 10-20 секунд отжиманий. Видео сохранится в галерею как запись техники. Линии тела и оценку добавим поверх этой базы.');
+    appAlert('Запиши 10–20 секунд отжиманий. Видео сохранится в галерее как запись техники.','info','Запись техники');
     $('techVideoFile').click();
   });
   $('techVideoFile').addEventListener('change',onMediaFile);
@@ -2663,9 +2898,9 @@
   $('mediaCompare').addEventListener('click',e=>{ const s=e.target.closest('.cmpslot'); if(s){ cmpActive=+s.dataset.slot; renderCompare(); } });
   $('mediaViewClose').addEventListener('click',()=>$('mediaView').classList.remove('open'));
   $('mediaShare').addEventListener('click',()=>{ const e=media.find(m=>m.id===mediaViewId); if(e)mediaShareEntry(e); });
-  $('mediaDelete').addEventListener('click',async()=>{ const e=media.find(m=>m.id===mediaViewId); if(e&&confirm('Удалить это фото/видео? Отменить нельзя.')){ await mediaRemove(e); $('mediaView').classList.remove('open'); renderMedia(); } });
+  $('mediaDelete').addEventListener('click',()=>{ const e=media.find(m=>m.id===mediaViewId); if(e)appConfirm('Фото или видео будет удалено без возможности восстановления.',async()=>{await mediaRemove(e);$('mediaView').classList.remove('open');renderMedia();appAlert('Файл удалён.','success');},null,{confirmText:'Удалить',title:'Удалить файл?'}); });
 
-  loadAll();loadMedia();loadVoiceManifest();showTab('train');showView('train');renderHello();render();
+  loadAll();loadMedia();loadVoiceManifest();showTab('technical');showView('train');renderHello();render();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   if(!seen)$('onboard').classList.add('open');
 })();
