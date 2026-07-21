@@ -3,7 +3,7 @@
 	"appName": "Умный счётчик отжиманий",
 	"webDir": "www",
 	"android": {
-		"allowMixedContent": true
+		"allowMixedContent": false
 	},
 	"plugins": {
 		"LocalNotifications": {

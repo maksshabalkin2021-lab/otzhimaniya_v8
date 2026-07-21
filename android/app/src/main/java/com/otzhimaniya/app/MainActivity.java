@@ -1,6 +1,5 @@
 package com.otzhimaniya.app;
 
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.core.view.WindowCompat;
@@ -13,8 +12,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(Color.TRANSPARENT);
-        getWindow().setNavigationBarColor(Color.BLACK);
+        WindowCompat.enableEdgeToEdge(getWindow());
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(
                 getWindow(), getWindow().getDecorView());
         controller.setAppearanceLightStatusBars(false);

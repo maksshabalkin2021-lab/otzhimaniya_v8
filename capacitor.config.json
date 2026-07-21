@@ -2,7 +2,7 @@
   "appId": "com.otzhimaniya.app",
   "appName": "Умный счётчик отжиманий",
   "webDir": "www",
-  "android": { "allowMixedContent": true },
+  "android": { "allowMixedContent": false },
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_icon",
