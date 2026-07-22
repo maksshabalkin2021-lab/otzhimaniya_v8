@@ -638,7 +638,7 @@
   .progress-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0 18px}.progress-actions button{min-width:0;min-height:50px;padding:9px 10px;border:1px solid var(--glass-brd);border-radius:15px;background:var(--glass);color:var(--ink);font-family:'Oswald';font-weight:600;font-size:13px;white-space:normal;line-height:1.2}.progress-actions button:first-child{border-color:color-mix(in srgb,var(--gold) 40%,var(--glass-brd));color:var(--gold)}
   .achgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:8px 0 18px}.achcard{min-width:0;padding:12px;border:1px solid var(--glass-brd);border-radius:17px;background:var(--glass);text-align:left;box-shadow:var(--glass-sh-sm)}
   .achcard.earned{border-color:color-mix(in srgb,var(--work) 42%,var(--glass-brd));background:linear-gradient(145deg,color-mix(in srgb,var(--work) 9%,var(--glass)),var(--glass))}.ach-top{display:flex;align-items:center;gap:9px}.ach-emoji{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--work) 10%,var(--surface1));font-size:21px;flex:0 0 auto}.achcard:not(.earned) .ach-emoji{filter:grayscale(1);opacity:.55}
-  .ach-copy{min-width:0}.ach-copy b{display:block;color:var(--ink);font-family:'Oswald';font-size:15px;line-height:1.15}.ach-copy small{display:block;margin-top:3px;color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ach-progress{height:5px;margin-top:10px;border-radius:5px;background:var(--surface2);overflow:hidden}.ach-progress i{display:block;height:100%;border-radius:inherit;background:var(--work)}
+  .ach-copy{min-width:0}.ach-copy b{display:block;color:var(--ink);font-family:'Oswald';font-size:15px;line-height:1.15}.ach-copy small{display:block;margin-top:3px;color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ach-progress{display:block;width:100%;height:5px;margin-top:10px;border-radius:5px;background:var(--surface2);overflow:hidden}.ach-progress i{display:block;max-width:100%;height:100%;border-radius:inherit;background:var(--work)}
   .ach-meta{display:flex;justify-content:space-between;gap:6px;margin-top:7px;color:var(--muted);font-size:10px}.detail-card{margin-top:20px;padding:20px;border:1px solid var(--glass-brd);border-radius:22px;background:var(--glass);box-shadow:var(--glass-sh)}.detail-icon{font-size:48px}.detail-card h3{margin:10px 0 6px;font-family:'Oswald';font-size:27px}.detail-progress{height:9px;margin:18px 0 8px;border-radius:9px;background:var(--surface2);overflow:hidden}.detail-progress i{display:block;height:100%;background:var(--work)}
   #graph{padding:14px;border:1px solid var(--glass-brd);border-radius:18px;background:var(--glass);box-shadow:var(--glass-sh-sm)}
   .bars{height:112px;gap:5px}.bars .b{border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--work),color-mix(in srgb,var(--work) 38%,transparent));box-shadow:0 0 10px color-mix(in srgb,var(--work) 18%,transparent)}
@@ -708,6 +708,15 @@
     .daily-ring{width:104px;height:104px;bottom:10px}@keyframes athleteBreath{0%,100%{transform:translateY(-20px) scale(1)}50%{transform:translateY(-20px) scale(1.008)}}}
   @media(orientation:landscape) and (max-height:500px){.coach-stage{height:auto;min-height:0}.coach-stage img.home-athlete{height:175px;width:auto;max-width:none;transform:translateY(-16px)}
     @keyframes athleteBreath{0%,100%{transform:translateY(-16px) scale(1)}50%{transform:translateY(-16px) scale(1.008)}}}
+  /* Финальная полировка доступности: все видимые элементы управления имеют
+     безопасную сенсорную зону, не ломая компактную семиколоночную сетку дней. */
+  .tabbar button,.seg button,.stepper button,.vsel{min-height:45px}
+  .seg button{min-width:44px}
+  .stepper button{min-width:45px;width:45px;height:45px}
+  .days-line{gap:3px}
+  .days-line .daychip{min-height:45px;height:45px}
+  .iconbtn{min-height:45px}
+  .phead .iconbtn{min-height:45px;height:45px}
 </style>
 </head>
 <body>
@@ -1075,6 +1084,27 @@
   "use strict";
   const $=id=>document.getElementById(id), now=()=>performance.now();
   function setOverlayOpen(id,open){const el=$(id);if(!el)return;el.classList.toggle('open',open);el.setAttribute('aria-hidden',String(!open));if(open)el.removeAttribute('inert');else el.setAttribute('inert','');}
+
+  function improveControlAccessibility(){
+    const labels={
+      profileWeight:'Вес, кг',profileHeight:'Рост, см',profileAge:'Возраст',profileSex:'Пол',
+      profileActivity:'Образ жизни',nutritionGoal:'Питательная цель',programProfile:'Цель программы',
+      voiceSel:'Голос',musicApp:'Музыкальное приложение',musicCustomUrl:'Ссылка на музыкальное приложение',
+      remTime:'Время напоминания',appLang:'Язык интерфейса',coachTone:'Характер тренера',
+      coachInput:'Вопрос тренеру',obWeight:'Вес, кг',obHeight:'Рост, см',obAge:'Возраст',
+      obSex:'Пол',obActivity:'Образ жизни',obNutrition:'Цель питания'
+    };
+    Object.entries(labels).forEach(([id,label])=>{const el=$(id);if(el&&!el.getAttribute('aria-label'))el.setAttribute('aria-label',label);});
+    const actions={
+      wMinus:'Предыдущая неделя',wPlus:'Следующая неделя',psMinus:'Уменьшить число подходов',psPlus:'Увеличить число подходов',
+      prMinus:'Уменьшить отдых',prPlus:'Увеличить отдых',gMinus:'Уменьшить цель на подход',gPlus:'Увеличить цель на подход',
+      trMinus:'Уменьшить таймер отдыха',trPlus:'Увеличить таймер отдыха',clMinus:'Подбадривать реже',clPlus:'Подбадривать чаще',
+      msMinus:'Уменьшить интервал метронома',msPlus:'Увеличить интервал метронома',amMinus:'Уменьшить длительность',amPlus:'Увеличить длительность'
+    };
+    Object.entries(actions).forEach(([id,label])=>{const el=$(id);if(el)el.setAttribute('aria-label',label);});
+    const switches={formCheck:'Проверка техники',auto:'Автопереход на следующую неделю',autoAdjust:'Автоподбор нагрузки',voice:'Голосовой счёт',sound:'Звук',vibe:'Вибрация',metro:'Метроном темпа',tempoV:'Голос темпа',warm:'Разминка перед стартом',remind:'Напоминание'};
+    Object.entries(switches).forEach(([id,label])=>{const el=$(id);if(!el)return;const sync=()=>el.setAttribute('aria-checked',String(el.classList.contains('on')));el.setAttribute('role','switch');el.setAttribute('tabindex','0');el.setAttribute('aria-label',label);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click();}});sync();new MutationObserver(sync).observe(el,{attributes:true,attributeFilter:['class']});});
+  }
   let dialogYes=null,dialogNo=null;
   function closeAppDialog(answer){const yes=dialogYes,no=dialogNo;dialogYes=null;dialogNo=null;$('appDialog').classList.remove('open');if(answer&&yes)yes();else if(!answer&&no)no();}
   function showAppDialog(message,{type='info',title='',confirmText='Понятно',cancelText='',onConfirm=null,onCancel=null}={}){
@@ -1083,6 +1113,7 @@
     $('dialogConfirm').textContent=confirmText;$('dialogCancel').textContent=cancelText||'Отмена';$('dialogCancel').style.display=cancelText?'':'none';$('dialogConfirm').classList.toggle('single',!cancelText);
     dialogYes=onConfirm;dialogNo=onCancel;$('appDialog').classList.add('open');
   }
+
   function appAlert(message,type='info',title=''){showAppDialog(message,{type,title});}
   function appConfirm(message,onConfirm,onCancel=null,options={}){showAppDialog(message,{type:options.type||'warning',title:options.title||'Подтверждение',confirmText:options.confirmText||'Продолжить',cancelText:options.cancelText||'Отмена',onConfirm,onCancel});}
   $('dialogConfirm').addEventListener('click',()=>closeAppDialog(true));$('dialogCancel').addEventListener('click',()=>closeAppDialog(false));
@@ -1876,7 +1907,7 @@
       '<div class="sgsub">Назначь шаблон хвата для подходов программы — если подходов больше пяти, шаблон повторяется по кругу. Действует, когда включён тумблер под каталогом.</div>';
     for(let s=0;s<SET_COUNT;s++){
       h+='<div class="sgrow"><div class="sgnum">Подход <b>'+(s+1)+'</b></div>'+
-         '<select class="sgsel" data-set="'+s+'">'+groups+'</select></div>'+
+         '<select class="sgsel" data-set="'+s+'" aria-label="Вариант отжиманий для подхода '+(s+1)+'">'+groups+'</select></div>'+
          '<div class="sgtgt" data-tgt="'+s+'"></div>';
     }
     el.innerHTML=h;
@@ -2904,7 +2935,7 @@
   $('mediaShare').addEventListener('click',()=>{ const e=media.find(m=>m.id===mediaViewId); if(e)mediaShareEntry(e); });
   $('mediaDelete').addEventListener('click',()=>{ const e=media.find(m=>m.id===mediaViewId); if(e)appConfirm('Фото или видео будет удалено без возможности восстановления.',async()=>{await mediaRemove(e);setOverlayOpen('mediaView',false);renderMedia();appAlert('Файл удалён.','success');},null,{confirmText:'Удалить',title:'Удалить файл?'}); });
 
-  loadAll();loadMedia();loadVoiceManifest();showTab('technical');showView('train');renderHello();render();
+  loadAll();loadMedia();loadVoiceManifest();showTab('technical');showView('train');renderHello();render();improveControlAccessibility();
   let seen=false;try{seen=localStorage.getItem('pushup_onboarded')==='1';}catch(e){}
   document.querySelectorAll('.overlay').forEach(el=>setOverlayOpen(el.id,el.classList.contains('open')));
   if(!seen)setOverlayOpen('onboard',true);

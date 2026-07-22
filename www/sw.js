@@ -1,4 +1,4 @@
-const CACHE='pushup-v21';
+const CACHE='pushup-v22';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./vendor/fonts/fonts.css','./assets/coach-layma-fox-v1.png','./assets/coach-lime-fox-v1.png','./assets/hero-man-pushup-v1.png','./assets/technique-gym-bg-v1.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
